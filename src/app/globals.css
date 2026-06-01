@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+/* ─── Design tokens ──────────────────────────────────────────────── */
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Desktop grid — 24 columns, 20px margin, 8px gutter */
+  --grid-cols: 24;
+  --grid-margin: 20px;
+  --grid-gutter: 8px;
+}
+
+/* ─── Tailwind theme extensions ──────────────────────────────────── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* 24-column grid utility: grid-cols-24 */
+  --grid-template-columns-24: repeat(24, minmax(0, 1fr));
+
+  /* Extended col-start utilities beyond Tailwind's default max (13) */
+  --grid-column-start-14: 14;
+  --grid-column-start-15: 15;
+  --grid-column-start-16: 16;
+  --grid-column-start-17: 17;
+  --grid-column-start-18: 18;
+  --grid-column-start-19: 19;
+  --grid-column-start-20: 20;
+  --grid-column-start-21: 21;
+
+  /* Spacing aliases for grid margin and gutter */
+  --spacing-grid-margin: var(--grid-margin);  /* 20px — px-grid-margin */
+  --spacing-grid-gutter: var(--grid-gutter);  /* 8px  — gap-grid-gutter */
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
