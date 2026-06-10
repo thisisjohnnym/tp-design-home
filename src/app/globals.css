@@ -1,27 +1,47 @@
 @import "tailwindcss";
 
-/* ─── Design tokens ──────────────────────────────────────────────── */
+/* ─── Palette — OKLCH ────────────────────────────────────────────── */
+/* Strategy: pure near-black ground. The Sunrise shader's warm orange */
+/* is the single saturated event. Everything else is achromatic.      */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Ground — pure near-black, no hue tint (Vercel-grade dark) */
+  --bg:      oklch(0.10 0.000 0);
+  /* Surface — cards, elevated panels */
+  --surface: oklch(0.15 0.000 0);
+  /* Surface hover */
+  --surface-hover: oklch(0.18 0.000 0);
+  /* Ink — warm off-white for primary text, slight tint toward orange */
+  --ink:     oklch(0.93 0.008 55);
+  /* Muted — secondary text ≥ 3.5:1 on --bg */
+  --muted:   oklch(0.52 0.006 55);
+  /* Accent — warm orange from the shader palette, used once */
+  --accent:  oklch(0.72 0.14 52);
+  /* Rule — hairline separators */
+  --rule:    oklch(0.22 0.000 0);
 
-  /* Desktop grid — 24 columns, 20px margin, 8px gutter */
-  --grid-cols: 24;
-  --grid-margin: 20px;
+  /* Desktop grid — 24 columns, 24px margin, 8px gutter */
+  --grid-cols:   24;
+  --grid-margin: 24px;
   --grid-gutter: 8px;
 }
 
 /* ─── Tailwind theme extensions ──────────────────────────────────── */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg:           var(--bg);
+  --color-surface:      var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-ink:          var(--ink);
+  --color-muted:        var(--muted);
+  --color-accent:       var(--accent);
+  --color-rule:         var(--rule);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* 24-column grid utility: grid-cols-24 */
+  /* 24-column grid utility */
   --grid-template-columns-24: repeat(24, minmax(0, 1fr));
 
-  /* Extended col-start utilities beyond Tailwind's default max (13) */
+  /* Extended col-start utilities */
   --grid-column-start-14: 14;
   --grid-column-start-15: 15;
   --grid-column-start-16: 16;
@@ -31,13 +51,147 @@
   --grid-column-start-20: 20;
   --grid-column-start-21: 21;
 
-  /* Spacing aliases for grid margin and gutter */
-  --spacing-grid-margin: var(--grid-margin);  /* 20px — px-grid-margin */
-  --spacing-grid-gutter: var(--grid-gutter);  /* 8px  — gap-grid-gutter */
+  --spacing-grid-margin: var(--grid-margin);
+  --spacing-grid-gutter: var(--grid-gutter);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ─── Hero expansion (DOM-driven, no scroll re-renders) ──────────── */
+.hero-section {
+  --hero-expand: 0;
+  --hero-pad: 20px;
+  --hero-radius: 20px;
+  --hero-viewport-inner: calc(100dvh - 40px);
+  --hero-expanded-inner: var(--hero-viewport-inner);
+  --hero-hero-natural: var(--hero-viewport-inner);
+  --hero-inner-height: var(--hero-viewport-inner);
+  --hero-headline-min: var(--hero-viewport-inner);
+  --hero-shell-height: 100dvh;
+  box-sizing: border-box;
+  padding: var(--hero-pad);
+  height: var(--hero-shell-height);
+}
+
+.hero-section__inner {
+  position: relative;
+  overflow: hidden;
+  height: var(--hero-inner-height);
+  border-radius: var(--hero-radius);
+  contain: layout style paint;
+  isolation: isolate;
+}
+
+.hero-headline-shell {
+  width: 100%;
+}
+
+.hero-headline-grid {
+  display: grid;
+  width: 100%;
+  box-sizing: border-box;
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+  gap: var(--grid-gutter);
+  /* Shell pad provides page margin at rest; this takes over on expand. */
+  padding-inline: calc(var(--hero-expand, 0) * var(--grid-margin));
+}
+
+.hero-headline-content {
+  /* Land: cols 2–23. Expanded: cols 1–24 within page grid. */
+  grid-column-start: calc(2 - var(--hero-expand, 0));
+  grid-column-end: calc(24 + var(--hero-expand, 0));
+  min-width: 0;
+}
+
+.hero-grid-span-1-24 {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+/* ─── Team member cards ──────────────────────────────────────────── */
+.team-card-media {
+  isolation: isolate;
+}
+
+.team-card-svg {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+  will-change: filter;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-card-svg {
+    will-change: auto;
+  }
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Quirky landing page ─────────────────────────────────────────── */
+.quirky-page .quirky-serif {
+  font-family: var(--font-quirky-serif), Georgia, serif;
+}
+
+@keyframes quirky-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes quirky-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(6deg); }
+}
+
+@keyframes quirky-float-slow {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(-4deg); }
+}
+
+@keyframes quirky-wiggle {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+.quirky-marquee__track {
+  animation: quirky-marquee 40s linear infinite;
+}
+
+.quirky-float {
+  animation: quirky-float 4s ease-in-out infinite;
+}
+
+.quirky-float-slow {
+  animation: quirky-float-slow 6s ease-in-out infinite;
+}
+
+.quirky-wiggle {
+  animation: quirky-wiggle 3s ease-in-out infinite;
+}
+
+.quirky-team-card:hover,
+.quirky-team-card:focus-visible {
+  transform: rotate(0deg) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quirky-marquee__track,
+  .quirky-float,
+  .quirky-float-slow,
+  .quirky-wiggle {
+    animation: none;
+  }
 }

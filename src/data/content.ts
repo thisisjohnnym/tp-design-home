@@ -11,13 +11,46 @@ export const capabilities = [
   { id: "10", name: "Figma Libraries & Tooling", description: "Master component libraries, variables, and file organization for the whole org." },
 ];
 
-export const team = [
-  { name: "Cong Kim", role: "Director, Product Design", focus: "Systems · Strategy · Operations", initials: "CK", location: "New York" },
-  { name: "Juliana Botero", role: "Senior Product Designer", focus: "Interaction · Prototyping", initials: "JB", location: "Remote" },
-  { name: "Alex Rivera", role: "Product Designer", focus: "Mobile · Accessibility", initials: "AR", location: "New York" },
-  { name: "Sam Park", role: "Product Designer", focus: "Systems · Components", initials: "SP", location: "Remote" },
-  { name: "Maya Chen", role: "UX Researcher", focus: "Research · Strategy", initials: "MC", location: "New York" },
-  { name: "Jordan Lee", role: "Content Designer", focus: "Writing · Information Architecture", initials: "JL", location: "Remote" },
+export type TeamMember = {
+  name: string;
+  role: string;
+  image: string;
+  quirk?: string;
+  emoji?: string;
+  color?: string;
+};
+
+export const team: TeamMember[] = [
+  { name: "Sean Kelly", role: "Sr. Product Designer", image: "/team/member-1.jpg", quirk: "Will die on the spacing hill", emoji: "📐", color: "#FF5722" },
+  { name: "Wendy Chan", role: "Sr. Product Designer", image: "/team/member-2.jpg", quirk: "Figma file naming evangelist", emoji: "🗂️", color: "#6C63FF" },
+  { name: "Cong Kim", role: "Sr. Product Designer", image: "/team/member-3.jpg", quirk: "Shader enthusiast, obviously", emoji: "✨", color: "#FFD93D" },
+  { name: "Juliana Botero", role: "Sr. Product Designer", image: "/team/member-4.jpg", quirk: "Accessibility before aesthetics (but both)", emoji: "♿", color: "#4ECDC4" },
+  { name: "Johnathan Martinez", role: "Sr. Product Designer", image: "/team/member-5.jpg", quirk: "Prototype first, ask questions later", emoji: "⚡", color: "#FF6B9D" },
+  { name: "Kat Guzman", role: "Sr. Product Designer", image: "/team/member-6.jpg", quirk: "Critique sessions are her love language", emoji: "💬", color: "#95E1A3" },
+  { name: "Mitra Raveendran", role: "Product Designer", image: "/team/member-7.jpg", quirk: "Research notes longer than the spec", emoji: "🔍", color: "#C084FC" },
+  { name: "Gulsheen Bhatia", role: "Sr. Product Designer", image: "/team/member-8.jpg", quirk: "Component library guardian", emoji: "🛡️", color: "#FB923C" },
+];
+
+export const teamMarquee = [
+  "pixel pushers",
+  "figma nerds",
+  "flow chart people",
+  "critique lovers",
+  "Coach · Kate Spade · Stuart Weitzman",
+  "design token hoarders",
+  "micro-interaction obsessives",
+  "accessibility advocates",
+];
+
+export const quirkyCapabilities = [
+  { label: "Design Strategy", size: "xl" as const },
+  { label: "Product Experience", size: "lg" as const },
+  { label: "Interaction Design", size: "md" as const },
+  { label: "Research Collab", size: "lg" as const },
+  { label: "Prototyping", size: "xl" as const },
+  { label: "UI Systems", size: "sm" as const },
+  { label: "Content Design", size: "md" as const },
+  { label: "Accessibility", size: "sm" as const },
 ];
 
 export const process = [
