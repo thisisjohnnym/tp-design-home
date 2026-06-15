@@ -19,6 +19,13 @@
   /* Rule — hairline separators */
   --rule:    oklch(0.22 0.000 0);
 
+  /* Landing page — hero shader worley.colorB (#fffbf2) */
+  --page-ground: #fffbf2;
+  --page-ink:    oklch(0.20 0.006 80);
+  --page-label:  oklch(0.44 0.005 80);
+  --page-body:   oklch(0.34 0.005 80);
+  --page-rule:   oklch(0.91 0.008 85);
+
   /* Desktop grid — 24 columns, 24px margin, 8px gutter */
   --grid-cols:   24;
   --grid-margin: 24px;
@@ -34,6 +41,12 @@
   --color-muted:        var(--muted);
   --color-accent:       var(--accent);
   --color-rule:         var(--rule);
+
+  --color-page-ground:  var(--page-ground);
+  --color-page-ink:     var(--page-ink);
+  --color-page-label:   var(--page-label);
+  --color-page-body:    var(--page-body);
+  --color-page-rule:    var(--page-rule);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -55,6 +68,10 @@
   --spacing-grid-gutter: var(--grid-gutter);
 }
 
+@utility grid-cols-24 {
+  grid-template-columns: repeat(24, minmax(0, 1fr));
+}
+
 body {
   background: var(--bg);
   color: var(--ink);
@@ -63,8 +80,23 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+/* ─── Lenis smooth scroll ────────────────────────────────────────── */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
 /* ─── Hero expansion (DOM-driven, no scroll re-renders) ──────────── */
 .hero-section {
+  overflow-anchor: none;
   --hero-expand: 0;
   --hero-pad: 20px;
   --hero-radius: 20px;
@@ -74,6 +106,8 @@ body {
   --hero-inner-height: var(--hero-viewport-inner);
   --hero-headline-min: var(--hero-viewport-inner);
   --hero-shell-height: 100dvh;
+  position: relative;
+  z-index: 0;
   box-sizing: border-box;
   padding: var(--hero-pad);
   height: var(--hero-shell-height);
@@ -103,10 +137,14 @@ body {
 }
 
 .hero-headline-content {
-  /* Land: cols 2–23. Expanded: cols 1–24 within page grid. */
-  grid-column-start: calc(2 - var(--hero-expand, 0));
-  grid-column-end: calc(24 + var(--hero-expand, 0));
+  /* Full span; inset animates smoothly (grid-column lines only snap to integers). */
+  grid-column: 1 / -1;
   min-width: 0;
+  box-sizing: border-box;
+  --hero-col-width: calc((100% - 23 * var(--grid-gutter)) / 24);
+  padding-inline: calc(
+    (1 - var(--hero-expand, 0)) * (var(--hero-col-width) + var(--grid-gutter))
+  );
 }
 
 .hero-grid-span-1-24 {
@@ -114,7 +152,367 @@ body {
   min-width: 0;
 }
 
+/* ─── v2 hero — Figma diptych (271:42) ─────────────────────────── */
+.hero-v2 {
+  position: relative;
+  z-index: 10;
+  background: #fff;
+}
+
+.hero-v2__diptych {
+  display: flex;
+  flex-direction: column;
+  gap: var(--grid-gutter);
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+@media (min-width: 1024px) {
+  .hero-v2__diptych {
+    flex-direction: row;
+    min-height: 865px;
+  }
+}
+
+.hero-v2__panel {
+  position: relative;
+  min-width: 0;
+}
+
+.hero-v2__panel--copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: #000;
+  min-height: clamp(320px, 52vw, 865px);
+  padding: 12px;
+}
+
+@media (min-width: 1024px) {
+  .hero-v2__panel--copy {
+    flex: 1 1 0;
+    min-height: 865px;
+  }
+}
+
+.hero-v2__headline {
+  max-width: 329px;
+  font-size: clamp(2.5rem, 5vw, 72px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.2px;
+  color: #fff;
+}
+
+.hero-v2__panel--visual {
+  height: clamp(280px, 45vw, 865px);
+  min-height: clamp(280px, 45vw, 865px);
+  background: #fffee0;
+}
+
+@media (min-width: 1024px) {
+  .hero-v2__panel--visual {
+    flex: 1 1 0;
+    height: 865px;
+    min-height: 865px;
+  }
+}
+
+.hero-v2__shader {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+/* ─── v2 sticker playground (FigJam-style canvas) ───────────────── */
+.sticker-playground {
+  background: #f3efe6;
+  color: #2a2520;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.sticker-playground__toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f3efe6;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.sticker-playground__tool {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 13px;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: rgba(42, 37, 32, 0.55);
+  transition: color 0.15s ease;
+}
+
+.sticker-playground__tool:hover {
+  color: rgba(42, 37, 32, 0.85);
+}
+
+.sticker-playground__tool--accent {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ─── Sticker composer (flim.ai–style frosted bar) ─────────────────── */
+.sticker-composer-wrap {
+  border-radius: 9999px;
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+
+.sticker-composer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 58px;
+  padding: 8px 8px 8px 18px;
+  border: 0;
+  border-radius: 9999px;
+  background-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
+}
+
+.sticker-composer--active {
+  gap: 12px;
+}
+
+.sticker-composer > * {
+  position: relative;
+}
+
+.sticker-composer__field {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  height: 24px;
+  align-items: center;
+}
+
+.sticker-composer__placeholder {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22.5px;
+  color: #868686;
+}
+
+.sticker-composer__input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22.5px;
+  color: #292524;
+  outline: none;
+}
+
+.sticker-composer__input--hidden {
+  color: transparent;
+  caret-color: transparent;
+}
+
+.sticker-composer__make {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 94px;
+  height: 42px;
+  padding: 0 4px 0 8px;
+  border: 0;
+  border-radius: 25px;
+  background: #F5AC5F;
+  color: #292524;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: normal;
+  box-shadow: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.sticker-composer__make:focus,
+.sticker-composer__make:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.sticker-composer__make:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.sticker-composer__error {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 6px 16px;
+  text-align: center;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 11px;
+  line-height: 1.4;
+  color: #8b3a3a;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+}
+
+.sticker-playground__canvas {
+  overflow: hidden;
+  background-color: #f8f4ec;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 18px 18px;
+  background-position: 28px 0;
+}
+
+.sticker-playground__hole {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.sticker-stamp {
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.07));
+}
+
+.sticker-stamp__inner {
+  background: transparent;
+  padding: 0;
+}
+
+.sticker-playground__placed--selected .sticker-stamp {
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.14));
+}
+
+/* ─── Generating sticker skeleton (Figma flower 582:227) ─────────── */
+.sticker-skeleton {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.sticker-skeleton__spin {
+  position: absolute;
+  inset: 0;
+  animation: sticker-skeleton-spin 20s linear infinite;
+}
+
+.sticker-skeleton__flower {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sticker-skeleton__flower-pulse {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  -webkit-mask-image: url('/stickers/flower-loader.svg');
+  mask-image: url('/stickers/flower-loader.svg');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  animation: sticker-skeleton-pulse 2s ease-in-out infinite;
+}
+
+@keyframes sticker-skeleton-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sticker-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sticker-skeleton__spin {
+    animation-duration: 40s;
+  }
+
+  .sticker-skeleton__flower-pulse {
+    animation-duration: 3.2s;
+  }
+}
+
+/* ─── v1 bottom sticker canvas ───────────────────────────────────── */
+.sticker-canvas-section__panel {
+  min-height: clamp(480px, 62.4vh, 816px);
+  border-radius: 20px;
+}
+
+/* ─── Hero float-over (boring.industries vid-start-wrap) ─────────── */
+/* Hero scrolls normally (inf-layout is not pinned). Overlap margin is scroll-driven in JS. */
+.content-overlay {
+  position: relative;
+  z-index: 5;
+  margin-top: 0;
+  background: var(--page-ground);
+  border-top-left-radius: 1.25rem;
+  border-top-right-radius: 1.25rem;
+}
+
 /* ─── Team member cards ──────────────────────────────────────────── */
+.team-cascade-card__frame {
+  isolation: isolate;
+}
+
+.team-card-gradient {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 46%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.5) 100%);
+  pointer-events: none;
+}
+
+.team-card-content {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px 12px;
+}
+
 .team-card-media {
   isolation: isolate;
 }
@@ -130,6 +528,110 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .team-card-svg {
     will-change: auto;
+  }
+}
+
+/* ─── What we do — monoline draw-in icons (reference video style) ─ */
+.wwd-icon path,
+.wwd-icon circle,
+.wwd-icon line,
+.wwd-icon polyline,
+.wwd-icon polygon,
+.wwd-icon rect,
+.wwd-icon ellipse {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+.wwd-cell:hover .wwd-icon path,
+.wwd-cell:hover .wwd-icon circle,
+.wwd-cell:hover .wwd-icon line,
+.wwd-cell:hover .wwd-icon polyline,
+.wwd-cell:hover .wwd-icon polygon,
+.wwd-cell:hover .wwd-icon rect,
+.wwd-cell:hover .wwd-icon ellipse,
+.wwd-cell:focus-within .wwd-icon path,
+.wwd-cell:focus-within .wwd-icon circle,
+.wwd-cell:focus-within .wwd-icon line,
+.wwd-cell:focus-within .wwd-icon polyline,
+.wwd-cell:focus-within .wwd-icon polygon,
+.wwd-cell:focus-within .wwd-icon rect,
+.wwd-cell:focus-within .wwd-icon ellipse {
+  animation: wwd-draw 0.75s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes wwd-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wwd-icon path,
+  .wwd-icon circle,
+  .wwd-icon line,
+  .wwd-icon polyline,
+  .wwd-icon polygon,
+  .wwd-icon rect,
+  .wwd-icon ellipse {
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
+}
+
+/* ─── What we do · v.02 showcase ─────────────────────────────────── */
+/* Left-column graphic preview — soft crossfade + lift, no stroke draw-in. */
+.wwd2-preview {
+  animation: wwd2-preview-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes wwd2-preview-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wwd2-preview {
+    animation: none;
+  }
+}
+
+.wwd2-iconwrap {
+  transform: translate3d(var(--px, 0px), var(--py, 0px), 0);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.wwd2-icon .wwd-icon path,
+.wwd2-icon .wwd-icon circle,
+.wwd2-icon .wwd-icon line,
+.wwd2-icon .wwd-icon polyline,
+.wwd2-icon .wwd-icon polygon,
+.wwd2-icon .wwd-icon rect,
+.wwd2-icon .wwd-icon ellipse {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: wwd-draw 0.85s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.wwd2-row:hover .wwd2-icon .wwd-icon *,
+.wwd2-row:focus-visible .wwd2-icon .wwd-icon * {
+  animation-duration: 0.85s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wwd2-iconwrap {
+    transform: none !important;
+    transition: none !important;
+  }
+  .wwd2-icon .wwd-icon * {
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
   }
 }
 

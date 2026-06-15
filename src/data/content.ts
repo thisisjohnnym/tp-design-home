@@ -54,12 +54,12 @@ export const quirkyCapabilities = [
 ];
 
 export const process = [
-  { step: "01", name: "Frame", description: "Clarify the user need, business context, constraints, and success criteria." },
-  { step: "02", name: "Explore", description: "Generate concepts, flows, prototypes, or pattern options." },
-  { step: "03", name: "Align", description: "Review with stakeholders, engineering, product, and design peers." },
-  { step: "04", name: "Refine", description: "Resolve interaction details, edge cases, accessibility, and content." },
-  { step: "05", name: "Publish", description: "Document the artifact, component, or pattern with a Figma reference." },
-  { step: "06", name: "Evolve", description: "Revisit based on usage, feedback, implementation, and product needs." },
+  { step: "01", name: "Frame", description: "Clarify the user need, business context, constraints, and success criteria.", shape: "/objects/process/shape-10.png" },
+  { step: "02", name: "Explore", description: "Generate concepts, flows, prototypes, or pattern options.", shape: "/objects/process/shape-16.png" },
+  { step: "03", name: "Align", description: "Review with stakeholders, engineering, product, and design peers.", shape: "/objects/process/shape-15.png" },
+  { step: "04", name: "Refine", description: "Resolve interaction details, edge cases, accessibility, and content.", shape: "/objects/process/shape-13.png" },
+  { step: "05", name: "Publish", description: "Document the design artifact, component, or pattern with a Figma reference.", shape: "/objects/process/shape-19.png" },
+  { step: "06", name: "Evolve", description: "Revisit based on usage, feedback, implementation, and product needs.", shape: "/objects/process/shape-20.png" },
 ];
 
 export const components = [

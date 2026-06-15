@@ -13,6 +13,8 @@ const LandingPageHeroShaderClient = dynamic(
 )
 
 const HERO_PAD = 20
+/** Extra shader scroll room below the paragraph before cream content floats over. */
+const HERO_SCROLL_TAIL_VH = 0.22
 
 interface HeroSectionProps {
   teamFunction: ReactNode
@@ -23,7 +25,7 @@ export function HeroSection({ teamFunction }: HeroSectionProps) {
   const shellRef = useRef<HTMLElement>(null)
   const heroRef = useRef<HTMLDivElement>(null)
   const teamRef = useRef<HTMLDivElement>(null)
-  const shaderConfig = useAnimatedHeroShader(theme)
+  const { config: shaderConfig, preset: shaderPreset } = useAnimatedHeroShader(theme)
 
   useHeroScrollExpansion(shellRef)
 
@@ -32,9 +34,11 @@ export function HeroSection({ teamFunction }: HeroSectionProps) {
     if (!shell) return
 
     const updateViewport = () => {
+      const viewportInner = Math.max(0, window.innerHeight - 2 * HERO_PAD)
+      shell.style.setProperty('--hero-viewport-inner', `${viewportInner}px`)
       shell.style.setProperty(
-        '--hero-viewport-inner',
-        `${Math.max(0, window.innerHeight - 2 * HERO_PAD)}px`
+        '--hero-scroll-tail',
+        `${Math.round(window.innerHeight * HERO_SCROLL_TAIL_VH)}px`
       )
       syncHeroExpansion(shell)
     }
@@ -53,10 +57,12 @@ export function HeroSection({ teamFunction }: HeroSectionProps) {
     const measure = () => {
       const heroNatural = heroEl.offsetHeight
       const teamHeight = teamEl.offsetHeight
+      const scrollTail = Math.round(window.innerHeight * HERO_SCROLL_TAIL_VH)
       shell.style.setProperty('--hero-hero-natural', `${heroNatural}px`)
+      shell.style.setProperty('--hero-scroll-tail', `${scrollTail}px`)
       shell.style.setProperty(
         '--hero-expanded-inner',
-        `${heroNatural + teamHeight}px`
+        `${heroNatural + teamHeight + scrollTail}px`
       )
       syncHeroExpansion(shell)
     }
@@ -69,10 +75,10 @@ export function HeroSection({ teamFunction }: HeroSectionProps) {
   }, [teamFunction])
 
   return (
-    <section ref={shellRef} className="hero-section relative">
+    <section ref={shellRef} data-hero-section className="hero-section relative">
       <div className="hero-section__inner">
         <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <LandingPageHeroShaderClient config={shaderConfig} />
+          <LandingPageHeroShaderClient preset={shaderPreset} />
           <div
             className="absolute inset-0"
             style={{ background: shaderConfig.overlay }}
@@ -113,10 +119,16 @@ export function HeroSection({ teamFunction }: HeroSectionProps) {
           <div
             ref={teamRef}
             data-team-function
-            className="hero-headline-grid pb-[150px] pt-[150px]"
+            className="hero-headline-grid pb-[150px] pt-[200px]"
           >
             <div className="hero-grid-span-1-24">{teamFunction}</div>
           </div>
+
+          <div
+            className="hero-scroll-tail shrink-0"
+            style={{ height: 'var(--hero-scroll-tail, 0px)' }}
+            aria-hidden
+          />
         </div>
       </div>
     </section>

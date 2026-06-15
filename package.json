@@ -6,15 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "generate:hero-attractor": "node scripts/generate-hero-attractor.mjs"
   },
   "dependencies": {
     "clsx": "^2.1.1",
     "flubber": "^0.4.2",
+    "lenis": "^1.3.23",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "shaders": "^2.5.129",
+    "shaders": "^2.5.130",
     "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
@@ -24,6 +26,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "sharp": "^0.34.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

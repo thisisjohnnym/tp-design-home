@@ -75,12 +75,16 @@ export function ScrollRevealText({
         if (hero) {
           if (hero.dataset.heroExpanded !== 'true') {
             commitIndex(0)
+            const team = el.closest('[data-team-function]') as HTMLElement | null
+            if (team) team.dataset.revealComplete = 'false'
             return
           }
 
           const revealStartTop = parseFloat(hero.dataset.revealLockedTop ?? '')
+          const team = el.closest('[data-team-function]') as HTMLElement | null
           if (!Number.isFinite(revealStartTop)) {
             commitIndex(0)
+            if (team) team.dataset.revealComplete = 'false'
             return
           }
 
@@ -95,14 +99,22 @@ export function ScrollRevealText({
           const textRect = el.getBoundingClientRect()
           const viewport = window.innerHeight
 
-          if (containerRect.bottom <= 0 || containerRect.top >= viewport) {
+          if (containerRect.bottom <= 0) {
+            container.dataset.revealComplete = 'true'
+            commitIndex(chars.length)
+            return
+          }
+
+          if (containerRect.top >= viewport) {
             commitIndex(0)
+            container.dataset.revealComplete = 'false'
             return
           }
 
           // Progress 0 at post-expansion position; advances only as user scrolls up
           if (containerRect.top >= revealStartTop) {
             commitIndex(0)
+            container.dataset.revealComplete = 'false'
             return
           }
 
@@ -119,6 +131,8 @@ export function ScrollRevealText({
             Math.max(0, (revealStartTop - containerRect.top) / scrollRange)
           )
           commitIndex(progress * chars.length)
+          container.dataset.revealComplete =
+            progress >= 0.999 ? 'true' : 'false'
           return
         }
 

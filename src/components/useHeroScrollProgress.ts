@@ -2,7 +2,7 @@
 
 import { useEffect, type RefObject } from 'react'
 
-export const HERO_EXPAND_DURATION = 600
+export const HERO_EXPAND_DURATION = 720
 const HERO_PAD = 20
 
 function viewportInnerPx() {
@@ -15,8 +15,8 @@ function readPx(el: HTMLElement, name: string, fallback: number) {
   return Number.isFinite(value) && value > 0 ? value : fallback
 }
 
-function easeOutCubic(t: number) {
-  return 1 - Math.pow(1 - t, 3)
+function easeInOutCubic(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
 }
 
 function readProgress(el: HTMLElement) {
@@ -87,7 +87,7 @@ export function useHeroScrollExpansion(ref: RefObject<HTMLElement | null>) {
 
     const animate = (now: number) => {
       const t = Math.min(1, (now - animStart) / HERO_EXPAND_DURATION)
-      const progress = animFrom + (targetProgress - animFrom) * easeOutCubic(t)
+      const progress = animFrom + (targetProgress - animFrom) * easeInOutCubic(t)
       applyExpansion(el, progress)
 
       if (t < 1) {
