@@ -1,38 +1,35 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { GridOverlay } from "@/components/GridOverlay";
-import { SmoothScroll } from "@/components/SmoothScroll";
+import { dmSans } from "./fonts";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { ConditionalChrome } from "@/components/layout/ConditionalChrome";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { ThemeScript } from "@/components/theme/ThemeScript";
 
 export const metadata: Metadata = {
-  title: "tapestry.design",
-  description: "The home for Tapestry's Product Design team — people, practices, and published UI work.",
+  title: {
+    default: "Tapestry Design Team",
+    template: "%s",
+  },
+  description:
+    "Designing the connective tissue of Tapestry's product experience — team, capabilities, assets, and how we work.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        <SmoothScroll />
-        <GridOverlay />
-        {children}
+    <html lang="en" className={dmSans.variable} data-palette="studio" data-mode="light" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if(location.hash.includes('figmacapture')){sessionStorage.setItem('tapestry-hero-intro-seen','1');}`,
+          }}
+        />
+        <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async />
+      </head>
+      <body className="bg-[var(--background)] font-sans text-[var(--foreground)] antialiased">
+        <ThemeProvider>
+          <ConditionalChrome>{children}</ConditionalChrome>
+        </ThemeProvider>
       </body>
     </html>
   );

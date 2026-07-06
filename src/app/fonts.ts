@@ -1,0 +1,19 @@
+import localFont from "next/font/local";
+
+/** DM Sans — primary sans-serif for all site typography (self-hosted variable font). */
+export const dmSans = localFont({
+  src: [
+    {
+      path: "../../public/fonts/dm-sans/DMSans-Variable.ttf",
+      weight: "100 1000",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/dm-sans/DMSans-Italic-Variable.ttf",
+      weight: "100 1000",
+      style: "italic",
+    },
+  ],
+  variable: "--font-dm-sans",
+  display: "swap",
+});

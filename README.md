@@ -1,36 +1,101 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tapestry Design Team — tapestry.design
 
-## Getting Started
+Internal team site for Tapestry Design: who we are, what we do, what we manage, how we work, and how to collaborate.
 
-First, run the development server:
+## Quick start
 
 ```bash
+cd design-team-landing-page
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**After code changes:** production preview requires a fresh build — `npm run build && npm run start`. For live reload while editing, use `npm run dev` instead. The hero intro animation runs once per session (`tapestry-hero-intro-seen` in session storage); use a private window or clear that key to replay it.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Pages
 
-## Learn More
+| Route | Purpose |
+|-------|---------|
+| `/` | Landing — hero + section teasers |
+| `/team` | Values + poster gallery (each member + chosen design poster) |
+| `/capabilities` | Capability breakdown |
+| `/what-we-manage` | Ownership map |
+| `/how-we-work` | 6-step process + principles |
+| `/contact` | Collaboration info + intake form |
 
-To learn more about Next.js, take a look at the following resources:
+## Layout grid
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Tokens in `src/content/grid.ts` (applied via CSS in `globals.css`):
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| | Mobile | Desktop (768px+) |
+|---|--------|------------------|
+| Columns | 12 | 24 |
+| Margin | 12px | 20px |
+| Gutter | 4px | 8px |
 
-## Deploy on Vercel
+Use `PageGrid` and `GridCell` from `src/components/layout/PageGrid.tsx`:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```tsx
+<PageGrid>
+  <GridCell span={12}>Half width on desktop; 6 cols on mobile (proportional)</GridCell>
+  <GridCell span={12} spanMobile={12}>Full width on mobile, half on desktop</GridCell>
+</PageGrid>
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`span` = desktop (1–24). `spanMobile` = mobile (1–12); defaults to full width or proportional to `span`.
+
+To preview columns in dev, add `page-grid--debug` to a `PageGrid` `className`.
+
+**Section spacing:** `--section-gap` is `120px` between major sections. Use `section-stack` on a flex column parent, or `mt-section` / `gap-section` (Tailwind).
+
+## Theme controls
+
+Inspired by [michelegre.co](https://www.michelegre.co) — controls in the header (right of “Tapestry · Design”):
+
+- **Sun** — light mode
+- **Moon** — dark mode  
+- **Shuffle** — cycles palettes: **Studio** `#f0f0f0` (default, accent `#ffcb00`), **Sage** `#EAF2E7`, **Plum** `#5C0036`, **Flame** `#F05400`
+
+Default palette is **Studio** (`#f0f0f0` background, black type, `#ffcb00` accent). Preferences persist in `localStorage`. Tokens live in `src/content/themes.ts` and `globals.css`.
+
+## Edit content
+
+All copy, team roster, capabilities, and placeholders live in one file:
+
+**`src/content/site.ts`**
+
+Update `links.figma`, `links.slack`, and `links.intakeForm` when URLs are ready — contact page will show those buttons automatically.
+
+## Team poster gallery
+
+Each team member is paired with a design poster in `public/team-posters/` (URL-safe filenames, e.g. `sean-kelly.jpg`). Source originals live on Desktop in `Team posters/`.
+
+To change a pairing, update `poster` and optional `posterLabel` on that member in `src/content/site.ts`, then copy or replace the JPG in `public/team-posters/`. Intro copy is `site.teamIntro`.
+
+## Contact form
+
+`src/components/contact/ContactForm.tsx` currently acknowledges submit locally. Wire to Formspree, Slack webhook, or an internal API when ready.
+
+## Stack
+
+- Next.js 15 (App Router)
+- React 19
+- TypeScript
+- Tailwind CSS 3.4 (editorial type scale, Helvetica typography)
+- Framer Motion (optional — add motion as you design)
+- Material Symbols (`Icon` component)
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Local dev server (Turbopack) |
+| `npm run build` | Production build |
+| `npm run start` | Serve production build |
+| `npm run lint` | ESLint |
+
+## Fonts
+
+Helvetica Roman and Bold are loaded from `public/fonts/coachtopia/` via `src/app/fonts.ts`. Licensed for internal Tapestry use.
