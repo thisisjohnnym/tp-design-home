@@ -1,6 +1,6 @@
 import localFont from "next/font/local";
 
-/** DM Sans — primary sans-serif for all site typography (self-hosted variable font). */
+/** DM Sans — self-hosted variable font (avoids Turbopack + next/font/google bug). */
 export const dmSans = localFont({
   src: [
     {

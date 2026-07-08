@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
 import { PillNav } from "@/components/layout/PillNav";
 import { HeroV2Viewport } from "./HeroV2Viewport";
 import { HeroV5CursorLabel } from "./HeroV5CursorLabel";
 import { HeroV5RollingWord } from "./HeroV5RollingWord";
 import { HERO_V5_CURSORS } from "./heroV5Cursors";
 import { useHeroV5Timeline } from "./useHeroV5Timeline";
+import { useHeroV5VerbRoll } from "./useHeroV5VerbRoll";
+import { heroV5BloomTimingStyle } from "./heroV5Timing";
+import { HERO_V5_VERB_WORDS } from "./heroV5VerbWords";
+
+const SUBHEADLINE =
+  "Uniting brand, product, and customer insight across Coach & Kate Spade.";
 
 /** Design-tool canvas grid — radial bloom behind the title. */
 function HeroV5CanvasGrid() {
@@ -14,26 +19,34 @@ function HeroV5CanvasGrid() {
 }
 
 /**
- * v5 hero — autoplayed "Design Team" reveal building toward Figma frame 900:849.
+ * v5 hero — canvas bloom, then headline + cursors reveal together.
+ * After the intro settles, the lead verb rolls through four variants.
  */
 export function HeroSectionV5() {
-  const [slotReady, setSlotReady] = useState(false);
-  const { phase, wordIndex } = useHeroV5Timeline(slotReady);
-  const cursorsActive = phase === "expand" || phase === "cursors" || phase === "settled";
+  const phase = useHeroV5Timeline();
+  const verbRollActive = phase === "settled";
+  const verbIndex = useHeroV5VerbRoll(verbRollActive);
+  const cursorsActive = phase === "cursors" || phase === "settled";
 
   return (
-    <HeroV2Viewport>
+    <HeroV2Viewport style={heroV5BloomTimingStyle}>
       <PillNav phase={phase} />
 
       <section data-hero-section className="hero-v5" data-phase={phase}>
         <HeroV5CanvasGrid />
 
         <div className="hero-v5__frame">
-          <div className="hero-v5__title">
-            <span className="hero-v5__design">
-              <HeroV5RollingWord wordIndex={wordIndex} onReady={() => setSlotReady(true)} />
-            </span>
-            <span className="hero-v5__team">Team</span>
+          <div className="hero-v5__copy">
+            <h1 className="hero-v5__headline">
+              <span className="hero-v5__headline-line">
+                <span className="hero-v5__headline-phrase">
+                  <HeroV5RollingWord words={HERO_V5_VERB_WORDS} wordIndex={verbIndex} />
+                  <span className="hero-v5__headline-suffix">Experiences</span>
+                </span>
+              </span>
+              <span className="hero-v5__headline-line">That Shape Retail</span>
+            </h1>
+            <p className="hero-v5__subhead">{SUBHEADLINE}</p>
           </div>
 
           <div className="hero-v5__cursors">

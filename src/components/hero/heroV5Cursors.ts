@@ -3,6 +3,9 @@
  * Figma frame (node 900:849). Positions are stored as percentages of the
  * reference frame (1401 x 724) so the scatter scales with the viewport.
  * `enter` is the px offset each cursor animates from when flying into frame.
+ *
+ * Positions are radially scaled from frame center (50%, 50%) to clear the
+ * centered headline block while preserving the original scatter shape.
  */
 
 export type HeroV5CursorSide = "left" | "right";
@@ -29,7 +32,28 @@ export type HeroV5Cursor = {
   order: number;
 };
 
-export const HERO_V5_CURSORS: HeroV5Cursor[] = [
+const FRAME_CENTER = { x: 50, y: 50 };
+const RADIAL_SCALE = 1.3;
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
+/** Push cursors outward from center — keeps angles, clears copy block. */
+function spreadFromCenter(x: number, y: number) {
+  return {
+    x: clamp(FRAME_CENTER.x + (x - FRAME_CENTER.x) * RADIAL_SCALE, 4, 94),
+    y: clamp(FRAME_CENTER.y + (y - FRAME_CENTER.y) * RADIAL_SCALE, 8, 90),
+  };
+}
+
+/** Extra px-equivalent % nudges for cursors that sit near the copy block. */
+const CURSOR_NUDGES: Partial<Record<string, { x: number; y: number }>> = {
+  mitra: { x: 7, y: -7 },
+  gulsheen: { x: 5, y: 8 },
+};
+
+const FIGMA_CURSORS: (Omit<HeroV5Cursor, "x" | "y"> & { x: number; y: number })[] = [
   {
     id: "kat",
     name: "Kat Guzman",
@@ -135,3 +159,14 @@ export const HERO_V5_CURSORS: HeroV5Cursor[] = [
     order: 1,
   },
 ];
+
+export const HERO_V5_CURSORS: HeroV5Cursor[] = FIGMA_CURSORS.map((cursor) => {
+  const spread = spreadFromCenter(cursor.x, cursor.y);
+  const nudge = CURSOR_NUDGES[cursor.id] ?? { x: 0, y: 0 };
+
+  return {
+    ...cursor,
+    x: Number(clamp(spread.x + nudge.x, 4, 94).toFixed(1)),
+    y: Number(clamp(spread.y + nudge.y, 8, 90).toFixed(1)),
+  };
+});

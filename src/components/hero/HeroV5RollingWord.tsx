@@ -1,9 +1,9 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState } from "react";
-import { HERO_V5_WORDS } from "./useHeroV5Timeline";
 
 type HeroV5RollingWordProps = {
+  words: readonly string[];
   wordIndex: number;
   onReady?: () => void;
 };
@@ -16,7 +16,6 @@ type LetterBox = {
 };
 
 type WordMetrics = {
-  laneWidth: number;
   wordWidths: number[];
   letters: LetterBox[][];
 };
@@ -47,8 +46,8 @@ function measureWordLetters(el: HTMLElement): LetterBox[] {
   });
 }
 
-function measureAll(root: HTMLElement): WordMetrics | null {
-  const letters = HERO_V5_WORDS.map((_, wi) => {
+function measureAll(root: HTMLElement, words: readonly string[]): WordMetrics | null {
+  const letters = words.map((_, wi) => {
     const el = root.querySelector<HTMLElement>(`[data-word-index="${wi}"]`);
     return el ? measureWordLetters(el) : [];
   });
@@ -57,17 +56,17 @@ function measureAll(root: HTMLElement): WordMetrics | null {
     boxes.length > 0 ? boxes[boxes.length - 1].left + boxes[boxes.length - 1].width : 0,
   );
 
-  const laneWidth = Math.max(...wordWidths, 0);
-  if (laneWidth <= 0) return null;
+  if (!wordWidths.some((width) => width > 0)) return null;
 
-  return { laneWidth, wordWidths, letters };
+  return { wordWidths, letters };
 }
 
 /**
  * Per-letter vertical slot machine with Range-measured positions — letters sit
  * exactly where the browser would set them in the full word (natural kerning).
+ * Slot width follows the active word so the headline centers on visible text.
  */
-export function HeroV5RollingWord({ wordIndex, onReady }: HeroV5RollingWordProps) {
+export function HeroV5RollingWord({ words, wordIndex, onReady }: HeroV5RollingWordProps) {
   const measureRef = useRef<HTMLSpanElement>(null);
   const onReadyRef = useRef(onReady);
   onReadyRef.current = onReady;
@@ -84,7 +83,7 @@ export function HeroV5RollingWord({ wordIndex, onReady }: HeroV5RollingWordProps
 
     const apply = () => {
       if (cancelled || measuredRef.current) return;
-      const next = measureAll(root);
+      const next = measureAll(root, words);
       if (!next) return;
       measuredRef.current = true;
       setMetrics(next);
@@ -98,7 +97,7 @@ export function HeroV5RollingWord({ wordIndex, onReady }: HeroV5RollingWordProps
 
     const onResize = () => {
       if (!measuredRef.current) return;
-      const next = measureAll(root);
+      const next = measureAll(root, words);
       if (next) setMetrics(next);
     };
 
@@ -107,9 +106,8 @@ export function HeroV5RollingWord({ wordIndex, onReady }: HeroV5RollingWordProps
       cancelled = true;
       window.removeEventListener("resize", onResize);
     };
-  }, []);
+  }, [words]);
 
-  // Enable CSS transitions only after the first measured layout is painted.
   useLayoutEffect(() => {
     if (!metrics) return;
     onReadyRef.current?.();
@@ -117,26 +115,25 @@ export function HeroV5RollingWord({ wordIndex, onReady }: HeroV5RollingWordProps
     return () => cancelAnimationFrame(id);
   }, [metrics]);
 
-  const current = HERO_V5_WORDS[wordIndex] ?? HERO_V5_WORDS[0];
-  const currentLetters = metrics?.letters[wordIndex] ?? [];
-  const currentWidth = metrics?.wordWidths[wordIndex] ?? 0;
+  const safeIndex = Math.min(wordIndex, words.length - 1);
+  const current = words[safeIndex] ?? words[0];
+  const currentLetters = metrics?.letters[safeIndex] ?? [];
+  const currentWidth = metrics?.wordWidths[safeIndex] ?? 0;
 
   return (
     <span
       className="hero-v5__slot"
       data-ready={motionReady ? "true" : "false"}
       data-measured={metrics ? "true" : "false"}
+      style={currentWidth ? { width: currentWidth } : undefined}
     >
-      {/* Pixel-locked lane width from measurement — avoids fallback-font reflow. */}
-      <span
-        className="hero-v5__slot-lane"
-        aria-hidden
-        style={metrics ? { width: metrics.laneWidth } : undefined}
-      />
+      <span className="hero-v5__slot-lane" aria-hidden>
+        {current}
+      </span>
 
       <span ref={measureRef} className="hero-v5__slot-measure" aria-hidden>
-        {HERO_V5_WORDS.map((word, wi) => (
-          <span key={wi} data-word-index={wi} className="hero-v5__slot-measure-word">
+        {words.map((word, wi) => (
+          <span key={word} data-word-index={wi} className="hero-v5__slot-measure-word">
             {word}
           </span>
         ))}
@@ -157,14 +154,14 @@ export function HeroV5RollingWord({ wordIndex, onReady }: HeroV5RollingWordProps
                     left: box.left,
                     width: box.width,
                     "--col-index": index,
-                    "--slot-index": wordIndex,
+                    "--slot-index": safeIndex,
                   } as React.CSSProperties
                 }
               >
                 <span className="hero-v5__slot-col-drum">
-                  {HERO_V5_WORDS.map((word, wi) => (
+                  {words.map((word, wi) => (
                     <span
-                      key={wi}
+                      key={word}
                       className="hero-v5__slot-col-face"
                       data-empty={graphemeAt(word, index) === NBSP ? "true" : "false"}
                     >

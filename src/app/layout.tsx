@@ -26,7 +26,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
         <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async />
       </head>
-      <body className="bg-[var(--background)] font-sans text-[var(--foreground)] antialiased">
+      <body
+        className={`${dmSans.className} bg-[var(--background)] font-sans text-[var(--foreground)] antialiased`}
+      >
         <ThemeProvider>
           <ConditionalChrome>{children}</ConditionalChrome>
         </ThemeProvider>

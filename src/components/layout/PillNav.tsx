@@ -61,7 +61,6 @@ function ModeToggle() {
 export function PillNav({ phase }: PillNavProps) {
   const pathname = usePathname();
   const animated = phase !== undefined;
-  const preReveal = animated && (phase === "intro" || phase === "roll");
 
   return (
     <header
@@ -71,10 +70,7 @@ export function PillNav({ phase }: PillNavProps) {
     >
       <nav
         aria-label="Primary"
-        aria-hidden={preReveal}
-        className={`pill-nav__bar pointer-events-auto flex h-[3.25rem] max-w-[calc(100vw-2rem)] items-center gap-1 rounded-full border border-[var(--rule)] bg-[var(--background)]/92 py-1 pl-3 pr-1.5 shadow-[0_10px_40px_rgba(0,0,0,0.08)] backdrop-blur-xl dark:shadow-[0_10px_40px_rgba(0,0,0,0.4)] ${
-          preReveal ? "opacity-0" : ""
-        }`}
+        className="pill-nav__bar pointer-events-auto flex h-[3.25rem] max-w-[calc(100vw-2rem)] items-center gap-1 rounded-full border border-[var(--rule)] bg-[var(--background)]/92 py-1 pl-3 pr-1.5 shadow-[0_10px_40px_rgba(0,0,0,0.08)] backdrop-blur-xl dark:shadow-[0_10px_40px_rgba(0,0,0,0.4)]"
       >
         <Link
           href="/"

@@ -1,14 +1,15 @@
 "use client";
 
-import { useLayoutEffect, type ReactNode } from "react";
+import { useLayoutEffect, type CSSProperties, type ReactNode } from "react";
 
 type HeroV2ViewportProps = {
   children: ReactNode;
   className?: string;
+  style?: CSSProperties;
 };
 
 /** Locks hero shell to the visible viewport — avoids dvh/svh mismatches eating bottom margin. */
-export function HeroV2Viewport({ children, className }: HeroV2ViewportProps) {
+export function HeroV2Viewport({ children, className, style }: HeroV2ViewportProps) {
   useLayoutEffect(() => {
     const root = document.documentElement;
 
@@ -27,5 +28,9 @@ export function HeroV2Viewport({ children, className }: HeroV2ViewportProps) {
     };
   }, []);
 
-  return <div className={["hero-v2-viewport", className].filter(Boolean).join(" ")}>{children}</div>;
+  return (
+    <div className={["hero-v2-viewport", className].filter(Boolean).join(" ")} style={style}>
+      {children}
+    </div>
+  );
 }
