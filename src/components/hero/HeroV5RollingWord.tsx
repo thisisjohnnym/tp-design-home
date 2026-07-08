@@ -159,7 +159,7 @@ export function HeroV5RollingWord({ words, wordIndex, onReady }: HeroV5RollingWo
                 }
               >
                 <span className="hero-v5__slot-col-drum">
-                  {words.map((word, wi) => (
+                  {words.map((word) => (
                     <span
                       key={word}
                       className="hero-v5__slot-col-face"
