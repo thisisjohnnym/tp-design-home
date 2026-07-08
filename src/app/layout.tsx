@@ -19,11 +19,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={dmSans.variable} data-palette="studio" data-mode="light" suppressHydrationWarning>
       <head>
         <ThemeScript />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `if(location.hash.includes('figmacapture')){sessionStorage.setItem('tapestry-hero-intro-seen','1');}`,
-          }}
-        />
         <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async />
       </head>
       <body
