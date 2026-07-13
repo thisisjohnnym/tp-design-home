@@ -25,7 +25,7 @@ export default function TeamPage() {
         </div>
       </section>
       <section aria-label="The team">
-        <TeamGallery variant="page" />
+        <TeamGallery />
       </section>
     </PageShell>
   );

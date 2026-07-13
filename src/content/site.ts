@@ -25,13 +25,16 @@ export const site = {
     },
   ],
   teamIntro:
-    "We asked our team to choose a design poster that represents them. Each pick is a window into how they think, what they love, and the lens they bring to their work. Different voices, different personalities, but side by side, they start talking to each other. That's the team.",
+    "We asked our team to choose a piece of art that represents them. Each pick is a window into how they think, what they love, and the lens they bring to their work. Different voices, different personalities, but side by side, they start talking to each other. That's the team.",
   team: [
     {
       name: "Sean Kelly",
       title: "UX Director",
       location: "Chicago, IL",
       poster: "/team-posters/sean-kelly.jpg",
+      photo: "/team-posters/sean-kelly-photo.png",
+      hoverBio:
+        "When I'm not at work, I'm exploring Chicago's architecture and hunting for the perfect deep dish.",
       posterLabel: "Bauhaus exhibition poster",
     },
     {
@@ -39,6 +42,9 @@ export const site = {
       title: "Sr. Manager, Digital Designer",
       location: "New York, NY",
       poster: "/team-posters/wendy-chan.jpg",
+      photo: "/team-posters/wendy-chan-photo.png",
+      hoverBio:
+        "When I'm not at work, I'm wandering museum galleries and sketching the little details that catch my eye.",
       posterLabel: "Fluid wave stripes",
     },
     {
@@ -46,6 +52,9 @@ export const site = {
       title: "Sr. Product Designer",
       location: "New York, NY",
       poster: "/team-posters/cong-kim.jpg",
+      photo: "/team-posters/cong-kim-photo.png",
+      hoverBio:
+        "When I'm not at work, I'm trying a new café, people-watching, and collecting inspiration from everyday moments.",
       posterLabel: "Constructivist geometry",
     },
     {
@@ -54,6 +63,9 @@ export const site = {
       location: "Buenos Aires, Argentina",
       ic: true,
       poster: "/team-posters/jonathan-martinez.jpg",
+      photo: "/team-posters/jonathan-martinez-photo.png",
+      hoverBio:
+        "When I'm not at work, I'm riding through the city, catching live music, and sharing mate with friends.",
       posterLabel: "Japanese GP poster",
     },
     {
@@ -61,6 +73,9 @@ export const site = {
       title: "UX Designer",
       location: "New York, NY",
       poster: "/team-posters/mitra-raveendran.jpg",
+      photo: "/team-posters/mitra-raveendran-photo.png",
+      hoverBio:
+        "When I'm not at work, I'm cooking something new, dancing it out, and laughing with the people I love.",
       posterLabel: "Bauhaus bouquet",
     },
     {
@@ -69,6 +84,8 @@ export const site = {
       location: "Sarasota, FL",
       poster: "/team-posters/juliana-botero.jpg",
       photo: "/team-posters/juliana-botero-photo.png",
+      hoverBio:
+        "When I'm not at work, I'm chasing sunsets and making memories outdoors with my son, Santi 💚",
       posterLabel: "CREATE typographic poster",
     },
     {
@@ -76,14 +93,19 @@ export const site = {
       title: "UX Designer",
       location: "New York, NY",
       poster: "/team-posters/gulsheen-bhatia.jpg",
+      photo: "/team-posters/gulsheen-bhatia-photo.png",
+      hoverBio:
+        "When I'm not at work, I'm getting lost in a good book and finding calm in the middle of a busy city.",
       posterLabel: "Bauhaus bicycle",
     },
     {
       name: "Kat Guzman",
       title: "UX Designer",
       location: "New York, NY",
-      ic: true,
       poster: "/team-posters/kat-guzman.jpg",
+      photo: "/team-posters/kat-guzman-photo.png",
+      hoverBio:
+        "When I'm not at work, I'm at a concert, thrifting vinyl, and chasing the next creative rabbit hole.",
       posterLabel: "Music poster",
     },
   ],
