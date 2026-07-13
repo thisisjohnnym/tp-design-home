@@ -1,31 +1,63 @@
+"use client";
+
+import { useState } from "react";
+import { Reveal } from "@/components/Reveal";
 import { site } from "@/content/site";
-import { TeamGalleryCard } from "./TeamGalleryCard";
+import { AlternativeTeamCard, type TeamView } from "./AlternativeTeamCard";
+import { WarholFilters } from "./WarholPortrait";
 
 type TeamGalleryProps = {
-  variant?: "home" | "page";
-  showIntro?: boolean;
   className?: string;
 };
 
-export function TeamGallery({
-  showIntro = true,
-  className = "",
-}: TeamGalleryProps) {
+const VIEW_OPTIONS: { value: TeamView; label: string }[] = [
+  { value: "faces", label: "Team Lineup" },
+  { value: "art", label: "Art Gallery" },
+];
+
+export function TeamGallery({ className = "" }: TeamGalleryProps) {
+  const [view, setView] = useState<TeamView>("art");
+
   return (
     <div className={className}>
-      {showIntro ? (
-        <p className="max-w-[32.5rem] font-sans text-[clamp(1.25rem,2.22vw,2rem)] font-normal leading-[1.3] tracking-[0.0125em] text-[var(--foreground)]">
-          {site.teamIntro}
-        </p>
-      ) : null}
+      <WarholFilters />
+      <Reveal>
+        <div
+          className="mb-[clamp(2rem,4vw,3rem)] flex justify-start"
+          role="group"
+          aria-label="Gallery view"
+        >
+          <div className="inline-flex rounded-full border border-[var(--rule)] p-1">
+            {VIEW_OPTIONS.map((option) => {
+              const active = view === option.value;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setView(option.value)}
+                  className={`rounded-full px-4 py-2 font-sans text-[14px] font-semibold uppercase tracking-[0.12em] transition ${
+                    active
+                      ? "bg-foreground text-background"
+                      : "text-foreground hover:opacity-70"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </Reveal>
 
       <ul
-        className="mt-10 grid list-none grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-4 lg:gap-12"
+        className="grid list-none grid-cols-1 gap-x-12 gap-y-16 sm:grid-cols-2 lg:grid-cols-4"
         aria-label="Team gallery"
       >
         {site.team.map((member) => (
-          <li key={member.name} className="group">
-            <TeamGalleryCard member={member} className="h-full" />
+          <li key={member.name}>
+            <AlternativeTeamCard member={member} view={view} />
           </li>
         ))}
       </ul>

@@ -33,6 +33,8 @@ const config: Config = {
         eyebrow: ["0.75rem", { lineHeight: "1.2", letterSpacing: "0.14em" }],
       },
       colors: {
+        foreground: "var(--foreground)",
+        background: "var(--background)",
         ink: {
           900: "var(--ink-900)",
           800: "var(--ink-800)",
