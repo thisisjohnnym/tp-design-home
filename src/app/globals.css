@@ -1027,10 +1027,11 @@ html[data-mode="dark"] .hero-v5 {
   }
 
   .warhol-portrait {
-    position: relative;
     isolation: isolate;
     overflow: hidden;
     background: var(--warhol-bg);
+    width: 100%;
+    height: 100%;
   }
 
   .warhol-portrait__foliage {
@@ -1053,8 +1054,13 @@ html[data-mode="dark"] .hero-v5 {
   }
 
   .warhol-portrait__photo {
-    position: relative;
+    position: absolute !important;
+    inset: 0;
     z-index: 1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
     filter: grayscale(1) contrast(1.7) brightness(1.06) url(#warhol-posterize);
     mix-blend-mode: multiply;
   }
@@ -1144,13 +1150,14 @@ html[data-mode="dark"] .hero-v5 {
     width: min(100%, 87.5rem);
     margin-inline: auto;
     display: none;
-    overflow: hidden;
+    overflow: visible;
+    margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
   }
 
   .how-we-do-it__stage--desktop {
     position: absolute;
-    left: 0;
-    width: 100%;
+    left: -5%;
+    width: 110%;
     top: -12%;
     height: 112%;
   }

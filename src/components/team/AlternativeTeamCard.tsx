@@ -21,6 +21,7 @@ function TeamCardArtMedia({ member }: { member: TeamMember }) {
         alt={posterAltText(member)}
         fill
         sizes={IMAGE_SIZES}
+        loading="eager"
         className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none"
       />
     </div>

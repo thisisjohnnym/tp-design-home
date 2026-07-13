@@ -55,11 +55,9 @@ export function TeamGallery({ className = "" }: TeamGalleryProps) {
         className="grid list-none grid-cols-1 gap-x-12 gap-y-16 sm:grid-cols-2 lg:grid-cols-4"
         aria-label="Team gallery"
       >
-        {site.team.map((member, index) => (
+        {site.team.map((member) => (
           <li key={member.name}>
-            <Reveal delay={index * 0.06}>
-              <AlternativeTeamCard member={member} view={view} />
-            </Reveal>
+            <AlternativeTeamCard member={member} view={view} />
           </li>
         ))}
       </ul>
