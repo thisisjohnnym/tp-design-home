@@ -40,7 +40,7 @@ function TropicalFoliage() {
 
 export function WarholFilters() {
   return (
-    <svg aria-hidden className="pointer-events-none absolute size-0 overflow-hidden">
+    <svg aria-hidden className="pointer-events-none absolute h-0 w-0" width="0" height="0">
       <defs>
         <filter id="warhol-posterize" colorInterpolationFilters="sRGB">
           <feComponentTransfer>
@@ -84,7 +84,6 @@ export function WarholPortrait({ src, alt, name, sizes, className = "" }: Warhol
         alt={alt}
         fill
         sizes={sizes}
-        loading="eager"
         className="warhol-portrait__photo object-cover object-center"
       />
       <span className="warhol-portrait__skin" aria-hidden />

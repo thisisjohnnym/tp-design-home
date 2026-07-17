@@ -1,19 +1,9 @@
-import localFont from "next/font/local";
+import { DM_Sans } from "next/font/google";
 
-/** DM Sans — self-hosted variable font (avoids Turbopack + next/font/google bug). */
-export const dmSans = localFont({
-  src: [
-    {
-      path: "../../public/fonts/dm-sans/DMSans-Variable.ttf",
-      weight: "100 1000",
-      style: "normal",
-    },
-    {
-      path: "../../public/fonts/dm-sans/DMSans-Italic-Variable.ttf",
-      weight: "100 1000",
-      style: "italic",
-    },
-  ],
+/** DM Sans — site-wide typography (400–700). */
+export const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-dm-sans",
   display: "swap",
 });

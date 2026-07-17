@@ -1,14 +1,6 @@
 /** Color palettes inspired by https://www.michelegre.co (Indie print paper) */
 export type ThemeMode = "light" | "dark";
 
-export type ColorPalette = {
-  id: string;
-  name: string;
-  swatch: string;
-  light: ThemeTokens;
-  dark: ThemeTokens;
-};
-
 export type ThemeTokens = {
   background: string;
   foreground: string;
@@ -17,6 +9,14 @@ export type ThemeTokens = {
   rule: string;
   accent: string;
   controlInactive: string;
+};
+
+export type ColorPalette = {
+  id: string;
+  name: string;
+  swatch: string;
+  light: ThemeTokens;
+  dark: ThemeTokens;
 };
 
 export const colorPalettes: ColorPalette[] = [
@@ -248,6 +248,144 @@ export const colorPalettes: ColorPalette[] = [
       rule: "rgba(255, 248, 231, 0.18)",
       accent: "#E8B830",
       controlInactive: "#5A4830",
+    },
+  },
+  {
+    id: "midnight-coral",
+    name: "Midnight Coral",
+    swatch: "#0A1628",
+    light: {
+      background: "#F4F6FA",
+      foreground: "#0A1628",
+      foregroundSecondary: "#1A2A44",
+      foregroundMuted: "#5A6A82",
+      rule: "rgba(10, 22, 40, 0.14)",
+      accent: "#FF6B5B",
+      controlInactive: "#9AA8BC",
+    },
+    dark: {
+      background: "#0A1628",
+      foreground: "#F4F6FA",
+      foregroundSecondary: "#D0D8E8",
+      foregroundMuted: "#8A9AB8",
+      rule: "rgba(244, 246, 250, 0.16)",
+      accent: "#FF6B5B",
+      controlInactive: "#3A4A62",
+    },
+  },
+  {
+    id: "forest-cream",
+    name: "Forest Cream",
+    swatch: "#1B4332",
+    light: {
+      background: "#F5F0E6",
+      foreground: "#1B4332",
+      foregroundSecondary: "#2D6A4F",
+      foregroundMuted: "#6A8A72",
+      rule: "rgba(27, 67, 50, 0.18)",
+      accent: "#40916C",
+      controlInactive: "#B8C8B0",
+    },
+    dark: {
+      background: "#1B4332",
+      foreground: "#F5F0E6",
+      foregroundSecondary: "#D8E8D0",
+      foregroundMuted: "#95B8A0",
+      rule: "rgba(245, 240, 230, 0.2)",
+      accent: "#52B788",
+      controlInactive: "#3A5A48",
+    },
+  },
+  {
+    id: "electric",
+    name: "Electric",
+    swatch: "#0066FF",
+    light: {
+      background: "#FFFFFF",
+      foreground: "#000000",
+      foregroundSecondary: "#1A1A1A",
+      foregroundMuted: "#5C5C5C",
+      rule: "rgba(0, 0, 0, 0.14)",
+      accent: "#0066FF",
+      controlInactive: "#A0A0A0",
+    },
+    dark: {
+      background: "#000000",
+      foreground: "#FFFFFF",
+      foregroundSecondary: "#E8E8E8",
+      foregroundMuted: "#9A9A9A",
+      rule: "rgba(255, 255, 255, 0.16)",
+      accent: "#00AAFF",
+      controlInactive: "#404040",
+    },
+  },
+  {
+    id: "terracotta",
+    name: "Terracotta",
+    swatch: "#C75B3A",
+    light: {
+      background: "#F2E8DC",
+      foreground: "#4A2018",
+      foregroundSecondary: "#6A3020",
+      foregroundMuted: "#9A7060",
+      rule: "rgba(74, 32, 24, 0.18)",
+      accent: "#C75B3A",
+      controlInactive: "#C4A898",
+    },
+    dark: {
+      background: "#3D1F14",
+      foreground: "#F2E8DC",
+      foregroundSecondary: "#E8D0B8",
+      foregroundMuted: "#C0A088",
+      rule: "rgba(242, 232, 220, 0.2)",
+      accent: "#E07A5F",
+      controlInactive: "#6A4838",
+    },
+  },
+  {
+    id: "slate-lavender",
+    name: "Slate Lavender",
+    swatch: "#9B7FD4",
+    light: {
+      background: "#E8ECF0",
+      foreground: "#2D3142",
+      foregroundSecondary: "#3D4258",
+      foregroundMuted: "#6A7088",
+      rule: "rgba(45, 49, 66, 0.14)",
+      accent: "#9B7FD4",
+      controlInactive: "#A8B0C0",
+    },
+    dark: {
+      background: "#2D3142",
+      foreground: "#E8ECF0",
+      foregroundSecondary: "#C8D0E0",
+      foregroundMuted: "#9098B0",
+      rule: "rgba(232, 236, 240, 0.18)",
+      accent: "#B794F6",
+      controlInactive: "#4A5068",
+    },
+  },
+  {
+    id: "monochrome",
+    name: "Monochrome",
+    swatch: "#000000",
+    light: {
+      background: "#FFFFFF",
+      foreground: "#000000",
+      foregroundSecondary: "#1A1A1A",
+      foregroundMuted: "#666666",
+      rule: "rgba(0, 0, 0, 0.2)",
+      accent: "#000000",
+      controlInactive: "#BBBBBB",
+    },
+    dark: {
+      background: "#000000",
+      foreground: "#FFFFFF",
+      foregroundSecondary: "#E5E5E5",
+      foregroundMuted: "#999999",
+      rule: "rgba(255, 255, 255, 0.22)",
+      accent: "#FFFFFF",
+      controlInactive: "#444444",
     },
   },
 ];

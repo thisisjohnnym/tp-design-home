@@ -1,12 +1,7 @@
+const TEAM_BIO_PLACEHOLDER =
+  "Approaching every project with deep user-centered insight and overt passion for the craft, Sean has been the fresh creative force behind market-defining experiences for Coach and Kate Spade. His raw ability in both graphic, product design and leadership have had a profound effect on Tapestry's philosophy, work and culture.";
+
 export const site = {
-  name: "Tapestry Design Team",
-  tagline: "Designing the connective tissue of our product experience",
-  hero: {
-    body: [
-      "From reusable patterns to published UI references, we build the shared foundation Tapestry's products are made from.",
-      "We partner across product, engineering, and leadership to create experiences that are intuitive, consistent, accessible, and distinctly Tapestry.",
-    ],
-  },
   values: [
     {
       title: "We are crafters",
@@ -25,271 +20,113 @@ export const site = {
     },
   ],
   teamIntro:
-    "We asked our team to choose a piece of art that represents them. Each pick is a window into how they think, what they love, and the lens they bring to their work. Different voices, different personalities, but side by side, they start talking to each other. That's the team.",
+    "We come from diverse backgrounds—with experience across startups, agencies, and in-house teams. Those different paths shape how we see problems, collaborate, and design. Together, we bring a wide range of perspectives to the table.",
   team: [
     {
       name: "Sean Kelly",
       title: "UX Director",
       location: "Chicago, IL",
+      bio: TEAM_BIO_PLACEHOLDER,
       poster: "/team-posters/sean-kelly.jpg",
       photo: "/team-posters/sean-kelly-photo.png",
       hoverBio:
         "When I'm not at work, I'm exploring Chicago's architecture and hunting for the perfect deep dish.",
       posterLabel: "Bauhaus exhibition poster",
+      email: "sean.kelly@tapestry.com",
     },
     {
       name: "Wendy Chan",
       title: "Sr. Manager, Digital Designer",
       location: "New York, NY",
+      bio: TEAM_BIO_PLACEHOLDER,
       poster: "/team-posters/wendy-chan.jpg",
       photo: "/team-posters/wendy-chan-photo.png",
       hoverBio:
         "When I'm not at work, I'm wandering museum galleries and sketching the little details that catch my eye.",
       posterLabel: "Fluid wave stripes",
+      email: "wendy.chan@tapestry.com",
     },
     {
       name: "Cong Kim",
       title: "Sr. Product Designer",
       location: "New York, NY",
+      bio: TEAM_BIO_PLACEHOLDER,
       poster: "/team-posters/cong-kim.jpg",
       photo: "/team-posters/cong-kim-photo.png",
       hoverBio:
         "When I'm not at work, I'm trying a new café, people-watching, and collecting inspiration from everyday moments.",
       posterLabel: "Constructivist geometry",
+      email: "cong.kim@tapestry.com",
     },
     {
       name: "Jonathan Martinez",
       title: "Sr. Product Designer",
       location: "Buenos Aires, Argentina",
+      bio: TEAM_BIO_PLACEHOLDER,
       ic: true,
       poster: "/team-posters/jonathan-martinez.jpg",
       photo: "/team-posters/jonathan-martinez-photo.png",
       hoverBio:
         "When I'm not at work, I'm riding through the city, catching live music, and sharing mate with friends.",
       posterLabel: "Japanese GP poster",
+      email: "jonathan.martinez@tapestry.com",
     },
     {
       name: "Mitra Raveendran",
       title: "UX Designer",
       location: "New York, NY",
+      bio: TEAM_BIO_PLACEHOLDER,
       poster: "/team-posters/mitra-raveendran.jpg",
       photo: "/team-posters/mitra-raveendran-photo.png",
       hoverBio:
         "When I'm not at work, I'm cooking something new, dancing it out, and laughing with the people I love.",
       posterLabel: "Bauhaus bouquet",
+      email: "mitra.raveendran@tapestry.com",
     },
     {
       name: "Juliana Botero",
       title: "Product Designer",
       location: "Sarasota, FL",
+      bio: TEAM_BIO_PLACEHOLDER,
       poster: "/team-posters/juliana-botero.jpg",
       photo: "/team-posters/juliana-botero-photo.png",
       hoverBio:
         "When I'm not at work, I'm chasing sunsets and making memories outdoors with my son, Santi 💚",
       posterLabel: "CREATE typographic poster",
+      email: "juliana.botero@tapestry.com",
     },
     {
       name: "Gulsheen Bhatia",
       title: "UX Designer",
       location: "New York, NY",
+      bio: TEAM_BIO_PLACEHOLDER,
       poster: "/team-posters/gulsheen-bhatia.jpg",
       photo: "/team-posters/gulsheen-bhatia-photo.png",
       hoverBio:
         "When I'm not at work, I'm getting lost in a good book and finding calm in the middle of a busy city.",
       posterLabel: "Bauhaus bicycle",
+      email: "gulsheen.bhatia@tapestry.com",
     },
     {
       name: "Kat Guzman",
       title: "UX Designer",
       location: "New York, NY",
+      bio: TEAM_BIO_PLACEHOLDER,
       poster: "/team-posters/kat-guzman.jpg",
       photo: "/team-posters/kat-guzman-photo.png",
       hoverBio:
         "When I'm not at work, I'm at a concert, thrifting vinyl, and chasing the next creative rabbit hole.",
       posterLabel: "Music poster",
+      email: "kat.guzman@tapestry.com",
     },
   ],
-  capabilitiesIntro:
-    "We partner across product, engineering, and leadership to shape experiences that are useful, consistent, accessible, and thoughtfully crafted.",
-  capabilities: [
-    {
-      label: "strategies",
-      title: "Design strategies",
-      description: "Framing problems, aligning on direction, and connecting design work to outcomes.",
-    },
-    {
-      label: "products",
-      title: "Design products",
-      description: "End-to-end flows and product surfaces shaped with product and engineering partners.",
-    },
-    {
-      label: "UI/UX",
-      title: "Design UI/UX",
-      description: "Behaviors, states, and motion that make interfaces predictable and delightful.",
-    },
-    {
-      label: "user research",
-      title: "Design user research",
-      description: "Partnering with research to ground decisions in evidence and customer insight.",
-    },
-    {
-      label: "service",
-      title: "Design service",
-      description: "Rituals, tooling, and workflows that help teams move with clarity across the org.",
-    },
-    {
-      label: "prototypes",
-      title: "Design prototypes",
-      description: "Rapid exploration to test ideas before they ship.",
-    },
-    {
-      label: "content",
-      title: "Design content",
-      description: "Language, structure, and tone that clarify intent and reduce friction.",
-    },
-    {
-      label: "accessibility",
-      title: "Design accessibility",
-      description: "Building experiences that work for more people, earlier in the process.",
-    },
-  ],
-  manageIntro:
-    "We maintain the patterns, files, rituals, and reusable design references that help our teams move with clarity and confidence.",
-  ownershipMapTitle: "A practical ownership map",
-  ownership: [
-    {
-      category: "Patterns",
-      label: "Shared interaction and UI patterns",
-      status: "placeholder" as const,
-    },
-    {
-      category: "Figma",
-      label: "Design system components and libraries",
-      status: "placeholder" as const,
-    },
-    {
-      category: "Rituals",
-      label: "Critique and review sessions",
-      status: "placeholder" as const,
-    },
-    {
-      category: "References",
-      label: "Published UI references",
-      status: "placeholder" as const,
-    },
-  ],
-  process: [
-    {
-      step: 1,
-      title: "Frame",
-      description:
-        "Clarify the user need, business context, constraints, and success criteria.",
-    },
-    {
-      step: 2,
-      title: "Explore",
-      description: "Generate concepts, flows, prototypes, or pattern options.",
-    },
-    {
-      step: 3,
-      title: "Align",
-      description: "Review with stakeholders, engineering, product, and design peers.",
-    },
-    {
-      step: 4,
-      title: "Refine",
-      description: "Resolve interaction details, edge cases, accessibility, and content.",
-    },
-    {
-      step: 5,
-      title: "Publish",
-      description:
-        "Document the design artifact, component, or pattern with a Figma reference.",
-    },
-    {
-      step: 6,
-      title: "Evolve",
-      description:
-        "Revisit based on usage, feedback, implementation, and product needs.",
-    },
-  ],
-  principles: [
-    {
-      title: "Collaboration principles",
-      description:
-        "We partner early with product and engineering, share work in progress, and make tradeoffs visible. Good ideas can come from anywhere.",
-      status: "placeholder" as const,
-    },
-    {
-      title: "Quality bar",
-      description:
-        "We hold a high bar for craft, accessibility, and coherence — and we document decisions so teams can build with confidence.",
-      status: "placeholder" as const,
-    },
-    {
-      title: "Decision-making",
-      description:
-        "We frame options with context, align on success criteria, and leave a clear trail from problem to solution.",
-      status: "placeholder" as const,
-    },
-  ],
-  contact: {
-    intro: "A clear path for collaboration.",
-    sections: [
-      {
-        title: "When to contact us",
-        body: "Reach out when you need design partnership on a new initiative, help navigating our patterns or libraries, or clarity on who owns a surface.",
-        status: "placeholder" as const,
-      },
-      {
-        title: "Appropriate requests",
-        body: "Product design support, pattern or component questions, accessibility reviews, and design feedback on in-flight work.",
-        status: "placeholder" as const,
-      },
-      {
-        title: "Preferred intake",
-        body: "Add your intake process here — e.g. Slack channel, Jira queue, or request form.",
-        status: "placeholder" as const,
-      },
-      {
-        title: "Office hours & rituals",
-        body: "Add critique sessions, review rituals, or office hours when scheduled.",
-        status: "placeholder" as const,
-      },
-      {
-        title: "Turnaround expectations",
-        body: "Optional: typical response times for different request types.",
-        status: "placeholder" as const,
-      },
-    ],
-    formNote:
-      "Submit the form below and we'll route your request. Connect Formspree or an internal endpoint in src/components/contact/ContactForm.tsx when ready.",
-  },
-  links: {
-    figma: "",
-    slack: "",
-    intakeForm: "",
-  },
   nav: [
-    { href: "/", label: "Home" },
-    { href: "/team", label: "Team" },
-    { href: "/capabilities", label: "Capabilities" },
-    { href: "/what-we-manage", label: "What we manage" },
-    { href: "/how-we-work", label: "How we work" },
-    { href: "/contact", label: "Contact" },
+    { href: "#resources", label: "Resources" },
+    { href: "#contact", label: "Contact" },
   ],
 } as const;
 
 export type TeamMember = (typeof site.team)[number];
-
-export function memberInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 export function memberDisplayName(member: TeamMember): string {
   return "ic" in member && member.ic ? `${member.name} (IC)` : member.name;
