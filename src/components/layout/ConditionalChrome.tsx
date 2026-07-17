@@ -1,26 +1,33 @@
 "use client";
 
+import { useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 import { SiteHeader } from "./SiteHeader";
-import { SiteFooter } from "./SiteFooter";
-import { CustomCursor } from "@/components/cursor/CustomCursor";
 
 export function ConditionalChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAlternativeHome = pathname === "/";
+  const hideSiteHeader = pathname === "/" || pathname === "/hero-v3";
+
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+
+    if (pathname === "/hero-v3") {
+      root.dataset.heroVariant = "v3";
+    } else if (root.dataset.heroVariant === "v3") {
+      delete root.dataset.heroVariant;
+    }
+
+    if (pathname === "/") {
+      root.style.setProperty("--site-header-height", "0px");
+    } else {
+      root.style.removeProperty("--site-header-height");
+    }
+  }, [pathname]);
 
   return (
     <>
-      {!isAlternativeHome ? <CustomCursor /> : null}
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-[var(--foreground)] focus:px-4 focus:py-2 focus:text-[var(--background)]"
-      >
-        Skip to content
-      </a>
-      {!isAlternativeHome ? <SiteHeader /> : null}
-      <main id="main">{children}</main>
-      {!isAlternativeHome ? <SiteFooter /> : null}
+      {!hideSiteHeader ? <SiteHeader /> : null}
+      {children}
     </>
   );
 }

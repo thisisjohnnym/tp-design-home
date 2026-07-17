@@ -40,18 +40,34 @@ export function StatementRevealSection() {
     >
       <div className="statement-reveal__sticky">
         <p className="statement-reveal__sentence px-[var(--grid-margin)]">
-          {designStatementChars.map((char, index) => (
-            <span
-              key={index}
-              className={
-                index < revealedCount
-                  ? "statement-reveal__char statement-reveal__char--bright"
-                  : "statement-reveal__char statement-reveal__char--dim"
-              }
-            >
-              {char}
-            </span>
-          ))}
+          {designStatementChars.map((char, index) => {
+            const bright = index < revealedCount;
+
+            if (char === "i" && bright) {
+              return (
+                <span
+                  key={index}
+                  className="statement-reveal__char statement-reveal__char-i statement-reveal__char-i--bright"
+                >
+                  <span className="statement-reveal__char-i-dot" aria-hidden />
+                  <span className="statement-reveal__char-i-stem">ı</span>
+                </span>
+              );
+            }
+
+            return (
+              <span
+                key={index}
+                className={
+                  bright
+                    ? "statement-reveal__char statement-reveal__char--bright"
+                    : "statement-reveal__char statement-reveal__char--dim"
+                }
+              >
+                {char}
+              </span>
+            );
+          })}
         </p>
       </div>
     </section>

@@ -35,13 +35,6 @@ function applyTheme(paletteId: string, mode: ThemeMode) {
   root.style.colorScheme = mode;
 }
 
-function withThemeTransition(action: () => void) {
-  const root = document.documentElement;
-  root.classList.add("theme-transition");
-  action();
-  window.setTimeout(() => root.classList.remove("theme-transition"), 500);
-}
-
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [paletteId, setPaletteId] = useState(DEFAULT_PALETTE_ID);
   const [mode, setModeState] = useState<ThemeMode>(DEFAULT_MODE);
@@ -64,10 +57,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setMode = useCallback(
     (next: ThemeMode) => {
       setModeState(next);
-      withThemeTransition(() => {
-        applyTheme(paletteId, next);
-        localStorage.setItem(STORAGE_KEYS.mode, next);
-      });
+      applyTheme(paletteId, next);
+      localStorage.setItem(STORAGE_KEYS.mode, next);
     },
     [paletteId],
   );
@@ -75,10 +66,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const shufflePalette = useCallback(() => {
     const nextId = getNextPaletteId(paletteId);
     setPaletteId(nextId);
-    withThemeTransition(() => {
-      applyTheme(nextId, mode);
-      localStorage.setItem(STORAGE_KEYS.palette, nextId);
-    });
+    applyTheme(nextId, mode);
+    localStorage.setItem(STORAGE_KEYS.palette, nextId);
   }, [paletteId, mode]);
 
   const value = useMemo(

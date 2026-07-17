@@ -1,27 +1,50 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useLayoutEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
-import { site } from "@/content/site";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 import { ThemeControls } from "@/components/theme/ThemeControls";
-import { GridCell, PageGrid } from "./PageGrid";
+import { site } from "@/content/site";
 
-const navItems = site.nav.map((item) => ({
-  ...item,
-  shortLabel:
-    item.href === "/what-we-manage"
-      ? "Manage"
-      : item.href === "/how-we-work"
-        ? "Process"
-        : item.href === "/capabilities"
-          ? "Caps"
-          : item.label,
-}));
+const SCROLL_DELTA_THRESHOLD = 8;
+const TOP_REVEAL_OFFSET = 16;
+
+function useHash() {
+  const [hash, setHash] = useState("");
+
+  useEffect(() => {
+    const updateHash = () => setHash(window.location.hash);
+    updateHash();
+    window.addEventListener("hashchange", updateHash);
+    return () => window.removeEventListener("hashchange", updateHash);
+  }, []);
+
+  return hash;
+}
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const hash = useHash();
+  const reduceMotion = useReducedMotion();
   const headerRef = useRef<HTMLElement>(null);
+  const lastScrollYRef = useRef(0);
+  const tickingRef = useRef(false);
+  const [scrollState, setScrollState] = useState<"visible" | "hidden">("visible");
+  const isHeroV2 = pathname === "/" && searchParams.get("hero") === "v2";
+  const isHeroDark = isHeroV2;
+
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+
+    if (isHeroV2) {
+      root.dataset.heroVariant = "v2";
+    } else {
+      delete root.dataset.heroVariant;
+    }
+  }, [isHeroV2]);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -43,57 +66,96 @@ export function SiteHeader() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (reduceMotion) {
+      setScrollState("visible");
+      return;
+    }
+
+    lastScrollYRef.current = window.scrollY;
+
+    const updateScrollState = () => {
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollYRef.current;
+
+      if (currentY <= TOP_REVEAL_OFFSET) {
+        setScrollState("visible");
+      } else if (delta > SCROLL_DELTA_THRESHOLD) {
+        setScrollState("hidden");
+      } else if (delta < -SCROLL_DELTA_THRESHOLD) {
+        setScrollState("visible");
+      }
+
+      lastScrollYRef.current = currentY;
+      tickingRef.current = false;
+    };
+
+    const onScroll = () => {
+      if (tickingRef.current) return;
+      tickingRef.current = true;
+      requestAnimationFrame(updateScrollState);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    setScrollState("visible");
+    lastScrollYRef.current = window.scrollY;
+  }, [pathname, hash]);
+
   return (
     <header
       ref={headerRef}
-      className="site-header pointer-events-none sticky top-0 z-50 bg-[var(--background)]/88 backdrop-blur-xl"
+      className={`site-header sticky top-0 z-50${isHeroDark ? "" : " bg-background"}`}
+      data-scroll-state={scrollState}
       style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
     >
-      <PageGrid className="py-3 md:py-4">
-        <GridCell>
-          <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 md:gap-4">
-            <Link
-              href="/"
-              className="pointer-events-auto eyebrow shrink-0 justify-self-start transition hover:opacity-80"
-            >
-              Tapestry · Design
-            </Link>
+      <div className="site-header__inner">
+        <Link href="/" className="site-header__logo shrink-0 transition hover:opacity-80">
+          <Image
+            src={isHeroDark ? "/brand/tapestry-logo-light.svg" : "/brand/tapestry-logo.svg"}
+            alt="Tapestry"
+            width={120}
+            height={28}
+            priority
+            className="h-[1.75rem] w-auto md:h-[1.875rem]"
+          />
+        </Link>
 
-            <nav
-              aria-label="Primary"
-              className="pointer-events-auto max-w-[min(100vw-12rem,42rem)] justify-self-center overflow-x-auto rounded-full border border-[var(--rule)] bg-transparent [-ms-overflow-style:none] [scrollbar-width:none] md:max-w-none [&::-webkit-scrollbar]:hidden"
-            >
-              <ul className="flex items-center gap-0.5 p-1.5">
-                {navItems.map((item) => {
-                  const active =
-                    item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+        <div className="site-header-pill">
+          <div className="site-header-pill__inner">
+            <nav aria-label="Primary">
+              <ul className="site-header-pill__links">
+                {site.nav.map((item) => {
+                  const normalizedHash = item.href.startsWith("/#")
+                    ? item.href.slice(1)
+                    : item.href.startsWith("#")
+                      ? item.href
+                      : null;
+                  const active = normalizedHash
+                    ? pathname === "/" && hash === normalizedHash
+                    : pathname === item.href;
 
                   return (
-                    <li key={item.href} className="shrink-0">
+                    <li key={item.href + item.label}>
                       <Link
                         href={item.href}
-                        className={`block whitespace-nowrap rounded-full px-3.5 py-2 font-sans text-[0.6875rem] font-medium uppercase tracking-[0.12em] transition md:px-4 md:text-[0.75rem] ${
-                          active
-                            ? "bg-[var(--foreground)] text-[var(--background)]"
-                            : "text-[var(--foreground-muted)] hover:bg-[var(--ink-100)] hover:text-[var(--foreground)] dark:hover:bg-[var(--ink-800)]"
-                        }`}
+                        className={`site-header-pill__link${active ? " site-header-pill__link--active" : ""}`}
                         aria-current={active ? "page" : undefined}
                       >
-                        <span className="md:hidden">{item.shortLabel}</span>
-                        <span className="hidden md:inline">{item.label}</span>
+                        {item.label}
                       </Link>
                     </li>
                   );
                 })}
               </ul>
             </nav>
-
-            <div className="pointer-events-auto justify-self-end">
-              <ThemeControls />
-            </div>
+            <ThemeControls variant="nav" />
           </div>
-        </GridCell>
-      </PageGrid>
+        </div>
+      </div>
     </header>
   );
 }
