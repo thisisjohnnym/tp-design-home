@@ -1,7 +1,6 @@
 "use client";
 
 import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
-import { HERO_V5_WORDS } from "@/content/heroV5";
 
 type LetterBox = { left: number; width: number };
 
