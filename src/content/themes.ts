@@ -23,9 +23,9 @@ export const colorPalettes: ColorPalette[] = [
   {
     id: "studio",
     name: "Studio",
-    swatch: "#f0f0f0",
+    swatch: "#f8f8f8",
     light: {
-      background: "#f0f0f0",
+      background: "#f8f8f8",
       foreground: "#000000",
       foregroundSecondary: "#1a1a1a",
       foregroundMuted: "#5c5c5c",

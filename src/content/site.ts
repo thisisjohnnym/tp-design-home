@@ -2,23 +2,6 @@ const TEAM_BIO_PLACEHOLDER =
   "Approaching every project with deep user-centered insight and overt passion for the craft, Sean has been the fresh creative force behind market-defining experiences for Coach and Kate Spade. His raw ability in both graphic, product design and leadership have had a profound effect on Tapestry's philosophy, work and culture.";
 
 export const site = {
-  values: [
-    {
-      title: "We are crafters",
-      description:
-        "We believe great craft is how trust is earned. We refine, question, and polish — not for perfection, but because the work deserves it, and so do the people who use it.",
-    },
-    {
-      title: "We're intentional",
-      description:
-        "We move with purpose, not just speed. Curiosity drives us and taste guides us. We sweat the details. Every pattern, decision, and pixel has a reason; we take thoughtful risks and reimagine what's possible.",
-    },
-    {
-      title: "We're human",
-      description:
-        "We look for ways to support each other. We take ownership and choose trust over ego. We create space to have fun and find joy in creating together.",
-    },
-  ],
   teamIntro:
     "We come from diverse backgrounds—with experience across startups, agencies, and in-house teams. Those different paths shape how we see problems, collaborate, and design. Together, we bring a wide range of perspectives to the table.",
   team: [

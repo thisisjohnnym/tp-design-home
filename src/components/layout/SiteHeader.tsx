@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import { ThemeControls } from "@/components/theme/ThemeControls";
@@ -26,25 +26,12 @@ function useHash() {
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const hash = useHash();
   const reduceMotion = useReducedMotion();
   const headerRef = useRef<HTMLElement>(null);
   const lastScrollYRef = useRef(0);
   const tickingRef = useRef(false);
   const [scrollState, setScrollState] = useState<"visible" | "hidden">("visible");
-  const isHeroV2 = pathname === "/" && searchParams.get("hero") === "v2";
-  const isHeroDark = isHeroV2;
-
-  useLayoutEffect(() => {
-    const root = document.documentElement;
-
-    if (isHeroV2) {
-      root.dataset.heroVariant = "v2";
-    } else {
-      delete root.dataset.heroVariant;
-    }
-  }, [isHeroV2]);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -108,14 +95,14 @@ export function SiteHeader() {
   return (
     <header
       ref={headerRef}
-      className={`site-header sticky top-0 z-50${isHeroDark ? "" : " bg-background"}`}
+      className="site-header sticky top-0 z-50 bg-background"
       data-scroll-state={scrollState}
       style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
     >
       <div className="site-header__inner">
         <Link href="/" className="site-header__logo shrink-0 transition hover:opacity-80">
           <Image
-            src={isHeroDark ? "/brand/tapestry-logo-light.svg" : "/brand/tapestry-logo.svg"}
+            src="/brand/tapestry-logo.svg"
             alt="Tapestry"
             width={120}
             height={28}

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ConditionalChrome } from "@/components/layout/ConditionalChrome";
-import { CustomCursor } from "@/components/ui/CustomCursor";
+import { GridOverlay } from "@/components/layout/GridOverlay";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { ThemeScript } from "@/components/theme/ThemeScript";
 import "./globals.css";
@@ -28,13 +28,13 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased">
         <ThemeProvider>
-          <CustomCursor />
           <Suspense fallback={null}>
             <ConditionalChrome>
               <main id="main">{children}</main>
             </ConditionalChrome>
           </Suspense>
         </ThemeProvider>
+        <GridOverlay />
       </body>
     </html>
   );
