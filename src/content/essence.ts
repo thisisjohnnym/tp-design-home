@@ -8,7 +8,7 @@ export type EssenceItem = {
   color: string;
 };
 
-export const ESSENCE_SECTION_BG = "#f2f2f2";
+export const ESSENCE_SECTION_BG = "#f8f8f8";
 
 export const essenceItems: EssenceItem[] = [
   {
