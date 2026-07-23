@@ -51,38 +51,22 @@ function easeOutQuart(value: number): number {
   return 1 - (1 - value) ** 4;
 }
 
-function lineRevealProgress(globalSpread: number, index: number): number {
-  const start = 0.52 + index * 0.1;
-  const duration = 0.38;
-
-  return easeOutQuart(clamp((globalSpread - start) / duration, 0, 1));
-}
-
-const INTRO_LINES =
-  site.teamIntro.match(/[^.!?]+[.!?]+/g)?.map((line) => line.trim()) ?? [site.teamIntro];
-
 type TeamIntroRevealProps = {
   spreadProgress: MotionValue<number>;
 };
 
-function TeamIntroLine({
-  line,
-  index,
-  spreadProgress,
-}: {
-  line: string;
-  index: number;
-  spreadProgress: MotionValue<number>;
-}) {
-  const reveal = useTransform(spreadProgress, (global) => lineRevealProgress(global, index));
+function TeamIntroReveal({ spreadProgress }: TeamIntroRevealProps) {
+  const reveal = useTransform(spreadProgress, (global) =>
+    easeOutQuart(clamp((global - 0.48) / 0.52, 0, 1)),
+  );
   const opacity = useTransform(reveal, [0, 0.35, 1], [0, 0.2, 1]);
   const y = useTransform(reveal, [0, 1], [72, 0]);
-  const scale = useTransform(reveal, [0, 1], [0.84, 1]);
+  const scale = useTransform(reveal, [0, 1], [0.9, 1]);
   const blur = useTransform(reveal, (value) => `blur(${20 * (1 - value)}px)`);
 
   return (
-    <motion.span
-      className="team-tapestry__intro-line"
+    <motion.p
+      className="team-tapestry__intro"
       style={{
         opacity,
         y,
@@ -90,22 +74,7 @@ function TeamIntroLine({
         filter: blur,
       }}
     >
-      {line}
-    </motion.span>
-  );
-}
-
-function TeamIntroReveal({ spreadProgress }: TeamIntroRevealProps) {
-  const shellReveal = useTransform(spreadProgress, (global) =>
-    easeOutQuart(clamp((global - 0.48) / 0.52, 0, 1)),
-  );
-  const shellScale = useTransform(shellReveal, [0, 1], [0.9, 1]);
-
-  return (
-    <motion.p className="team-tapestry__intro" style={{ scale: shellScale }}>
-      {INTRO_LINES.map((line, index) => (
-        <TeamIntroLine key={line} line={line} index={index} spreadProgress={spreadProgress} />
-      ))}
+      {site.teamIntro}
     </motion.p>
   );
 }
@@ -113,14 +82,19 @@ function TeamIntroReveal({ spreadProgress }: TeamIntroRevealProps) {
 type AnimatedTeamCardProps = {
   member: (typeof site.team)[number];
   index: number;
+  placement: { left: number; top: number };
   spreadProgress: MotionValue<number>;
   spinBoost: MotionValue<number>;
 };
 
-function AnimatedTeamCard({ member, index, spreadProgress, spinBoost }: AnimatedTeamCardProps) {
-  const placement = teamTapestryLayout[member.name];
+function AnimatedTeamCard({
+  member,
+  index,
+  placement,
+  spreadProgress,
+  spinBoost,
+}: AnimatedTeamCardProps) {
   const time = useTime();
-  if (!placement) return null;
 
   const baseAngle = (index / TEAM_COUNT) * 360 - 90;
 
@@ -293,9 +267,6 @@ export function TeamGallery({ className = "" }: TeamGalleryProps) {
     }
   });
 
-  const introOpacity = useTransform(spreadProgress, [0.3, 0.75], [0, 1]);
-  const introY = useTransform(spreadProgress, [0.3, 0.75], [18, 0]);
-
   if (reduceMotion || isMobile) {
     return (
       <div className="team-section__scroll-track team-section__scroll-track--static">
@@ -318,15 +289,21 @@ export function TeamGallery({ className = "" }: TeamGalleryProps) {
             <TeamIntroReveal spreadProgress={spreadProgress} />
           </motion.div>
           <ul className="team-tapestry__cards list-none" aria-label="Team gallery">
-            {site.team.map((member, index) => (
-              <AnimatedTeamCard
-                key={member.name}
-                member={member}
-                index={index}
-                spreadProgress={spreadProgress}
-                spinBoost={spinBoost}
-              />
-            ))}
+            {site.team.map((member, index) => {
+              const placement = teamTapestryLayout[member.name];
+              if (!placement) return null;
+
+              return (
+                <AnimatedTeamCard
+                  key={member.name}
+                  member={member}
+                  index={index}
+                  placement={placement}
+                  spreadProgress={spreadProgress}
+                  spinBoost={spinBoost}
+                />
+              );
+            })}
           </ul>
         </div>
       </div>
