@@ -1,20 +1,24 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  animate,
   motion,
-  useMotionValue,
   useMotionValueEvent,
   useReducedMotion,
   useScroll,
+  useSpring,
   useTime,
   useTransform,
   type MotionValue,
 } from "framer-motion";
 import { site } from "@/content/site";
-import { teamTapestryLayout } from "@/content/teamTapestry";
+import {
+  teamCardDrift,
+  teamCardDriftDelaySec,
+  teamCardDriftTimes,
+  teamTapestryLayout,
+} from "@/content/teamTapestry";
 import { TeamTapestryCard } from "./TeamTapestryCard";
 
 type TeamGalleryProps = {
@@ -23,28 +27,71 @@ type TeamGalleryProps = {
 
 const TEAM_COUNT = site.team.length;
 const WHEEL_RADIUS = 118;
-const SPREAD_TRIGGER = 0.2;
-const COLLAPSE_TRIGGER = 0.1;
-const SPREAD_DURATION = 1.35;
-const COLLAPSE_DURATION = 1.1;
-const SPREAD_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
-const CARD_STAGGER = 0.045;
+const WHEEL_PHASE_END = 0.24;
+const SPREAD_PHASE_END = 0.78;
+const SPREAD_CLOCKWISE_DEG = 130;
+const SPREAD_SETTLED_THRESHOLD = 0.97;
+const SPREAD_SPRING = { stiffness: 90, damping: 28, mass: 0.85, restDelta: 0.0008 };
+
+function useDocumentVisible() {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const updateVisibility = () => setVisible(!document.hidden);
+    updateVisibility();
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () => document.removeEventListener("visibilitychange", updateVisibility);
+  }, []);
+
+  return visible;
+}
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
 
-function staggeredSpread(globalSpread: number, index: number): number {
-  const delay = index * CARD_STAGGER;
-  const window = 1 - delay;
-
-  if (window <= 0) return globalSpread >= 1 ? 1 : 0;
-  return clamp((globalSpread - delay) / window, 0, 1);
+function smoothstep(value: number): number {
+  return value * value * (3 - 2 * value);
 }
 
-function computeWheelRotation(time: number, spinBoost: number, spread: number): number {
-  const idle = (time / 48) % 360;
-  return idle + spinBoost * (1 - spread);
+function scrollToSpread(scroll: number): number {
+  if (scroll <= WHEEL_PHASE_END) return 0;
+
+  const progress = clamp(
+    (scroll - WHEEL_PHASE_END) / (SPREAD_PHASE_END - WHEEL_PHASE_END),
+    0,
+    1,
+  );
+
+  return smoothstep(progress);
+}
+
+function useWheelRotation(spreadProgress: MotionValue<number>, time: MotionValue<number>) {
+  const frozenAngle = useRef<number | null>(null);
+  const angleOffset = useRef(0);
+  const wasSpreading = useRef(false);
+
+  return useTransform([spreadProgress, time], ([spread, t]) => {
+    const rawTime = (t as number) / 110;
+    const isSpreading = (spread as number) > 0.001;
+
+    if (!isSpreading) {
+      if (wasSpreading.current && frozenAngle.current !== null) {
+        angleOffset.current = frozenAngle.current - rawTime;
+        frozenAngle.current = null;
+      }
+
+      wasSpreading.current = false;
+      return rawTime + angleOffset.current;
+    }
+
+    if (!wasSpreading.current) {
+      frozenAngle.current = rawTime + angleOffset.current;
+      wasSpreading.current = true;
+    }
+
+    return frozenAngle.current!;
+  });
 }
 
 function easeOutQuart(value: number): number {
@@ -84,7 +131,7 @@ type AnimatedTeamCardProps = {
   index: number;
   placement: { left: number; top: number };
   spreadProgress: MotionValue<number>;
-  spinBoost: MotionValue<number>;
+  documentVisible: boolean;
 };
 
 function AnimatedTeamCard({
@@ -92,56 +139,76 @@ function AnimatedTeamCard({
   index,
   placement,
   spreadProgress,
-  spinBoost,
+  documentVisible,
 }: AnimatedTeamCardProps) {
   const time = useTime();
-
+  const [settled, setSettled] = useState(false);
   const baseAngle = (index / TEAM_COUNT) * 360 - 90;
+  const drift = useMemo(() => teamCardDrift(index), [index]);
+  const wheelRotation = useWheelRotation(spreadProgress, time);
 
-  const cardSpread = useTransform(spreadProgress, (global) => staggeredSpread(global, index));
-  const metaOpacity = useTransform(cardSpread, [0.72, 1], [0, 1]);
+  useMotionValueEvent(spreadProgress, "change", (spread) => {
+    setSettled(spread >= SPREAD_SETTLED_THRESHOLD);
+  });
 
-  const left = useTransform(cardSpread, (spread) => `${50 + (placement.left - 50) * spread}%`);
+  useEffect(() => {
+    setSettled(spreadProgress.get() >= SPREAD_SETTLED_THRESHOLD);
+  }, [spreadProgress]);
 
-  const top = useTransform(cardSpread, (spread) => `${50 + (placement.top - 50) * spread}%`);
+  const driftKeyframes = useMemo(
+    () => ({
+      x: drift.points.map((point) => point.x),
+      y: drift.points.map((point) => point.y),
+      times: teamCardDriftTimes(drift.points.length),
+    }),
+    [drift.points],
+  );
 
-  const x = useTransform([cardSpread, time, spinBoost], (values) => {
-    const spread = values[0] as number;
-    const t = values[1] as number;
-    const boost = values[2] as number;
-    const wheelRotation = computeWheelRotation(t, boost, spread);
-    const angleRad = ((baseAngle + wheelRotation) * Math.PI) / 180;
-    const wheelX = Math.cos(angleRad) * WHEEL_RADIUS * (1 - spread);
-    const centerOffset = -50 * (1 - spread);
+  const shouldFloat = settled && documentVisible;
 
-    if (spread >= 0.999) return "0%";
+  const metaOpacity = useTransform(spreadProgress, [0.72, 1], [0, 1]);
+
+  const left = useTransform(spreadProgress, (spread) => {
+    const clampedSpread = clamp(spread, 0, 1);
+    return `${50 + (placement.left - 50) * clampedSpread}%`;
+  });
+
+  const top = useTransform(spreadProgress, (spread) => {
+    const clampedSpread = clamp(spread, 0, 1);
+    return `${50 + (placement.top - 50) * clampedSpread}%`;
+  });
+
+  const x = useTransform([spreadProgress, wheelRotation], ([spread, wheelRot]) => {
+    const clampedSpread = clamp(spread as number, 0, 1);
+    const angleRad = ((baseAngle + (wheelRot as number)) * Math.PI) / 180;
+    const wheelX = Math.cos(angleRad) * WHEEL_RADIUS * (1 - clampedSpread);
+    const centerOffset = -50 * (1 - clampedSpread);
+
     return `calc(${centerOffset}% + ${wheelX}px)`;
   });
 
-  const y = useTransform([cardSpread, time, spinBoost], (values) => {
-    const spread = values[0] as number;
-    const t = values[1] as number;
-    const boost = values[2] as number;
-    const wheelRotation = computeWheelRotation(t, boost, spread);
-    const angleRad = ((baseAngle + wheelRotation) * Math.PI) / 180;
-    const wheelY = Math.sin(angleRad) * WHEEL_RADIUS * (1 - spread);
-    const centerOffset = -50 * (1 - spread);
+  const y = useTransform([spreadProgress, wheelRotation], ([spread, wheelRot]) => {
+    const clampedSpread = clamp(spread as number, 0, 1);
+    const angleRad = ((baseAngle + (wheelRot as number)) * Math.PI) / 180;
+    const wheelY = Math.sin(angleRad) * WHEEL_RADIUS * (1 - clampedSpread);
+    const centerOffset = -50 * (1 - clampedSpread);
 
-    if (spread >= 0.999) return "0%";
     return `calc(${centerOffset}% + ${wheelY}px)`;
   });
 
-  const rotate = useTransform([cardSpread, time, spinBoost], (values) => {
-    const spread = values[0] as number;
-    const t = values[1] as number;
-    const boost = values[2] as number;
-    const wheelRotation = computeWheelRotation(t, boost, spread);
-    const wheelAngle = baseAngle + wheelRotation;
+  const rotate = useTransform([spreadProgress, wheelRotation], ([spread, wheelRot]) => {
+    const clampedSpread = clamp(spread as number, 0, 1);
+    const wheelAngle = baseAngle + (wheelRot as number);
+    const stackRotation = (1 - clampedSpread) * (wheelAngle + 90);
+    const clockwiseSpin = (1 - clampedSpread) * clampedSpread * 2 * SPREAD_CLOCKWISE_DEG;
 
-    return (1 - spread) * (wheelAngle + 90);
+    return stackRotation + clockwiseSpin;
   });
 
-  const scale = useTransform(cardSpread, [0, 1], [0.9, 1]);
+  const scale = useTransform(spreadProgress, (spread) => {
+    const clampedSpread = clamp(spread, 0, 1);
+    return 0.9 + clampedSpread * 0.1;
+  });
 
   return (
     <motion.li
@@ -156,7 +223,23 @@ function AnimatedTeamCard({
         zIndex: 10 + index,
       }}
     >
-      <TeamTapestryCard member={member} metaOpacity={metaOpacity} />
+      <motion.div
+        className="team-tapestry__item-float"
+        animate={shouldFloat ? { x: driftKeyframes.x, y: driftKeyframes.y } : { x: 0, y: 0 }}
+        transition={
+          shouldFloat
+            ? {
+                duration: drift.durationSec,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: teamCardDriftDelaySec(index),
+                times: driftKeyframes.times,
+              }
+            : { duration: 0.2, ease: "easeOut" }
+        }
+      >
+        <TeamTapestryCard member={member} metaOpacity={metaOpacity} />
+      </motion.div>
     </motion.li>
   );
 }
@@ -194,54 +277,16 @@ function TeamGalleryStatic({ className = "" }: TeamGalleryProps) {
 
 export function TeamGallery({ className = "" }: TeamGalleryProps) {
   const reduceMotion = useReducedMotion();
+  const documentVisible = useDocumentVisible();
   const trackRef = useRef<HTMLDivElement>(null);
-  const phaseRef = useRef<"wheel" | "spread">("wheel");
-  const spreadAnimationRef = useRef<ReturnType<typeof animate> | null>(null);
-  const spinAnimationRef = useRef<ReturnType<typeof animate> | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-
-  const spreadProgress = useMotionValue(0);
-  const spinBoost = useMotionValue(0);
-
-  const stopAnimations = () => {
-    spreadAnimationRef.current?.stop();
-    spinAnimationRef.current?.stop();
-  };
-
-  const runSpread = () => {
-    stopAnimations();
-    spinAnimationRef.current = animate(spinBoost, 0, {
-      duration: SPREAD_DURATION * 0.85,
-      ease: SPREAD_EASE,
-    });
-    spreadAnimationRef.current = animate(spreadProgress, 1, {
-      duration: SPREAD_DURATION,
-      ease: SPREAD_EASE,
-    });
-  };
-
-  const runCollapse = (scroll: number) => {
-    stopAnimations();
-    const targetBoost = Math.min(scroll / SPREAD_TRIGGER, 1) * 600;
-    spinAnimationRef.current = animate(spinBoost, targetBoost, {
-      duration: COLLAPSE_DURATION * 0.75,
-      ease: SPREAD_EASE,
-    });
-    spreadAnimationRef.current = animate(spreadProgress, 0, {
-      duration: COLLAPSE_DURATION,
-      ease: SPREAD_EASE,
-    });
-  };
 
   useEffect(() => {
     const media = window.matchMedia("(max-width: 767px)");
     const update = () => setIsMobile(media.matches);
     update();
     media.addEventListener("change", update);
-    return () => {
-      media.removeEventListener("change", update);
-      stopAnimations();
-    };
+    return () => media.removeEventListener("change", update);
   }, []);
 
   const { scrollYProgress } = useScroll({
@@ -249,23 +294,8 @@ export function TeamGallery({ className = "" }: TeamGalleryProps) {
     offset: ["start start", "end end"],
   });
 
-  useMotionValueEvent(scrollYProgress, "change", (scroll) => {
-    if (scroll >= SPREAD_TRIGGER && phaseRef.current === "wheel") {
-      phaseRef.current = "spread";
-      runSpread();
-      return;
-    }
-
-    if (scroll < COLLAPSE_TRIGGER && phaseRef.current === "spread") {
-      phaseRef.current = "wheel";
-      runCollapse(scroll);
-      return;
-    }
-
-    if (phaseRef.current === "wheel") {
-      spinBoost.set(Math.min(scroll / SPREAD_TRIGGER, 1) * 600);
-    }
-  });
+  const targetSpread = useTransform(scrollYProgress, scrollToSpread);
+  const spreadProgress = useSpring(targetSpread, SPREAD_SPRING);
 
   if (reduceMotion || isMobile) {
     return (
@@ -300,7 +330,7 @@ export function TeamGallery({ className = "" }: TeamGalleryProps) {
                   index={index}
                   placement={placement}
                   spreadProgress={spreadProgress}
-                  spinBoost={spinBoost}
+                  documentVisible={documentVisible}
                 />
               );
             })}
