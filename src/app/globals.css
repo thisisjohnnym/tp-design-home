@@ -1413,16 +1413,13 @@ body {
   }
 
   .team-section--tapestry {
-    --team-tapestry-bg: #ffcb00;
-    --team-tapestry-ink: #151515;
-
-    background: var(--team-tapestry-bg);
-    color: var(--team-tapestry-ink);
+    background: #151515;
+    color: #fff;
     padding-block: 0;
   }
 
   .team-section__scroll-track {
-    height: 240vh;
+    height: 200vh;
   }
 
   .team-section__scroll-track--static {
@@ -1437,7 +1434,6 @@ body {
     align-items: center;
     height: 100vh;
     overflow: hidden;
-    background: var(--team-tapestry-bg);
   }
 
   .team-tapestry {
@@ -1466,16 +1462,26 @@ body {
     transform: none;
     font-family: var(--font-sans);
     font-size: clamp(1.25rem, 1.75vw, 1.75rem);
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1.4;
     text-align: center;
-    color: var(--team-tapestry-ink);
+    color: #fff;
     pointer-events: none;
   }
 
   .team-tapestry--animated .team-tapestry__intro {
     opacity: 1;
+    will-change: transform, opacity;
+  }
+
+  .team-tapestry__intro-line {
+    display: block;
+    transform-origin: center top;
     will-change: transform, opacity, filter;
+  }
+
+  .team-tapestry__intro-line + .team-tapestry__intro-line {
+    margin-top: 0.35em;
   }
 
   .team-section__scroll-track--static .team-tapestry__intro {
@@ -1504,12 +1510,7 @@ body {
     padding: 0;
     list-style: none;
     transform-origin: center center;
-    will-change: transform;
-  }
-
-  .team-tapestry__item-float {
-    width: 100%;
-    will-change: transform;
+    will-change: transform, left, top;
   }
 
   .team-section__scroll-track--static .team-tapestry__item {
@@ -1518,12 +1519,13 @@ body {
     will-change: auto;
   }
 
-  .team-tapestry-card {
+  .team-tapestry__item-float {
     width: 100%;
+    will-change: transform;
   }
 
-  .team-tapestry-card__stack {
-    position: relative;
+  .team-tapestry-card {
+    width: 100%;
   }
 
   .team-tapestry-card__media {
