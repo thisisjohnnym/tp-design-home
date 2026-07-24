@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   animate,
   motion,
@@ -14,7 +14,12 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { site } from "@/content/site";
-import { teamTapestryLayout } from "@/content/teamTapestry";
+import {
+  teamCardDrift,
+  teamCardDriftDelaySec,
+  teamCardDriftTimes,
+  teamTapestryLayout,
+} from "@/content/teamTapestry";
 import { TeamTapestryCard } from "./TeamTapestryCard";
 
 type TeamGalleryProps = {
@@ -29,6 +34,20 @@ const SPREAD_DURATION = 1.35;
 const COLLAPSE_DURATION = 1.1;
 const SPREAD_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 const CARD_STAGGER = 0.045;
+const SPREAD_SETTLED_THRESHOLD = 0.97;
+
+function useDocumentVisible() {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const updateVisibility = () => setVisible(!document.hidden);
+    updateVisibility();
+    document.addEventListener("visibilitychange", updateVisibility);
+    return () => document.removeEventListener("visibilitychange", updateVisibility);
+  }, []);
+
+  return visible;
+}
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -85,6 +104,7 @@ type AnimatedTeamCardProps = {
   placement: { left: number; top: number };
   spreadProgress: MotionValue<number>;
   spinBoost: MotionValue<number>;
+  documentVisible: boolean;
 };
 
 function AnimatedTeamCard({
@@ -93,8 +113,30 @@ function AnimatedTeamCard({
   placement,
   spreadProgress,
   spinBoost,
+  documentVisible,
 }: AnimatedTeamCardProps) {
   const time = useTime();
+  const [settled, setSettled] = useState(false);
+  const drift = useMemo(() => teamCardDrift(index), [index]);
+
+  useMotionValueEvent(spreadProgress, "change", (spread) => {
+    setSettled(spread >= SPREAD_SETTLED_THRESHOLD);
+  });
+
+  useEffect(() => {
+    setSettled(spreadProgress.get() >= SPREAD_SETTLED_THRESHOLD);
+  }, [spreadProgress]);
+
+  const driftKeyframes = useMemo(
+    () => ({
+      x: drift.points.map((point) => point.x),
+      y: drift.points.map((point) => point.y),
+      times: teamCardDriftTimes(drift.points.length),
+    }),
+    [drift.points],
+  );
+
+  const shouldFloat = settled && documentVisible;
 
   const baseAngle = (index / TEAM_COUNT) * 360 - 90;
 
@@ -156,7 +198,23 @@ function AnimatedTeamCard({
         zIndex: 10 + index,
       }}
     >
-      <TeamTapestryCard member={member} metaOpacity={metaOpacity} />
+      <motion.div
+        className="team-tapestry__item-float"
+        animate={shouldFloat ? { x: driftKeyframes.x, y: driftKeyframes.y } : { x: 0, y: 0 }}
+        transition={
+          shouldFloat
+            ? {
+                duration: drift.durationSec,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: teamCardDriftDelaySec(index),
+                times: driftKeyframes.times,
+              }
+            : { duration: 0.2, ease: "easeOut" }
+        }
+      >
+        <TeamTapestryCard member={member} metaOpacity={metaOpacity} />
+      </motion.div>
     </motion.li>
   );
 }
@@ -194,6 +252,7 @@ function TeamGalleryStatic({ className = "" }: TeamGalleryProps) {
 
 export function TeamGallery({ className = "" }: TeamGalleryProps) {
   const reduceMotion = useReducedMotion();
+  const documentVisible = useDocumentVisible();
   const trackRef = useRef<HTMLDivElement>(null);
   const phaseRef = useRef<"wheel" | "spread">("wheel");
   const spreadAnimationRef = useRef<ReturnType<typeof animate> | null>(null);
@@ -301,6 +360,7 @@ export function TeamGallery({ className = "" }: TeamGalleryProps) {
                   placement={placement}
                   spreadProgress={spreadProgress}
                   spinBoost={spinBoost}
+                  documentVisible={documentVisible}
                 />
               );
             })}

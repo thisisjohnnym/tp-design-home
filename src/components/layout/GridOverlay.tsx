@@ -87,7 +87,9 @@ export function GridOverlay() {
             style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
           >
             {Array.from({ length: columnCount }, (_, index) => (
-              <div key={index} className="grid-overlay__column" />
+              <div key={index} className="grid-overlay__column">
+                <span className="grid-overlay__label">{index + 1}</span>
+              </div>
             ))}
           </div>
         </div>
