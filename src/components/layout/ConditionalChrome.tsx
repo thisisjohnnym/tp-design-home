@@ -6,21 +6,21 @@ import { SiteHeader } from "./SiteHeader";
 
 export function ConditionalChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const hideSiteHeader = pathname === "/";
+  const ownsPageChrome = pathname === "/" || pathname === "/experiment";
 
   useLayoutEffect(() => {
     const root = document.documentElement;
 
-    if (pathname === "/") {
+    if (ownsPageChrome) {
       root.style.setProperty("--site-header-height", "0px");
     } else {
       root.style.removeProperty("--site-header-height");
     }
-  }, [pathname]);
+  }, [ownsPageChrome]);
 
   return (
     <>
-      {!hideSiteHeader ? <SiteHeader /> : null}
+      {!ownsPageChrome ? <SiteHeader /> : null}
       {children}
     </>
   );
