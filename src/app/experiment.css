@@ -1,3 +1,14 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  /* Keep the document canvas aligned before the experiment token scope mounts. */
+  background: #000000;
+}
+
 .experiment-shell {
   --experiment-dark: #000000;
   --experiment-light: #ffffff;

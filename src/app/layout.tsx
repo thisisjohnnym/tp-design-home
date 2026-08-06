@@ -1,14 +1,22 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import { ConditionalChrome } from "@/components/layout/ConditionalChrome";
-import { GridOverlay } from "@/components/layout/GridOverlay";
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
-import { ThemeScript } from "@/components/theme/ThemeScript";
-import "./globals.css";
+import localFont from "next/font/local";
+import "./experiment.css";
+
+const helveticaNow = localFont({
+  src: "../../public/fonts/HelveticaNowVar.ttf",
+  variable: "--font-experiment-sans",
+  display: "swap",
+});
+
+const lokanova = localFont({
+  src: "../../public/fonts/Lokanova-Std.otf",
+  variable: "--font-experiment-display",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "Tapestry Design Team",
-  description: "Internal design team site — in progress",
+  title: "Tapestry Design",
+  description: "Tapestry Design Team hero experiment",
 };
 
 export default function RootLayout({
@@ -17,24 +25,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      data-palette="studio"
-      data-mode="light"
-      suppressHydrationWarning
-    >
-      <head>
-        <ThemeScript />
-      </head>
-      <body className="font-sans antialiased">
-        <ThemeProvider>
-          <Suspense fallback={null}>
-            <ConditionalChrome>
-              <main id="main">{children}</main>
-            </ConditionalChrome>
-          </Suspense>
-        </ThemeProvider>
-        <GridOverlay />
+    <html lang="en">
+      <body className={`${helveticaNow.variable} ${lokanova.variable}`}>
+        {children}
       </body>
     </html>
   );
