@@ -1,0 +1,1040 @@
+.hs-root {
+  --hs-canvas: #06010d;
+  --hs-light: #dfdfdf;
+  --hs-white: #ffffff;
+  --hs-muted: rgba(223, 223, 223, 0.6);
+  --hs-card-well: #1e1e1e;
+  --hs-hairline: rgba(223, 223, 223, 0.18);
+  --hs-scrim: rgba(10, 4, 20, 0.92);
+
+  --hs-gutter: clamp(16px, 1.6vw, 24px);
+  --hs-band-height: 480px;
+  --hs-scrub-length: 300svh;
+
+  --hs-display: clamp(48px, 14.29vw, 216px);
+  --hs-title: clamp(34px, 8.47vw, 128px);
+  --hs-subhead: clamp(16px, 2.65vw, 40px);
+  --hs-card-title: clamp(20px, 1.85vw, 28px);
+  --hs-meta-label: 14px;
+  --hs-meta-copy: 12px;
+  --hs-logo-rest-width: 192px;
+
+  --hs-loader-logo-width: clamp(144px, 18.65vw, 282px);
+  --hs-loader-design-width: clamp(96px, 11.38vw, 172px);
+  --hs-loader-height: clamp(32px, 4.1vw, 62px);
+  --hs-loader-radius: calc(var(--hs-loader-height) / 2);
+  --hs-loader-type: clamp(32px, 3.9vw, 59px);
+
+  position: relative;
+  min-height: 100svh;
+  overflow-x: clip;
+  background: var(--hs-canvas);
+  color: var(--hs-light);
+  font-family: var(--font-hs-sans), sans-serif;
+}
+
+/* ScrollSmoother owns wrapper/content styles when active; without it these are
+   plain flow wrappers so touch / reduced-motion still scrolls natively.
+   Keep canvas fill on both — the fixed smoother wrapper is otherwise see-through
+   to the light site body, which reads as a white stripe under the clipped band. */
+.hs-smooth-wrapper,
+.hs-smooth-content {
+  width: 100%;
+  background: var(--hs-canvas);
+}
+
+.hs-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ */
+/* Stage                                                               */
+/* ------------------------------------------------------------------ */
+
+.hs-sequence {
+  position: relative;
+  background: var(--hs-canvas);
+}
+
+/*
+ * Provides the scrub scroll distance while the pin is sticky/fixed.
+ * Keep this height stable for the whole scrub — collapsing it mid-timeline
+ * shrinks the scroll range and stalls progress.
+ */
+.hs-scrub-runway {
+  height: var(--hs-scrub-length);
+  pointer-events: none;
+}
+
+/*
+ * Pin shell stays viewport-tall for the full scrub. Resource cards live under
+ * .hs-band inside this shell — as the band clips they fill the lower viewport
+ * with no dead void. Overflow stays visible so the brand dropdown can open.
+ */
+.hs-pin {
+  position: sticky;
+  z-index: 2;
+  top: 0;
+  height: 100svh;
+  overflow: visible;
+  background: var(--hs-canvas);
+}
+
+.hs-band {
+  position: relative;
+  height: 100svh;
+  background: var(--hs-canvas);
+}
+
+/*
+ * Only the artwork is clipped — the band itself has to stay overflow-visible so
+ * the brand dropdown can open past the header band once it has collapsed.
+ */
+.hs-art-clip {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+}
+
+/*
+ * The artwork keeps a full-viewport box even after the band shrinks, so the
+ * final beat reads as the illustration being cropped rather than resized.
+ */
+.hs-art {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100svh;
+}
+
+.hs-sphere-slot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 875px;
+  height: 933px;
+  margin-top: -466.5px;
+  margin-left: -437.5px;
+  /* Keep the animated slot on one compositor layer so Safari does not seam
+     overlapping filtered spheres along each wrapper’s bounds. */
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform;
+}
+
+.hs-band__inner {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  padding: var(--hs-gutter);
+}
+
+.hs-scene {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.hs-layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/* Nav                                                                 */
+/* ------------------------------------------------------------------ */
+
+.hs-nav {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 88px;
+}
+
+.hs-nav__logo-target {
+  width: var(--hs-logo-rest-width);
+  flex-shrink: 0;
+  aspect-ratio: 454 / 62;
+  container-type: inline-size;
+}
+
+/*
+ * Proportions mirror the loader mark (282 + 172 over a 454 box at 59px type),
+ * so the hand-off from the intro animation is invisible.
+ */
+.hs-nav__logo {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: flex-start;
+  color: var(--hs-white);
+  font-size: 12.99cqw;
+  letter-spacing: -0.03em;
+  line-height: 0.8;
+  white-space: nowrap;
+}
+
+.hs-nav__logo-img {
+  display: block;
+  flex: 0 0 62.11%;
+  filter: invert(1);
+}
+
+.hs-nav__logo-img img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.hs-nav__logo-suffix {
+  display: block;
+  flex: 0 0 37.89%;
+}
+
+.hs-nav__links {
+  display: flex;
+  gap: 56px;
+}
+
+.hs-nav__group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.hs-nav__group-title {
+  margin: 0;
+  opacity: 0.6;
+  font-size: var(--hs-meta-label);
+  font-weight: 700;
+  line-height: 18px;
+}
+
+.hs-nav__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  font-size: var(--hs-meta-copy);
+  line-height: 16px;
+  list-style: none;
+  text-transform: capitalize;
+}
+
+.hs-nav__list--contact {
+  font-style: normal;
+  text-transform: none;
+}
+
+.hs-nav__list a {
+  width: fit-content;
+  color: inherit;
+  text-decoration: none;
+}
+
+.hs-nav__list a:hover,
+.hs-nav__list a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* ------------------------------------------------------------------ */
+/* Frame 1 — shatter headline + cursors                                */
+/* ------------------------------------------------------------------ */
+
+.hs-layer--shatter {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.hs-shatter {
+  position: relative;
+  width: 100%;
+}
+
+.hs-shatter__headline {
+  display: flex;
+  flex-wrap: wrap;
+  /* Equal-height word boxes — center keeps drum + “what's” on one baseline row. */
+  align-items: center;
+  margin: 0;
+  column-gap: 0.22em;
+  /* Tight display leading was clipping Helvetica Now glyphs; keep punchy but safe. */
+  padding-block: 0.08em;
+  color: var(--hs-light);
+  font-size: var(--hs-display);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  text-transform: capitalize;
+}
+
+.hs-shatter__word {
+  display: block;
+  padding-inline: 0.02em;
+  will-change: filter, opacity, transform;
+}
+
+.hs-shatter__word--drum {
+  display: inline-block;
+  padding-inline: 0;
+  /* Kill flex-item stretch / extra leading so the box matches sibling words. */
+  line-height: 0;
+}
+
+.hs-headline-drum {
+  --hs-headline-drum-radius: 0.38em;
+
+  position: relative;
+  display: inline-block;
+  vertical-align: baseline;
+  /*
+   * Parent line-height strut was adding ~0.08em of phantom height on top of
+   * the 0.9em track — that taller box is what misaligned “what's”.
+   */
+  line-height: 0;
+  height: 0.9em;
+  overflow: visible;
+  perspective: 1200px;
+}
+
+.hs-headline-drum__track {
+  position: relative;
+  display: block;
+  height: 100%;
+  /* Restore real text metrics for the strut + faces. */
+  line-height: 0.9;
+  overflow: visible;
+}
+
+/*
+ * Real glyph baseline for the drum. Absolute faces alone would make the
+ * inline-block baseline the box bottom.
+ */
+.hs-headline-drum__track::before {
+  content: "A";
+  display: inline-block;
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  font-size: 1em;
+  line-height: inherit;
+  text-transform: none;
+}
+
+.hs-headline-drum__window {
+  /* Tight clip — only enough for the 3D roll, not a taller “ghost” box. */
+  --hs-drum-clip-top: 0.06em;
+  --hs-drum-clip-bottom: 0.12em;
+  --hs-drum-clip-x: 0.04em;
+
+  position: absolute;
+  top: calc(-1 * var(--hs-drum-clip-top));
+  right: calc(-1 * var(--hs-drum-clip-x));
+  bottom: calc(-1 * var(--hs-drum-clip-bottom));
+  left: calc(-1 * var(--hs-drum-clip-x));
+  overflow: clip;
+}
+
+.hs-headline-drum__rotor {
+  position: absolute;
+  top: var(--hs-drum-clip-top);
+  right: var(--hs-drum-clip-x);
+  bottom: var(--hs-drum-clip-bottom);
+  left: var(--hs-drum-clip-x);
+  transform-style: preserve-3d;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.hs-headline-drum__face {
+  position: absolute;
+  inset: 0;
+  /* Same text metrics as neighbouring words — no flex vertical centering. */
+  display: block;
+  line-height: inherit;
+  white-space: nowrap;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  text-transform: none;
+}
+
+.hs-headline-drum__face:nth-child(1) {
+  transform: rotateX(0deg) translateZ(var(--hs-headline-drum-radius));
+}
+
+.hs-headline-drum__face:nth-child(2) {
+  transform: rotateX(120deg) translateZ(var(--hs-headline-drum-radius));
+}
+
+.hs-headline-drum__face:nth-child(3) {
+  transform: rotateX(240deg) translateZ(var(--hs-headline-drum-radius));
+}
+
+.hs-headline-drum__character {
+  display: inline-block;
+  will-change: filter, opacity, transform;
+  text-transform: none;
+}
+
+.hs-headline-drum__sizers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: max-content;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.hs-headline-drum__sizer {
+  display: block;
+  width: fit-content;
+  white-space: nowrap;
+  text-transform: none;
+}
+
+.hs-cursors {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hs-cursor {
+  position: absolute;
+  display: flex;
+  width: max-content;
+  flex-direction: column;
+  align-items: flex-start;
+  color: var(--hs-cursor-fill);
+  will-change: filter, opacity, transform;
+}
+
+.hs-cursor[data-slot="a"] {
+  top: 25.6%;
+  left: 73.1%;
+}
+
+.hs-cursor[data-slot="b"] {
+  top: 86.1%;
+  left: 47.5%;
+}
+
+.hs-cursor[data-slot="c"] {
+  top: 35.3%;
+  left: 48.6%;
+}
+
+.hs-cursor[data-slot="d"] {
+  top: 60.7%;
+  left: 16.3%;
+}
+
+.hs-cursor__arrow {
+  position: relative;
+  z-index: 1;
+  display: block;
+  line-height: 0;
+}
+
+.hs-cursor__svg {
+  display: block;
+  width: 26px;
+  height: 28px;
+  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.28));
+}
+
+.hs-cursor__label {
+  margin-top: -6px;
+  margin-left: 16px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--hs-cursor-border);
+  background: var(--hs-cursor-fill);
+  color: var(--hs-white);
+  font-size: 18px;
+  line-height: 1.15;
+  text-shadow: 0 1.7px 3.4px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+}
+
+/* Team cursor identities keep the existing palette used across the site. */
+.hs-cursor[data-person="kat"] {
+  --hs-cursor-fill: #14ae5c;
+  --hs-cursor-border: #108b4a;
+}
+
+.hs-cursor[data-person="johnny"] {
+  --hs-cursor-fill: #9747ff;
+  --hs-cursor-border: #7939cc;
+}
+
+.hs-cursor[data-person="mitra"] {
+  --hs-cursor-fill: #0d99ff;
+  --hs-cursor-border: #0a7acc;
+}
+
+.hs-cursor[data-person="wendy"] {
+  --hs-cursor-fill: #f24822;
+  --hs-cursor-border: #c23a1b;
+}
+
+.hs-cursor[data-person="sean"] {
+  --hs-cursor-fill: #ffa629;
+  --hs-cursor-border: #cc8521;
+}
+
+.hs-cursor[data-person="cong"] {
+  --hs-cursor-fill: #ffcd29;
+  --hs-cursor-border: #cca421;
+}
+
+.hs-cursor[data-person="gulsheen"] {
+  --hs-cursor-fill: #0d99ff;
+  --hs-cursor-border: #0a7acc;
+}
+
+.hs-cursor[data-person="juliana"] {
+  --hs-cursor-fill: #9747ff;
+  --hs-cursor-border: #7939cc;
+}
+
+.hs-cursor[data-text="black"] .hs-cursor__label {
+  color: var(--hs-canvas);
+  text-shadow: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Frame 4 — mid copy + house of brands                                */
+/* ------------------------------------------------------------------ */
+
+.hs-layer--mid {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-top: 6svh;
+  will-change: filter, opacity, transform;
+}
+
+.hs-mid {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 3vw, 40px);
+}
+
+.hs-mid__title {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding-block: 0.04em;
+  color: var(--hs-light);
+  font-size: var(--hs-title);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+}
+
+.hs-mid__subhead {
+  max-width: 43ch;
+  margin: 0;
+  color: var(--hs-light);
+  font-size: var(--hs-subhead);
+  font-weight: 300;
+  line-height: 1.2;
+  text-wrap: pretty;
+}
+
+.hs-logos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(16px, 2.6vw, 40px);
+  color: var(--hs-light);
+  will-change: opacity, transform;
+}
+
+.hs-logos__mark {
+  height: auto;
+  max-width: 100%;
+  flex-shrink: 1;
+}
+
+/* ------------------------------------------------------------------ */
+/* Frames 6-7 — one collab title that morphs into the band             */
+/* ------------------------------------------------------------------ */
+
+.hs-layer--collab {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  /*
+   * Paper frame 7: headline container meets the 480 band edge with ~32px
+   * under the type before cards (cards use padding-top: 32). Keep this tight
+   * so the gradient doesn’t read as a dead void under the title.
+   */
+  padding-bottom: 8px;
+}
+
+.hs-collab {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  /* Left-aligned layout; GSAP offsets lines to center, then scrubs them home. */
+  align-items: flex-start;
+  margin: 0;
+  /* Brand underline clearance only — don’t inflate the band gap. */
+  padding-bottom: 0.12em;
+  color: var(--hs-white);
+  font-size: var(--hs-title);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  text-transform: capitalize;
+  will-change: filter, opacity, transform;
+}
+
+.hs-collab__line {
+  display: flex;
+  align-items: baseline;
+  width: max-content;
+  padding-block: 0.04em;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.hs-collab__line--share {
+  gap: 0;
+}
+
+.hs-collab__amp {
+  margin-left: 0.18em;
+}
+
+.hs-collab__on {
+  margin-right: 0.18em;
+}
+
+.hs-collab__brand {
+  display: inline-flex;
+  align-items: center;
+}
+
+.hs-brand {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.hs-brand__trigger {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  margin: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  gap: 0.14em;
+  letter-spacing: inherit;
+  perspective: 900px;
+}
+
+.hs-brand__trigger:focus-visible {
+  outline: 2px solid var(--hs-white);
+  outline-offset: 6px;
+}
+
+.hs-brand__drum {
+  position: relative;
+  display: inline-block;
+  height: 1em;
+}
+
+.hs-brand__drum::after {
+  content: "";
+  position: absolute;
+  top: calc(100% + 0.08em);
+  right: 0;
+  left: 0;
+  height: 0.07em;
+  background: currentColor;
+}
+
+.hs-brand__window {
+  position: absolute;
+  /* Extra inset so Helvetica Now caps/descenders are not clipped mid-roll. */
+  inset: -0.14em -0.04em;
+  overflow: clip;
+}
+
+.hs-brand__rotor {
+  position: absolute;
+  inset: 0;
+  transform-origin: center;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.hs-brand__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  backface-visibility: hidden;
+  white-space: nowrap;
+}
+
+.hs-brand__face:nth-child(1) {
+  transform: rotateX(0deg) translateZ(0.5em);
+}
+
+.hs-brand__face:nth-child(2) {
+  transform: rotateX(90deg) translateZ(0.5em);
+}
+
+.hs-brand__character {
+  display: inline-block;
+  will-change: filter, opacity, transform;
+}
+
+.hs-brand__sizers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: max-content;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.hs-brand__sizer {
+  display: block;
+  width: fit-content;
+  white-space: nowrap;
+}
+
+.hs-brand__chevron {
+  width: 0.5em;
+  height: 0.5em;
+  flex-shrink: 0;
+}
+
+.hs-brand__menu {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 0.2em);
+  left: 0;
+  min-width: 100%;
+  padding: 0.1em 0;
+  border: 1px solid var(--hs-hairline);
+  margin: 0;
+  background: var(--hs-scrim);
+  backdrop-filter: blur(18px);
+  list-style: none;
+}
+
+.hs-brand__option {
+  display: block;
+  width: 100%;
+  padding: 0.1em 0.32em;
+  border: 0;
+  background: none;
+  color: var(--hs-light);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.4em;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.hs-brand__option[aria-selected="true"],
+.hs-brand__option:hover,
+.hs-brand__option:focus-visible {
+  color: var(--hs-white);
+}
+
+/* ------------------------------------------------------------------ */
+/* Frame 8 — resource cards                                            */
+/* ------------------------------------------------------------------ */
+
+.hs-cards {
+  position: relative;
+  z-index: 1;
+  /* Paper frame 7: 32px between band edge and card grid. */
+  padding: 32px var(--hs-gutter) clamp(64px, 10vh, 128px);
+  background: var(--hs-canvas);
+}
+
+.hs-cards__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hs-cards__item {
+  will-change: opacity, transform;
+}
+
+.hs-card {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  gap: 20px;
+  color: var(--hs-light);
+  text-decoration: none;
+}
+
+.hs-card__media {
+  display: block;
+  aspect-ratio: 477 / 316;
+  background: var(--hs-card-well);
+  transition: background-color 240ms ease;
+}
+
+.hs-card:hover .hs-card__media,
+.hs-card:focus-visible .hs-card__media {
+  background: color-mix(in srgb, var(--hs-card-well) 76%, var(--hs-light));
+}
+
+.hs-card:focus-visible {
+  outline: 2px solid var(--hs-white);
+  outline-offset: 6px;
+}
+
+.hs-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 3px;
+}
+
+.hs-card__title {
+  font-size: var(--hs-card-title);
+  line-height: 1.21;
+  text-transform: capitalize;
+}
+
+.hs-card__link {
+  font-size: 12px;
+  line-height: 16px;
+  text-decoration: underline 1px;
+  text-transform: capitalize;
+  text-underline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Loader intro                                                        */
+/* ------------------------------------------------------------------ */
+
+.hs-loader {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  display: grid;
+  overflow: clip;
+  background: var(--hs-white);
+  color: var(--hs-canvas);
+  place-items: center;
+}
+
+.hs-loader-mark {
+  position: fixed;
+  z-index: 70;
+  top: 50%;
+  left: 50%;
+  width: calc(var(--hs-loader-logo-width) + var(--hs-loader-design-width));
+  height: var(--hs-loader-height);
+  color: #000000;
+  perspective: 480px;
+  perspective-origin: center;
+  pointer-events: none;
+  translate: -50% -50%;
+}
+
+.hs-mark {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.hs-mark__face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  backface-visibility: hidden;
+  font-size: var(--hs-loader-type);
+  letter-spacing: -0.03em;
+  line-height: 0.8;
+  white-space: nowrap;
+}
+
+.hs-mark__face:nth-child(1) {
+  transform: rotateX(0deg) translateZ(var(--hs-loader-radius));
+}
+
+.hs-mark__face:nth-child(2) {
+  transform: rotateX(90deg) translateZ(var(--hs-loader-radius));
+}
+
+.hs-mark__face:nth-child(3) {
+  transform: rotateX(180deg) translateZ(var(--hs-loader-radius));
+}
+
+.hs-mark__face:nth-child(4) {
+  transform: rotateX(270deg) translateZ(var(--hs-loader-radius));
+}
+
+.hs-mark__face--logo {
+  justify-content: flex-start;
+}
+
+.hs-mark__logo {
+  display: block;
+  width: var(--hs-loader-logo-width);
+  flex: 0 0 var(--hs-loader-logo-width);
+}
+
+.hs-mark__logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.hs-mark__suffix {
+  display: block;
+  width: var(--hs-loader-design-width);
+  height: var(--hs-loader-height);
+  flex: 0 0 var(--hs-loader-design-width);
+  font-size: var(--hs-loader-type);
+  letter-spacing: -0.03em;
+  line-height: 0.8;
+  white-space: nowrap;
+}
+
+.hs-mark__word {
+  display: block;
+  will-change: filter, opacity, transform;
+}
+
+/* ------------------------------------------------------------------ */
+/* Breakpoints                                                         */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 1100px) {
+  .hs-root {
+    --hs-logo-rest-width: 160px;
+  }
+
+  .hs-nav {
+    gap: 40px;
+  }
+
+  .hs-nav__links {
+    gap: 32px;
+  }
+
+  .hs-cursor__label {
+    padding: 7px 12px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 699px) {
+  .hs-root {
+    --hs-gutter: 16px;
+    --hs-band-height: 336px;
+    --hs-scrub-length: 260svh;
+    --hs-display: 15.4vw;
+    --hs-title: 10.6vw;
+    --hs-subhead: 4.4vw;
+    --hs-card-title: 22px;
+    --hs-logo-rest-width: 148px;
+    --hs-meta-copy: 11px;
+    --hs-meta-label: 12px;
+  }
+
+  .hs-nav {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .hs-nav__links {
+    gap: 24px;
+  }
+
+  .hs-cursor__svg {
+    width: 20px;
+    height: 22px;
+  }
+
+  .hs-cursor__label {
+    margin-top: -5px;
+    margin-left: 12px;
+    padding: 6px 9px;
+    font-size: 12px;
+  }
+
+  .hs-cursor[data-slot="a"] {
+    top: 18%;
+    left: 46%;
+  }
+
+  .hs-cursor[data-slot="b"] {
+    top: 88%;
+    left: 34%;
+  }
+
+  .hs-cursor[data-slot="c"] {
+    top: 52%;
+    left: 8%;
+  }
+
+  .hs-cursor[data-slot="d"] {
+    top: 70%;
+    left: 44%;
+  }
+
+  .hs-layer--mid {
+    padding-top: 3svh;
+  }
+
+  .hs-logos {
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    justify-content: flex-start;
+  }
+
+  .hs-logos__mark {
+    width: auto;
+    height: 12px;
+  }
+
+  .hs-cards__grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .hs-brand__option {
+    font-size: 0.46em;
+  }
+}
