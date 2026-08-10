@@ -1,5 +1,3 @@
-import { heroV5Cursors } from "@/content/heroV5";
-
 export const heroSequenceLoaderWords = ["craft", "build", "think"] as const;
 
 export const heroSequenceResources = [
@@ -92,9 +90,16 @@ export const heroSequenceCursors = [
 ] as const;
 
 /** Full team roster — slots cycle through everyone so the hero isn’t a fixed four. */
-export const heroSequenceCursorRoster = heroV5Cursors.map(
-  ({ id, name, text }) => ({ id, name, text }),
-);
+export const heroSequenceCursorRoster = [
+  { id: "kat", name: "Kat Guzman", text: "white" },
+  { id: "johnny", name: "Johnny Martinez", text: "white" },
+  { id: "mitra", name: "Mitra Raveendran", text: "white" },
+  { id: "wendy", name: "Wendy Chan", text: "white" },
+  { id: "sean", name: "Sean Kelly", text: "black" },
+  { id: "cong", name: "Cong Kim", text: "black" },
+  { id: "gulsheen", name: "Gulsheen Bhatia", text: "white" },
+  { id: "juliana", name: "Juliana Botero", text: "white" },
+] as const;
 
 export const heroSequenceCursorSlots = ["a", "b", "c", "d"] as const;
 
