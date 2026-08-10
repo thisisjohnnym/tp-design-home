@@ -266,12 +266,40 @@ export function HeroSequence() {
 
       let headlineLoop: gsap.core.Timeline | undefined;
 
+      /* Keep fixed line breaks; scale the whole shatter block to the viewport
+         width so words never wrap onto a new row when space gets tight. */
+      const fitShatterHeadline = () => {
+        if (!shatter) return;
+        const headline = select(".hs-shatter__headline")[0] as
+          | HTMLElement
+          | undefined;
+        if (!headline) return;
+
+        gsap.set(shatter, { scale: 1, transformOrigin: "left bottom" });
+        const available = shatter.clientWidth;
+        const needed = headline.scrollWidth;
+        if (available <= 0 || needed <= 0) return;
+        gsap.set(shatter, {
+          scale: Math.min(1, available / needed),
+          transformOrigin: "left bottom",
+        });
+      };
+
+      const shatterFitObserver =
+        typeof ResizeObserver !== "undefined"
+          ? new ResizeObserver(() => fitShatterHeadline())
+          : undefined;
+      shatterFitObserver?.observe(shatter);
+      requestAnimationFrame(fitShatterHeadline);
+      void document.fonts?.ready.then(() => fitShatterHeadline());
+
       const syncHeadlineDrumWidth = (faceIndex: number, animate: boolean) => {
         if (!headlineDrumTrack || !headlineSizers[faceIndex]) return;
         const nextWidth = headlineSizers[faceIndex].offsetWidth;
 
         if (!animate || prefersReducedMotion) {
           gsap.set(headlineDrumTrack, { width: nextWidth });
+          fitShatterHeadline();
           return;
         }
 
@@ -282,6 +310,8 @@ export function HeroSequence() {
           duration: heroSequenceMotion.headlineWidthDuration,
           ease: "power2.inOut",
           overwrite: "auto",
+          onUpdate: fitShatterHeadline,
+          onComplete: fitShatterHeadline,
         });
       };
 
@@ -387,6 +417,7 @@ export function HeroSequence() {
         ScrollTrigger.refresh();
         startCursorRoster();
         startHeadlineDrum();
+        fitShatterHeadline();
       } else {
         documentElement.style.overflow = "hidden";
         smoother?.paused(true);
@@ -429,6 +460,7 @@ export function HeroSequence() {
               ScrollTrigger.refresh();
               startCursorRoster();
               startHeadlineDrum();
+              fitShatterHeadline();
             },
             [],
             "reveal",
@@ -937,6 +969,7 @@ export function HeroSequence() {
         stopCursorRoster();
         cursorRosterTick.kill();
         headlineLoop?.kill();
+        shatterFitObserver?.disconnect();
         smoother?.kill();
         media.revert();
       };

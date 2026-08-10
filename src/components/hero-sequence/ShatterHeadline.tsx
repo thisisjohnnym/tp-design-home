@@ -2,6 +2,7 @@ import {
   heroSequenceCursors,
   heroSequenceHeadline,
   heroSequenceHeadlineDrumWords,
+  heroSequenceHeadlineLines,
 } from "./content";
 
 function CursorArrow() {
@@ -25,9 +26,46 @@ function CursorArrow() {
   );
 }
 
-export function ShatterHeadline() {
-  const [, ...restWords] = heroSequenceHeadline;
+function DrumWord() {
+  return (
+    <span className="hs-shatter__word hs-shatter__word--drum" aria-hidden="true">
+      <span className="hs-headline-drum">
+        <span className="hs-headline-drum__track">
+          <span className="hs-headline-drum__window">
+            <span className="hs-headline-drum__rotor">
+              {heroSequenceHeadlineDrumWords.map((word, faceIndex) => (
+                <span
+                  className="hs-headline-drum__face"
+                  data-face={faceIndex}
+                  key={word}
+                >
+                  {Array.from(word).map((character, characterIndex) => (
+                    <span
+                      className="hs-headline-drum__character"
+                      key={`${word}-${characterIndex}`}
+                    >
+                      {character}
+                    </span>
+                  ))}
+                </span>
+              ))}
+            </span>
+          </span>
+        </span>
 
+        <span className="hs-headline-drum__sizers">
+          {heroSequenceHeadlineDrumWords.map((word) => (
+            <span className="hs-headline-drum__sizer" key={`sizer-${word}`}>
+              {word}
+            </span>
+          ))}
+        </span>
+      </span>
+    </span>
+  );
+}
+
+export function ShatterHeadline() {
   return (
     <div className="hs-layer hs-layer--shatter">
       <div className="hs-shatter">
@@ -35,49 +73,24 @@ export function ShatterHeadline() {
           className="hs-shatter__headline"
           aria-label={heroSequenceHeadline.join(" ")}
         >
-          <span className="hs-shatter__word hs-shatter__word--drum" aria-hidden="true">
-            <span className="hs-headline-drum">
-              <span className="hs-headline-drum__track">
-                <span className="hs-headline-drum__window">
-                  <span className="hs-headline-drum__rotor">
-                    {heroSequenceHeadlineDrumWords.map((word, faceIndex) => (
-                      <span
-                        className="hs-headline-drum__face"
-                        data-face={faceIndex}
-                        key={word}
-                      >
-                        {Array.from(word).map((character, characterIndex) => (
-                          <span
-                            className="hs-headline-drum__character"
-                            key={`${word}-${characterIndex}`}
-                          >
-                            {character}
-                          </span>
-                        ))}
-                      </span>
-                    ))}
-                  </span>
-                </span>
-              </span>
+          {heroSequenceHeadlineLines.map((line, lineIndex) => (
+            <span className="hs-shatter__line" key={`line-${lineIndex}`}>
+              {line.map((word, wordIndex) => {
+                if (lineIndex === 0 && wordIndex === 0) {
+                  return <DrumWord key="drum" />;
+                }
 
-              <span className="hs-headline-drum__sizers">
-                {heroSequenceHeadlineDrumWords.map((word) => (
-                  <span className="hs-headline-drum__sizer" key={`sizer-${word}`}>
+                return (
+                  <span
+                    className="hs-shatter__word"
+                    data-word={word === "what's" ? "whats" : undefined}
+                    key={`${word}-${lineIndex}-${wordIndex}`}
+                    aria-hidden="true"
+                  >
                     {word}
                   </span>
-                ))}
-              </span>
-            </span>
-          </span>
-
-          {restWords.map((word, index) => (
-            <span
-              className="hs-shatter__word"
-              data-word={word === "what's" ? "whats" : undefined}
-              key={`${word}-${index}`}
-              aria-hidden="true"
-            >
-              {word}
+                );
+              })}
             </span>
           ))}
         </h1>

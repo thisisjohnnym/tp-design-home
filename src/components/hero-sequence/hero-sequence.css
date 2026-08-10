@@ -261,15 +261,19 @@
 .hs-shatter {
   position: relative;
   width: 100%;
+  /* Fit-scale keeps cursors locked to the type as the block shrinks. */
+  transform-origin: left bottom;
+  will-change: transform;
 }
 
 .hs-shatter__headline {
   display: flex;
-  flex-wrap: wrap;
-  /* Equal-height word boxes — center keeps drum + “what's” on one baseline row. */
-  align-items: center;
+  width: max-content;
+  max-width: none;
+  flex-direction: column;
+  align-items: flex-start;
   margin: 0;
-  column-gap: 0.22em;
+  row-gap: 0;
   /* Tight display leading was clipping Helvetica Now glyphs; keep punchy but safe. */
   padding-block: 0.08em;
   color: var(--hs-light);
@@ -280,8 +284,17 @@
   text-transform: capitalize;
 }
 
+.hs-shatter__line {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  width: max-content;
+  column-gap: 0.22em;
+}
+
 .hs-shatter__word {
   display: block;
+  flex-shrink: 0;
   padding-inline: 0.02em;
   will-change: filter, opacity, transform;
 }

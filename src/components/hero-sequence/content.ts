@@ -15,19 +15,17 @@ export const heroSequenceContact = {
 
 /**
  * Frame 1 headline. Words are individual nodes so the shatter beat can move
- * them at different rates; they still sit at their natural flow positions.
+ * them at different rates. Lines are fixed — the block scales to fit the
+ * viewport instead of reflowing words onto new rows.
  * The first slot is a drum that cycles `heroSequenceHeadlineDrumWords`.
  */
-export const heroSequenceHeadline = [
-  "Building",
-  "what's",
-  "next",
-  "for",
-  "coach",
-  "&",
-  "kate",
-  "spade",
+export const heroSequenceHeadlineLines = [
+  ["Building", "what's"],
+  ["next", "for", "coach"],
+  ["&", "kate", "spade"],
 ] as const;
+
+export const heroSequenceHeadline = heroSequenceHeadlineLines.flat();
 
 /** Triangular drum faces for the first headline word (120° roll steps). */
 export const heroSequenceHeadlineDrumWords = [
