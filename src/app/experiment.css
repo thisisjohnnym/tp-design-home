@@ -5,8 +5,9 @@
 html,
 body {
   margin: 0;
-  /* Keep the document canvas aligned before the experiment token scope mounts. */
-  background: #000000;
+  /* Match hero canvas (#06010d) — ScrollSmoother makes .hs-root viewport-tall
+     only, so body must carry the same color or a hard seam shows on scroll. */
+  background: #06010d;
 }
 
 .experiment-shell {

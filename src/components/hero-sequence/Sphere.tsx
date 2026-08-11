@@ -35,6 +35,42 @@ function SphereRim() {
   );
 }
 
+function SphereGrain({ variant }: SphereProps) {
+  const filterId = `hs-sphere-noise-${variant}`;
+
+  return (
+    <svg
+      className="hs-sphere__grain"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <defs>
+        <filter
+          id={filterId}
+          x="0%"
+          y="0%"
+          width="100%"
+          height="100%"
+          colorInterpolationFilters="sRGB"
+        >
+          {/* Procedural noise — no image tiles, so no repeat seams. */}
+          {/* Higher frequency so GSAP scale-up still reads as fine grit. */}
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="1.55"
+            numOctaves="3"
+            stitchTiles="stitch"
+            result="noise"
+          />
+          <feColorMatrix type="saturate" values="0" in="noise" />
+        </filter>
+      </defs>
+      <rect width="100%" height="100%" filter={`url(#${filterId})`} />
+    </svg>
+  );
+}
+
 function Sphere({ variant }: SphereProps) {
   return (
     <div className={`hs-sphere hs-sphere--${variant}`} aria-hidden="true">
@@ -46,6 +82,7 @@ function Sphere({ variant }: SphereProps) {
         <span className="hs-sphere__blob hs-sphere__blob--amber-top" />
         <span className="hs-sphere__blob hs-sphere__blob--core-light" />
         <SphereRim />
+        <SphereGrain variant={variant} />
       </div>
 
       <span className="hs-sphere__spill hs-sphere__spill--warm" />

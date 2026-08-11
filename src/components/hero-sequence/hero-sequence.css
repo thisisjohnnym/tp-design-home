@@ -10,6 +10,9 @@
   --hs-gutter: clamp(16px, 1.6vw, 24px);
   --hs-band-height: 480px;
   --hs-scrub-length: 300svh;
+  /* Paper “grid” strokes: 12 cols, 8px gutters, 24px page inset. */
+  --hs-grid-cols: 12;
+  --hs-grid-gap: 8px;
 
   --hs-display: clamp(48px, 14.29vw, 216px);
   --hs-title: clamp(34px, 8.47vw, 128px);
@@ -27,20 +30,106 @@
 
   position: relative;
   min-height: 100svh;
-  overflow-x: clip;
-  background: var(--hs-canvas);
+  /* Do not clip here — overflow on .hs-root traps position:fixed descendants
+     to this box (only ~100svh under ScrollSmoother) and seams the backdrop. */
+  background: transparent;
   color: var(--hs-light);
   font-family: var(--font-hs-sans), sans-serif;
 }
 
 /* ScrollSmoother owns wrapper/content styles when active; without it these are
    plain flow wrappers so touch / reduced-motion still scrolls natively.
-   Keep canvas fill on both — the fixed smoother wrapper is otherwise see-through
-   to the light site body, which reads as a white stripe under the clipped band. */
+   Mid layers stay transparent so the fixed plate (canvas/grid/noise) shows. */
 .hs-smooth-wrapper,
 .hs-smooth-content {
+  position: relative;
+  z-index: 3;
   width: 100%;
+  background: transparent;
+}
+
+.hs-smooth-content {
+  overflow-x: clip;
+}
+
+/* ------------------------------------------------------------------ */
+/* Site plate — canvas → grid → fine noise → UI                        */
+/* ------------------------------------------------------------------ */
+
+.hs-backdrop {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
   background: var(--hs-canvas);
+}
+
+/* Paper “grid” strokes — behind noise so grain sits on top of the lines. */
+.hs-grid {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--hs-grid-gap);
+  padding-inline: var(--hs-gutter);
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: plus-lighter;
+}
+
+.hs-grid__col {
+  flex: 1 1 0;
+  align-self: stretch;
+  min-width: 0;
+  border-left: 1px solid var(--hs-white);
+}
+
+.hs-noise {
+  --hs-noise-tile: 640px;
+  --hs-noise-drift: 160s;
+
+  position: fixed;
+  /* Above grid, below UI (smoother wrapper is z-index 3). */
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hs-noise__drift {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: calc(100% + var(--hs-noise-tile));
+  background-image: url("/textures/noise-gray-tile.jpg");
+  background-repeat: repeat;
+  background-size: var(--hs-noise-tile) var(--hs-noise-tile);
+  background-position: 0 0;
+  /* Paper “Gray surface”: luminosity @ ~10%. */
+  opacity: 0.12;
+  mix-blend-mode: luminosity;
+  will-change: transform;
+  animation: hs-noise-drift var(--hs-noise-drift) linear infinite;
+}
+
+@keyframes hs-noise-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(0, calc(-1 * var(--hs-noise-tile)), 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hs-noise__drift {
+    animation: none;
+  }
 }
 
 .hs-sr-only {
@@ -58,7 +147,7 @@
 
 .hs-sequence {
   position: relative;
-  background: var(--hs-canvas);
+  background: transparent;
 }
 
 /*
@@ -82,13 +171,13 @@
   top: 0;
   height: 100svh;
   overflow: visible;
-  background: var(--hs-canvas);
+  background: transparent;
 }
 
 .hs-band {
   position: relative;
   height: 100svh;
-  background: var(--hs-canvas);
+  background: transparent;
 }
 
 /*
@@ -99,6 +188,24 @@
   position: absolute;
   inset: 0;
   overflow: clip;
+}
+
+/* Soften the band crop into the shared canvas (avoids a knife-edge
+   between takeover art and the cards). */
+.hs-art-clip::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 180px;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--hs-canvas) 100%
+  );
 }
 
 /*
@@ -138,6 +245,10 @@
   padding: var(--hs-gutter);
 }
 
+/* ------------------------------------------------------------------ */
+/* Site grid tokens live on .hs-root; the fixed plate is above.        */
+/* ------------------------------------------------------------------ */
+
 .hs-scene {
   position: relative;
   flex: 1;
@@ -150,17 +261,18 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Nav                                                                 */
+/* Nav — snap logo + link columns to the 12-col grid                   */
 /* ------------------------------------------------------------------ */
 
 .hs-nav {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(var(--hs-grid-cols), minmax(0, 1fr));
+  column-gap: var(--hs-grid-gap);
   align-items: start;
-  justify-content: space-between;
-  gap: 88px;
 }
 
 .hs-nav__logo-target {
+  grid-column: 1 / span 2;
   width: var(--hs-logo-rest-width);
   flex-shrink: 0;
   aspect-ratio: 454 / 62;
@@ -200,15 +312,25 @@
   flex: 0 0 37.89%;
 }
 
+/* Flatten so each link group is a direct grid item on .hs-nav. */
 .hs-nav__links {
-  display: flex;
-  gap: 56px;
+  display: contents;
 }
 
 .hs-nav__group {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
+}
+
+/* Resources → col 10 (spans into 11 for long labels). Contact → col 12. */
+.hs-nav__links > .hs-nav__group:first-child {
+  grid-column: 10 / span 2;
+}
+
+.hs-nav__links > .hs-nav__group:last-child {
+  grid-column: 12;
 }
 
 .hs-nav__group-title {
@@ -789,19 +911,22 @@
   z-index: 1;
   /* Paper frame 7: 32px between band edge and card grid. */
   padding: 32px var(--hs-gutter) clamp(64px, 10vh, 128px);
-  background: var(--hs-canvas);
+  background: transparent;
 }
 
 .hs-cards__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(var(--hs-grid-cols), minmax(0, 1fr));
+  column-gap: var(--hs-grid-gap);
+  row-gap: 16px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .hs-cards__item {
+  grid-column: span 4;
+  min-width: 0;
   will-change: opacity, transform;
 }
 
@@ -958,12 +1083,12 @@
     --hs-logo-rest-width: 160px;
   }
 
-  .hs-nav {
-    gap: 40px;
+  .hs-nav__links > .hs-nav__group:first-child {
+    grid-column: 9 / span 2;
   }
 
-  .hs-nav__links {
-    gap: 32px;
+  .hs-nav__links > .hs-nav__group:last-child {
+    grid-column: 11 / span 2;
   }
 
   .hs-cursor__label {
@@ -987,12 +1112,27 @@
   }
 
   .hs-nav {
+    display: flex;
     flex-direction: column;
     gap: 24px;
   }
 
+  .hs-nav__logo-target {
+    grid-column: auto;
+  }
+
   .hs-nav__links {
+    display: flex;
     gap: 24px;
+  }
+
+  .hs-nav__links > .hs-nav__group:first-child,
+  .hs-nav__links > .hs-nav__group:last-child {
+    grid-column: auto;
+  }
+
+  .hs-cards__item {
+    grid-column: span 12;
   }
 
   .hs-cursor__svg {
@@ -1045,6 +1185,10 @@
   .hs-cards__grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 24px;
+  }
+
+  .hs-cards__item {
+    grid-column: auto;
   }
 
   .hs-brand__option {

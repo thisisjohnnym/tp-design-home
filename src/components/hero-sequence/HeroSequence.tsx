@@ -757,6 +757,24 @@ export function HeroSequence() {
             beats.spheresTakeoverStart,
           );
 
+          /* After takeover scale settles — keep the left field drifting on Y
+             (slower than scroll) so it doesn’t freeze under the collab/band. */
+          timeline.fromTo(
+            spheres.left,
+            {
+              ...pose("left", "takeover"),
+              transformOrigin: "50% 50%",
+            },
+            {
+              ...pose("left", "takeoverParallax"),
+              transformOrigin: "50% 50%",
+              duration: beats.bandClipEnd - beats.spheresTakeoverEnd,
+              ease: "none",
+              immediateRender: false,
+            },
+            beats.spheresTakeoverEnd,
+          );
+
           timeline.fromTo(
             spheres.right,
             pose("right", "overlap"),
@@ -979,6 +997,17 @@ export function HeroSequence() {
 
   return (
     <div className="hs-root" ref={rootRef}>
+      {/* Stack (back → front): canvas → grid → fine noise → UI. */}
+      <div className="hs-backdrop" aria-hidden="true" />
+      <div className="hs-grid" aria-hidden="true">
+        {Array.from({ length: 12 }, (_, index) => (
+          <div className="hs-grid__col" key={index} />
+        ))}
+      </div>
+      <div className="hs-noise" aria-hidden="true">
+        <div className="hs-noise__drift" />
+      </div>
+
       <div className="hs-smooth-wrapper">
         <div className="hs-smooth-content">
           <div className="hs-sequence">

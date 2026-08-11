@@ -137,6 +137,27 @@
   filter: blur(60px);
 }
 
+/*
+ * Procedural SVG noise (feTurbulence) — covers the disc in one continuous
+ * field so scaled orbs never show image-tile seams.
+ */
+.hs-sphere__grain {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.2;
+  mix-blend-mode: soft-light;
+}
+
+.hs-sphere--right .hs-sphere__grain {
+  opacity: 0.16;
+}
+
 /* Left sphere — light gathers on the trailing edge. */
 .hs-sphere--left .hs-sphere__blob--haze {
   top: 106px;

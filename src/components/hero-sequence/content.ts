@@ -118,7 +118,8 @@ export type SpherePose =
   | "lockArc"
   | "lock"
   | "overlap"
-  | "takeover";
+  | "takeover"
+  | "takeoverParallax";
 
 /**
  * Sphere keyframes read off the Paper storyboard. `x` is a fraction of the
@@ -161,6 +162,8 @@ export const sphereFrames: Record<
     // Frame 6 — expand past the left edge while scaling so the frame stays filled
     // (Paper places the takeover disc left of centre; drifting right left a void).
     takeover: { x: -0.2, y: 0.1, scale: 6.4 },
+    // After scale settles — slow Y drift through band clip (bg parallax).
+    takeoverParallax: { x: -0.2, y: -0.14, scale: 6.4 },
   },
   right: {
     land: { x: 0.922, y: 1.35, scale: 2.335 },
@@ -170,6 +173,7 @@ export const sphereFrames: Record<
     lock: { x: 0.246, y: -0.079, scale: 1.336 },
     overlap: { x: 0.146, y: -0.046, scale: 1.336 },
     takeover: { x: 0.146, y: -0.046, scale: 1.336 },
+    takeoverParallax: { x: 0.146, y: -0.046, scale: 1.336 },
   },
 };
 
