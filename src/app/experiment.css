@@ -214,11 +214,6 @@ body {
 }
 
 /* Paper cursor identities intentionally retain the existing team palette. */
-.experiment-cursor[data-person="kat"] {
-  --experiment-cursor-fill: #14ae5c;
-  --experiment-cursor-border: #108b4a;
-}
-
 .experiment-cursor[data-person="johnny"],
 .experiment-cursor[data-person="juliana"] {
   --experiment-cursor-fill: #9747ff;

@@ -5,40 +5,24 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
-import { CollabTitle } from "./CollabTitle";
+import { CapabilitiesSection } from "./CapabilitiesSection";
 import { LoaderIntro } from "./LoaderIntro";
-import { MidCopy } from "./MidCopy";
-import { ResourceCards } from "./ResourceCards";
 import { SequenceNav } from "./SequenceNav";
+import { TeamSection } from "./TeamSection";
+import { bindTeamFan } from "./team-fan";
 import { ShatterHeadline } from "./ShatterHeadline";
-import { SphereLeft, SphereRight } from "./Sphere";
 import {
   heroSequenceBeats as beats,
-  heroSequenceCollab,
   heroSequenceCursorRoster,
   heroSequenceCursorSlots,
   heroSequenceHeadlineDrumWords,
   heroSequenceIntro,
   heroSequenceMotion,
-  sphereFrames,
-  sphereNaturalWidth,
-  sphereUnitFraction,
-  type SphereFrame,
-  type SpherePose,
 } from "./content";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger, ScrollSmoother);
 
-const vw = () => window.innerWidth;
 const vh = () => window.innerHeight;
-
-function lerpFrame(from: SphereFrame, to: SphereFrame, amount: number) {
-  return {
-    x: from.x + (to.x - from.x) * amount,
-    y: from.y + (to.y - from.y) * amount,
-    scale: from.scale + (to.scale - from.scale) * amount,
-  };
-}
 
 export function HeroSequence() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -51,7 +35,6 @@ export function HeroSequence() {
       const select = gsap.utils.selector(root);
       const sequence = select(".hs-sequence")[0] as HTMLElement;
       const pin = select(".hs-pin")[0] as HTMLElement;
-      const band = select(".hs-band")[0] as HTMLElement;
       const shatter = select(".hs-shatter")[0] as HTMLElement;
       const words = select(".hs-shatter__word") as HTMLElement[];
       const headlineDrumTrack = select(
@@ -74,14 +57,6 @@ export function HeroSequence() {
       );
       const cursors = select(".hs-cursor") as HTMLElement[];
       const cursorLabels = select(".hs-cursor__label") as HTMLElement[];
-      const midLayer = select(".hs-layer--mid")[0] as HTMLElement;
-      const logos = select(".hs-logos")[0] as HTMLElement;
-      const collab = select(".hs-collab")[0] as HTMLElement;
-      const collabBrand = select(".hs-collab__brand")[0] as HTMLElement;
-      const spheres = {
-        left: select('[data-sphere="left"]')[0] as HTMLElement,
-        right: select('[data-sphere="right"]')[0] as HTMLElement,
-      };
       const navLinks = select(".hs-nav__links")[0] as HTMLElement;
       const loader = select(".hs-loader")[0] as HTMLElement;
       const loaderMark = select(".hs-loader-mark")[0] as HTMLElement;
@@ -92,18 +67,10 @@ export function HeroSequence() {
       const logoFace = select(".hs-mark__face--logo")[0] as HTMLElement;
       const logoTarget = select(".hs-nav__logo-target")[0] as HTMLElement;
       const navLogo = select(".hs-nav__logo")[0] as HTMLElement;
-      const cardItems = select(".hs-cards__item") as HTMLElement[];
 
       const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
       ).matches;
-
-      const bandRestHeight = () => {
-        const value = getComputedStyle(root).getPropertyValue(
-          "--hs-band-height",
-        );
-        return parseFloat(value) || 480;
-      };
 
       /* ---------------------------------------------------------------- */
       /* Loader intro (runs once, independent of breakpoint changes)       */
@@ -529,11 +496,13 @@ export function HeroSequence() {
         {
           all: "all",
           isMobile: "(max-width: 699px)",
+          isTablet: "(min-width: 700px) and (max-width: 1100px)",
           reduceMotion: "(prefers-reduced-motion: reduce)",
           allowMotion: "(prefers-reduced-motion: no-preference)",
         },
         (context) => {
           const isMobile = Boolean(context.conditions?.isMobile);
+          const isTablet = Boolean(context.conditions?.isTablet);
           const reduceMotion = Boolean(context.conditions?.reduceMotion);
           const reduced = heroSequenceMotion.reduced;
 
@@ -542,93 +511,6 @@ export function HeroSequence() {
           const travel = reduceMotion
             ? heroSequenceMotion.wordTravel * reduced.travel
             : heroSequenceMotion.wordTravel;
-          const midTravel = reduceMotion
-            ? heroSequenceMotion.midCopyTravel * reduced.travel
-            : heroSequenceMotion.midCopyTravel;
-          const logosTravel = reduceMotion
-            ? heroSequenceMotion.logosTravel * reduced.travel
-            : heroSequenceMotion.logosTravel;
-
-          const unit = () =>
-            vw() *
-            (isMobile ? sphereUnitFraction.mobile : sphereUnitFraction.desktop);
-
-          const frame = (side: "left" | "right", key: SpherePose) => {
-            const target = sphereFrames[side][key];
-            if (!reduceMotion) return target;
-            // Gentler journey: keep the story beats but compress the deltas
-            // around the settled "lock" pose.
-            return lerpFrame(sphereFrames[side].lock, target, reduced.sphereDelta);
-          };
-
-          const pose = (side: "left" | "right", key: SpherePose) => {
-            const value = frame(side, key);
-            return {
-              x: () => vw() * value.x,
-              y: () => vh() * value.y,
-              // Storyboard scale is relative to the 875 wrapper, not the inner disc.
-              scale: () => (unit() / sphereNaturalWidth) * value.scale,
-            };
-          };
-
-          /**
-           * Scrubbed pose-to-pose on one tween (shared ease). Split x/y eases
-           * under scrub read as wobble — curve comes from lockArc keyframes.
-           */
-          const scrubSphereArc = (
-            side: "left" | "right",
-            fromKey: SpherePose,
-            toKey: SpherePose,
-            duration: number,
-            at: number,
-          ) => {
-            timeline.fromTo(
-              spheres[side],
-              pose(side, fromKey),
-              {
-                ...pose(side, toKey),
-                duration,
-                ease: "none",
-                immediateRender: false,
-              },
-              at,
-            );
-          };
-
-          gsap.set(spheres.left, {
-            zIndex: 1,
-            transformOrigin: "center center",
-            ...pose("left", "land"),
-          });
-          gsap.set(spheres.right, {
-            zIndex: 2,
-            transformOrigin: "center center",
-            ...pose("right", "land"),
-          });
-
-          /* Soft scroll lock once logos are fully in — once per downward pass. */
-          let logosHoldArmed = !reduceMotion;
-          let logosHoldTimer: gsap.core.Tween | undefined;
-
-          const releaseLogosHold = () => {
-            smoother?.paused(false);
-            documentElement.style.removeProperty("overflow");
-          };
-
-          const engageLogosHold = () => {
-            if (reduceMotion || !logosHoldArmed) return;
-            logosHoldArmed = false;
-            if (smoother) {
-              smoother.paused(true);
-            } else {
-              documentElement.style.overflow = "hidden";
-            }
-            logosHoldTimer?.kill();
-            logosHoldTimer = gsap.delayedCall(
-              heroSequenceMotion.logosHoldSeconds,
-              releaseLogosHold,
-            );
-          };
 
           const timeline = gsap.timeline({
             scrollTrigger: {
@@ -641,7 +523,6 @@ export function HeroSequence() {
               invalidateOnRefresh: true,
               onUpdate: (self) => {
                 getSequenceProgress = () => self.progress;
-                const pct = self.progress * beats.total;
 
                 if (
                   cursorRosterAlive &&
@@ -652,12 +533,6 @@ export function HeroSequence() {
                 // Stop the verb drum once shatter owns the headline motion.
                 if (self.progress > 0.002) stopHeadlineDrum();
 
-                // Re-arm hold when the visitor scrolls back above the logos.
-                if (pct < beats.logosInStart) {
-                  logosHoldArmed = !reduceMotion;
-                } else if (self.direction === 1 && pct >= beats.logosInEnd) {
-                  engageLogosHold();
-                }
               },
             },
           });
@@ -698,283 +573,14 @@ export function HeroSequence() {
             beats.shatterStart,
           );
 
-          /* Beat 2 — spheres rise, then settle through a bowed lockArc mid
-             (geometry = curve; linear scrub = no axis wobble). */
-          (["left", "right"] as const).forEach((side) => {
-            const riseDur = beats.spheresZoomEnd - beats.spheresRiseStart;
-            const lockSpan = beats.spheresLockEnd - beats.spheresZoomEnd;
-            const arcDur = lockSpan * 0.55;
-            const settleDur = lockSpan - arcDur;
 
-            scrubSphereArc(
-              side,
-              "land",
-              "zoom",
-              riseDur,
-              beats.spheresRiseStart,
-            );
-
-            scrubSphereArc(
-              side,
-              "zoom",
-              "lockArc",
-              arcDur,
-              beats.spheresZoomEnd,
-            );
-
-            scrubSphereArc(
-              side,
-              "lockArc",
-              "lock",
-              settleDur,
-              beats.spheresZoomEnd + arcDur,
-            );
-
-            scrubSphereArc(
-              side,
-              "lock",
-              "overlap",
-              beats.spheresOverlapEnd - beats.spheresOverlapStart,
-              beats.spheresOverlapStart,
-            );
+          const releaseTeam = bindTeamFan(root, {
+            reduceMotion,
+            layout: isMobile ? "phone" : isTablet ? "tablet" : "desktop",
           });
 
-          /* Left sphere grows and shifts left so the takeover never opens a
-             black void on the left edge of the frame. */
-          timeline.fromTo(
-            spheres.left,
-            {
-              ...pose("left", "overlap"),
-              transformOrigin: "50% 50%",
-            },
-            {
-              ...pose("left", "takeover"),
-              transformOrigin: "50% 50%",
-              duration: beats.spheresTakeoverEnd - beats.spheresTakeoverStart,
-              ease: "none",
-              immediateRender: false,
-            },
-            beats.spheresTakeoverStart,
-          );
-
-          /* After takeover scale settles — keep the left field drifting on Y
-             (slower than scroll) so it doesn’t freeze under the collab/band. */
-          timeline.fromTo(
-            spheres.left,
-            {
-              ...pose("left", "takeover"),
-              transformOrigin: "50% 50%",
-            },
-            {
-              ...pose("left", "takeoverParallax"),
-              transformOrigin: "50% 50%",
-              duration: beats.bandClipEnd - beats.spheresTakeoverEnd,
-              ease: "none",
-              immediateRender: false,
-            },
-            beats.spheresTakeoverEnd,
-          );
-
-          timeline.fromTo(
-            spheres.right,
-            pose("right", "overlap"),
-            {
-              ...pose("right", "takeover"),
-              duration: beats.spheresTakeoverEnd - beats.spheresTakeoverStart,
-              ease: "none",
-              immediateRender: false,
-            },
-            beats.spheresTakeoverStart,
-          );
-
-          /* The left sphere rises above its sibling as they overlap. */
-          timeline
-            .set(spheres.left, { zIndex: 3 }, beats.spheresOverlapStart)
-            .set(spheres.right, { zIndex: 2 }, beats.spheresOverlapStart);
-
-          /* Beat 3 — mid copy rises from below, then keeps scrolling out. */
-          timeline
-            .fromTo(
-              midLayer,
-              { autoAlpha: 0, y: () => vh() * midTravel },
-              {
-                autoAlpha: 1,
-                y: 0,
-                duration: beats.midCopyInEnd - beats.midCopyInStart,
-                // Linear tracks scrub so it reads as page scroll, not a pop-in.
-                ease: "none",
-              },
-              beats.midCopyInStart,
-            )
-            .fromTo(
-              midLayer,
-              {
-                filter: `blur(${blurAmount(heroSequenceMotion.midCopyBlur)}px)`,
-              },
-              {
-                filter: "blur(0px)",
-                duration: beats.midCopyBlurEnd - beats.midCopyInStart,
-                ease: "none",
-              },
-              beats.midCopyInStart,
-            )
-            .to(
-              midLayer,
-              {
-                autoAlpha: 0,
-                y: () => -vh() * midTravel * 0.72,
-                filter: `blur(${blurAmount(heroSequenceMotion.midCopyBlur)}px)`,
-                duration: beats.midCopyOutEnd - beats.midCopyOutStart,
-                ease: "none",
-              },
-              beats.midCopyOutStart,
-            );
-
-          /* Logos trail the mid copy slightly so the strip feels scroll-linked. */
-          timeline
-            .fromTo(
-              logos,
-              { autoAlpha: 0, y: () => vh() * logosTravel },
-              {
-                autoAlpha: 1,
-                y: 0,
-                duration: beats.logosInEnd - beats.logosInStart,
-                ease: "none",
-              },
-              beats.logosInStart,
-            )
-            .to(
-              logos,
-              {
-                autoAlpha: 0,
-                y: () => -vh() * logosTravel * 1.1,
-                duration: beats.logosOutEnd - beats.logosOutStart,
-                ease: "none",
-              },
-              beats.logosOutStart,
-            );
-
-          /* Beat 4 — collab title enters centered (stair-step lines), then
-             scrubs flush-left into the band. Transforms only — full copy stays
-             in the DOM (no width morph for “on {brand}”). */
-          const collabLines = select(".hs-collab__line") as HTMLElement[];
-
-          const collabCenterY = () => {
-            const layer = collab.parentElement;
-            if (!layer) return 0;
-            // Title rests at the bottom; lift it so its midpoint sits on the scene center.
-            return -(layer.clientHeight / 2 - collab.offsetHeight / 2);
-          };
-
-          const collabLineIndent = () =>
-            parseFloat(getComputedStyle(collab).fontSize) *
-            heroSequenceCollab.lineIndentEm;
-
-          /**
-           * alignT: 0 = centered stair-step (line 2 indented),
-           *         1 = band lock — both lines flush left (matches Paper frame 7).
-           */
-          const syncCollabLineAlign = (alignT: number) => {
-            const t = Math.min(1, Math.max(0, alignT));
-            const indent = collabLineIndent();
-            const line0 = collabLines[0];
-            const line1 = collabLines[1];
-            if (!line0 || !line1) return;
-
-            const stackWidth = Math.max(
-              line0.offsetWidth,
-              indent + line1.offsetWidth,
-            );
-            const centerPad = Math.max(
-              0,
-              (collab.clientWidth - stackWidth) / 2,
-            );
-
-            collabLines.forEach((line, index) => {
-              const stepX = index === 0 ? 0 : indent;
-              const centeredX = centerPad + stepX;
-              // Locked: both lines at x = 0. Entrance: stair-step, optically centered.
-              gsap.set(line, {
-                x: centeredX * (1 - t),
-              });
-            });
-          };
-
-          gsap.set(collabBrand, { pointerEvents: "none" });
-          syncCollabLineAlign(0);
-
-          timeline
-            .fromTo(
-              collab,
-              {
-                autoAlpha: 0,
-                y: () => collabCenterY() + vh() * 0.12 * travel,
-                scale: reduceMotion ? 0.98 : 0.96,
-                filter: `blur(${blurAmount(heroSequenceMotion.collabBlur)}px)`,
-              },
-              {
-                autoAlpha: 1,
-                y: () => collabCenterY(),
-                scale: 1,
-                filter: "blur(0px)",
-                duration: beats.collabCenterInEnd - beats.collabCenterInStart,
-                ease: "none",
-                onUpdate: () => syncCollabLineAlign(0),
-              },
-              beats.collabCenterInStart,
-            )
-            .to(
-              collab,
-              {
-                y: 0,
-                duration: beats.collabMorphEnd - beats.collabMorphStart,
-                // Soft scrub curve so the left settle eases, not linear-snaps.
-                ease: "power2.inOut",
-                onUpdate: function onCollabMorph() {
-                  syncCollabLineAlign(this.ratio);
-                  if (this.ratio > 0.55) {
-                    gsap.set(collabBrand, { pointerEvents: "auto" });
-                  } else {
-                    gsap.set(collabBrand, { pointerEvents: "none" });
-                  }
-                },
-              },
-              beats.collabMorphStart,
-            );
-
-          /* Beat 5 — artwork clips to a header band. Pin + runway heights stay
-             fixed (stable scrub range); cards sit under the band inside the pin
-             and fill the revealed lower viewport — no dead void. */
-          const clipDuration = beats.bandClipEnd - beats.bandClipStart;
-
-          timeline.fromTo(
-            band,
-            { height: () => vh() },
-            {
-              height: () => bandRestHeight(),
-              duration: clipDuration,
-              ease: "none",
-            },
-            beats.bandClipStart,
-          );
-
-          /* Resource cards fade up as the band clips open space for them. */
-          timeline.fromTo(
-            cardItems,
-            { autoAlpha: 0, y: 28 },
-            {
-              autoAlpha: 1,
-              y: 0,
-              duration: clipDuration,
-              ease: "none",
-              stagger: 0.08,
-            },
-            beats.bandClipStart,
-          );
-
           return () => {
-            logosHoldTimer?.kill();
-            releaseLogosHold();
+            releaseTeam();
             timeline.scrollTrigger?.kill();
             timeline.kill();
           };
@@ -1013,33 +619,22 @@ export function HeroSequence() {
           <div className="hs-sequence">
             <div className="hs-pin">
               <div className="hs-band">
-                <div className="hs-art-clip" aria-hidden="true">
-                  <div className="hs-art">
-                    <div className="hs-sphere-slot" data-sphere="right">
-                      <SphereRight />
-                    </div>
-                    <div className="hs-sphere-slot" data-sphere="left">
-                      <SphereLeft />
-                    </div>
-                  </div>
-                </div>
-
                 <div className="hs-band__inner">
                   <SequenceNav />
 
                   <div className="hs-scene">
                     <ShatterHeadline />
-                    <MidCopy />
-                    <CollabTitle />
                   </div>
                 </div>
               </div>
-
-              <ResourceCards />
             </div>
 
             <div className="hs-scrub-runway" aria-hidden="true" />
           </div>
+
+          <TeamSection />
+
+          <CapabilitiesSection />
         </div>
       </div>
 

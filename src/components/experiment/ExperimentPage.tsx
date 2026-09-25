@@ -90,10 +90,16 @@ export function ExperimentPage() {
           const shuffledRoster = gsap.utils.shuffle([
             ...experimentCursorRoster,
           ]);
-          const cursorGroups = [
-            shuffledRoster.slice(0, heroCursors.length),
-            shuffledRoster.slice(heroCursors.length),
-          ];
+          const groupSize = heroCursors.length;
+          const cursorGroups: (typeof experimentCursorRoster)[number][][] =
+            [];
+          for (let i = 0; i < shuffledRoster.length; i += groupSize) {
+            const chunk = shuffledRoster.slice(i, i + groupSize);
+            while (chunk.length < groupSize) {
+              chunk.push(shuffledRoster[chunk.length % shuffledRoster.length]);
+            }
+            cursorGroups.push(chunk);
+          }
           const shuffledSlots = gsap.utils.shuffle([
             ...experimentCursorSlots,
           ]);

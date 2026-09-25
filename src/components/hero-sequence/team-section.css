@@ -1,0 +1,480 @@
+/* Team fan. Width follows the fan storyboard. The face matches the restyled
+   member card: 324×548, 16px outer radius, gray rim. */
+
+.hs-team {
+  /* Starts while the hero is leaving so the first card is not a screen below it. */
+  margin-top: -72vh;
+  /* Rim from the restyled card front. Back ground stays on the card back. */
+  --hs-team-rim: #dadada;
+  --hs-team-back: #262626;
+  --hs-team-card: #878787;
+  --hs-team-card-soft: #cacaca;
+  --hs-team-card-mid: #9b9b9b;
+  --hs-team-card-back: #5a5a5a;
+  --hs-team-radius: 16px;
+  --hs-team-card-width: clamp(200px, 20.77vw, 314px);
+  /* V-holo spectrum and grain. Raw on purpose: this is the foil light, not interface color. */
+  --hs-holo-1: hsl(2 100% 73%);
+  --hs-holo-2: hsl(53 100% 69%);
+  --hs-holo-3: hsl(93 100% 69%);
+  --hs-holo-4: hsl(176 100% 76%);
+  --hs-holo-5: hsl(228 100% 74%);
+  --hs-holo-6: hsl(283 100% 73%);
+  --hs-holo-grain: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCI+CjxmaWx0ZXIgaWQ9Im4iPgo8ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjciIG51bU9jdGF2ZXM9IjEwIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIj48L2ZlVHVyYnVsZW5jZT4KPC9maWx0ZXI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWxsPSIjMDAwIj48L3JlY3Q+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWx0ZXI9InVybCgjbikiIG9wYWNpdHk9IjAuMyI+PC9yZWN0Pgo8L3N2Zz4=");
+  /* Extra scroll while the fan is pinned. About one screen per teammate. */
+  --hs-team-runway: 800svh;
+
+  position: relative;
+  background: transparent;
+}
+
+.hs-team__pin {
+  position: relative;
+  z-index: 2;
+  height: 100svh;
+  /* Cards are clipped by the stage. The spheres stay outside that box so
+     they can leave with the scene instead of being sliced at its edge. */
+  overflow: visible;
+}
+
+.hs-team__orbs {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.hs-team__orbs--front {
+  z-index: 6;
+}
+
+.hs-team__orb {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  width: 875px;
+  height: 933px;
+  margin: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.hs-team__orb--accent {
+  z-index: 6;
+  filter: blur(20px);
+}
+
+.hs-team__title {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  color: var(--hs-light);
+  font-size: clamp(48px, 6.61vw, 100px);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 0.8;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.hs-team__stage {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: clip;
+  perspective: 1400px;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+.hs-team__card {
+  --hs-holo-opacity: 0.22;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--hs-team-card-width);
+  aspect-ratio: 324 / 548;
+  margin: 0;
+  container-type: inline-size;
+  perspective: 1400px;
+  pointer-events: none;
+  transform-style: preserve-3d;
+  visibility: hidden;
+  will-change: transform;
+}
+
+.hs-team__flip {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 2200px;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.hs-team__tilt {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.hs-team__face {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--hs-team-radius);
+}
+
+/* Hide the face that is turned away. backface-visibility flickers the bottom
+   edge while a card tilts, so the flip state picks the visible side instead. */
+.hs-team__flip[data-face="back"] .hs-team__face--front,
+.hs-team__flip[data-face="front"] .hs-team__face--back {
+  visibility: hidden;
+}
+
+.hs-team__face--front {
+  background: var(--hs-team-rim);
+}
+
+.hs-team__face--back {
+  background: var(--hs-team-back);
+}
+
+.hs-team__shell {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  background: var(--hs-team-rim);
+}
+
+.hs-team__face--back .hs-team__shell {
+  background: var(--hs-team-back);
+}
+
+.hs-team__face--front .hs-team__shell {
+  display: flex;
+  flex-direction: column;
+  padding: 3.7cqi 3.7cqi 0;
+}
+
+.hs-team__plate {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.hs-team__portrait {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* Foil is isolated here so blend modes stay on the artwork. Type sits outside this box. */
+.hs-team__art {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  pointer-events: none;
+}
+
+.hs-team__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.hs-team__logos {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  -webkit-mask-image: url("/team/card-pattern.png");
+  mask-image: url("/team/card-pattern.png");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: 398.6% 232.84%;
+  mask-size: 398.6% 232.84%;
+}
+
+.hs-team__pattern {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 398.6%;
+  height: 232.84%;
+  object-fit: fill;
+  filter: invert(20%);
+  translate: -50% -50%;
+}
+
+.hs-team__copy {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  gap: 3.7cqi;
+  height: 100%;
+  min-height: 0;
+  padding: 5.56cqi;
+}
+
+.hs-team__meta,
+.hs-team__links {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqi;
+}
+
+.hs-team__role,
+.hs-team__aside,
+.hs-team__place,
+.hs-team__given,
+.hs-team__family,
+.hs-team__bio,
+.hs-team__mark,
+.hs-team__link {
+  margin: 0;
+}
+
+.hs-team__role,
+.hs-team__aside,
+.hs-team__place,
+.hs-team__link {
+  color: #fff;
+  font-size: 2.47cqi;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.hs-team__aside,
+.hs-team__place {
+  text-align: right;
+}
+
+.hs-team__link,
+.hs-team__place {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.hs-team__name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.06em;
+}
+
+.hs-team__given,
+.hs-team__family {
+  color: var(--hs-light);
+  font-size: 14.81cqi;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.hs-team__family {
+  text-align: right;
+}
+
+.hs-team__spacer {
+  flex: 1 1 auto;
+  min-height: 8%;
+}
+
+.hs-team__link {
+  flex: 0 0 auto;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  pointer-events: auto;
+}
+
+.hs-team__link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.hs-team__bio {
+  position: relative;
+  isolation: isolate;
+  flex: 0 0 auto;
+  overflow: hidden;
+  padding: 5.56cqi;
+  background: #191919;
+  color: #fff;
+  font-size: 4.32cqi;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  text-wrap: balance;
+}
+
+.hs-team__bio-text {
+  position: relative;
+  z-index: 1;
+  text-wrap: balance;
+}
+
+.hs-team__shine,
+.hs-team__glare {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* Foil is painted once, larger than the face, then slid with transform.
+   Moving the gradient center repainted every card during scroll. */
+.hs-team__foil {
+  --hs-holo-space: 5%;
+  --hs-holo-angle: 133deg;
+  position: absolute;
+  top: -40%;
+  left: -40%;
+  width: 180%;
+  height: 180%;
+  background-image:
+    var(--hs-holo-grain),
+    repeating-linear-gradient(
+      0deg,
+      var(--hs-holo-1) calc(var(--hs-holo-space) * 1),
+      var(--hs-holo-2) calc(var(--hs-holo-space) * 2),
+      var(--hs-holo-3) calc(var(--hs-holo-space) * 3),
+      var(--hs-holo-4) calc(var(--hs-holo-space) * 4),
+      var(--hs-holo-5) calc(var(--hs-holo-space) * 5),
+      var(--hs-holo-6) calc(var(--hs-holo-space) * 6),
+      var(--hs-holo-1) calc(var(--hs-holo-space) * 7)
+    ),
+    repeating-linear-gradient(
+      var(--hs-holo-angle),
+      #0e152e 0%,
+      hsl(180 10% 60%) 3.8%,
+      hsl(180 29% 66%) 4.5%,
+      hsl(180 10% 60%) 5.2%,
+      #0e152e 10%,
+      #0e152e 12%
+    ),
+    radial-gradient(
+      farthest-corner circle at 50% 46%,
+      hsl(0 0% 0% / 0.1) 12%,
+      hsl(0 0% 0% / 0.15) 20%,
+      hsl(0 0% 0% / 0.25) 120%
+    );
+  background-blend-mode: screen, hue, hard-light;
+  background-repeat: no-repeat;
+  /* Sizes are the old face-relative sizes, rewritten for this 180% sheet.
+     Positions crop the sheet back to the resting foil (pointer at 50%, 46%). */
+  background-size: 500px 55.5556%, 111.1111% 388.8889%, 166.6667% 88.8889%, 111.1111% 88.8889%;
+  background-position: center, -200% 48.43%, 50% 54.08%, 50% 54.08%;
+  filter: brightness(0.9) contrast(1.15) saturate(0.65);
+  will-change: transform;
+}
+
+.hs-team__shine {
+  mix-blend-mode: color-dodge;
+  opacity: var(--hs-holo-opacity);
+}
+
+.hs-team__glare {
+  z-index: 1;
+  mix-blend-mode: soft-light;
+  opacity: calc(var(--hs-holo-opacity) * 0.35);
+}
+
+.hs-team__glare-spot {
+  position: absolute;
+  /* 240% sheet, centered on the resting hotspot (50%, 46% of the face). */
+  top: -74%;
+  left: -70%;
+  width: 240%;
+  height: 240%;
+  background-image: radial-gradient(
+    farthest-corner circle at 50% 50%,
+    hsl(0 0% 100%) 0%,
+    hsl(210 3% 54% / 0.33) 18.75%,
+    hsl(0 0% 20% / 0.9) 54.2%
+  );
+  filter: contrast(1.15);
+  will-change: transform;
+}
+
+.hs-team__mark {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85cqi 2cqi;
+  color: #000;
+  font-size: 1.15cqi;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.hs-team__face--back {
+  transform: rotateY(180deg);
+}
+
+/* One mask on the logo group. A second mask on the foil was drawing each word again. */
+.hs-team__face--back .hs-team__foil,
+.hs-team__face--back .hs-team__glare-spot {
+  filter: none;
+}
+
+.hs-team__face--back .hs-team__shine {
+  mix-blend-mode: screen;
+  opacity: 0.4;
+}
+
+.hs-team__face--back .hs-team__glare {
+  mix-blend-mode: screen;
+  opacity: 0.28;
+}
+
+.hs-team__runway {
+  height: var(--hs-team-runway);
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hs-team__runway {
+    height: 0;
+  }
+
+  .hs-team__card {
+    --hs-holo-opacity: 0.2;
+  }
+}
+
+@media (max-width: 699px) {
+  .hs-team__title {
+    font-size: clamp(40px, 12vw, 64px);
+  }
+}

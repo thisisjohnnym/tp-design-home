@@ -1,7 +1,6 @@
 import localFont from "next/font/local";
 import { HeroSequence } from "@/components/hero-sequence/HeroSequence";
 import "@/components/hero-sequence/hero-sequence.css";
-import "@/components/hero-sequence/sphere.css";
 
 const helveticaNow = localFont({
   src: "../../public/fonts/HelveticaNowVar.ttf",

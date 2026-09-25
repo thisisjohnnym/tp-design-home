@@ -9,7 +9,7 @@
 
   --hs-gutter: clamp(16px, 1.6vw, 24px);
   --hs-band-height: 480px;
-  --hs-scrub-length: 300svh;
+  --hs-scrub-length: 48svh;
   /* Paper “grid” strokes: 12 cols, 8px gutters, 24px page inset. */
   --hs-grid-cols: 12;
   --hs-grid-gap: 8px;
@@ -160,11 +160,7 @@
   pointer-events: none;
 }
 
-/*
- * Pin shell stays viewport-tall for the full scrub. Resource cards live under
- * .hs-band inside this shell — as the band clips they fill the lower viewport
- * with no dead void. Overflow stays visible so the brand dropdown can open.
- */
+/* Hero stays pinned while the headline leaves. The team fan follows. */
 .hs-pin {
   position: sticky;
   z-index: 2;
@@ -606,11 +602,6 @@
 }
 
 /* Team cursor identities keep the existing palette used across the site. */
-.hs-cursor[data-person="kat"] {
-  --hs-cursor-fill: #14ae5c;
-  --hs-cursor-border: #108b4a;
-}
-
 .hs-cursor[data-person="johnny"] {
   --hs-cursor-fill: #9747ff;
   --hs-cursor-border: #7939cc;
@@ -1101,7 +1092,7 @@
   .hs-root {
     --hs-gutter: 16px;
     --hs-band-height: 336px;
-    --hs-scrub-length: 260svh;
+    --hs-scrub-length: 40svh;
     --hs-display: 15.4vw;
     --hs-title: 10.6vw;
     --hs-subhead: 4.4vw;

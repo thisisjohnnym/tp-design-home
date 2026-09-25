@@ -1,0 +1,264 @@
+/* Capabilities accordion. Geometry follows the desktop storyboard (1512 wide):
+   500px numerals in a 560px column, 200px gutter, 232px closed / 345px open rows. */
+
+.hs-caps {
+  --hs-caps-text: #f8f8f8;
+  --hs-caps-number: clamp(132px, 33.07vw, 500px);
+  --hs-caps-number-col: clamp(148px, 37.04vw, 560px);
+  --hs-caps-gutter: clamp(20px, 13.23vw, 200px);
+  --hs-caps-row-closed: clamp(104px, 15.34vw, 232px);
+  --hs-caps-row-open: clamp(200px, 22.82vw, 345px);
+  --hs-caps-row-top: clamp(16px, 1.32vw, 20px);
+  --hs-caps-row-bottom: clamp(12px, 1.59vw, 24px);
+  --hs-caps-row-bottom-open: clamp(8px, 1.06vw, 16px);
+  /* Open rows hold the title at the top and drop the list to the baseline. */
+  --hs-caps-lead: clamp(28px, 5.03vw, 76px);
+  --hs-caps-title: clamp(20px, 1.85vw, 28px);
+  --hs-caps-service: clamp(15px, 1.19vw, 18px);
+  --hs-caps-dim: 0.2;
+  /* One duration for both directions: a hover swap closes one row while it
+     opens another, so unequal timings would shift the rows below mid-flight
+     and slide the next row under the cursor. */
+  --hs-caps-move: 520ms;
+  --hs-caps-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(48px, 7.94vw, 120px);
+  padding: clamp(96px, 12vw, 180px) var(--hs-gutter);
+}
+
+.hs-caps__heading {
+  margin: 0;
+  color: var(--hs-light);
+  font-size: clamp(48px, 6.61vw, 100px);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 0.8;
+}
+
+.hs-caps__list {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 3.7vw, 56px);
+}
+
+.hs-caps__row {
+  position: relative;
+  padding-left: calc(var(--hs-caps-number-col) + var(--hs-caps-gutter));
+  border-bottom: 1px solid var(--hs-hairline);
+  /* The numeral overflows every row height by design — clip, never grow. */
+  overflow: clip;
+  transition: border-bottom-color var(--hs-caps-move) var(--hs-caps-ease);
+}
+
+.hs-caps__row[data-open="true"] {
+  border-bottom-color: var(--hs-white);
+}
+
+.hs-caps__number {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--hs-caps-number-col);
+  opacity: var(--hs-caps-dim);
+  color: var(--hs-light);
+  font-size: var(--hs-caps-number);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 0.8;
+  pointer-events: none;
+  transition: opacity var(--hs-caps-move) var(--hs-caps-ease);
+}
+
+.hs-caps__row[data-open="true"] .hs-caps__number {
+  opacity: 1;
+}
+
+/* The row height rides on min-height rather than the growing panel: a hover
+   swap then loses and gains the same pixels at the same rate, so the rows below
+   never slide out from under the pointer. Taller content still wins. */
+.hs-caps__body {
+  display: flex;
+  min-height: var(--hs-caps-row-closed);
+  flex-direction: column;
+  /* Closed rows sit their title on the baseline of the row; the growing panel
+     lifts it to the top as the row opens. */
+  justify-content: flex-end;
+  padding-top: var(--hs-caps-row-top);
+  padding-bottom: var(--hs-caps-row-bottom);
+  transition:
+    min-height var(--hs-caps-move) var(--hs-caps-ease),
+    padding-bottom var(--hs-caps-move) var(--hs-caps-ease);
+}
+
+.hs-caps__row[data-open="true"] .hs-caps__body {
+  min-height: var(--hs-caps-row-open);
+  padding-bottom: var(--hs-caps-row-bottom-open);
+}
+
+.hs-caps__title {
+  margin: 0;
+  opacity: var(--hs-caps-dim);
+  color: var(--hs-caps-text);
+  font-size: var(--hs-caps-title);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  text-wrap: balance;
+  transition: opacity var(--hs-caps-move) var(--hs-caps-ease);
+}
+
+.hs-caps__row[data-open="true"] .hs-caps__title {
+  opacity: 1;
+}
+
+.hs-caps__trigger {
+  padding: 0;
+  border: 0;
+  margin: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: left;
+}
+
+.hs-caps__trigger:focus-visible {
+  outline: 2px solid var(--hs-white);
+  outline-offset: 6px;
+}
+
+.hs-caps__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--hs-caps-move) var(--hs-caps-ease);
+}
+
+.hs-caps__row[data-open="true"] .hs-caps__panel {
+  grid-template-rows: 1fr;
+}
+
+.hs-caps__panel-inner {
+  overflow: hidden;
+  padding-top: var(--hs-caps-lead);
+}
+
+/* The list resolves out of a blur once the row has begun to open, and clears
+   quickly on the way out so it never lingers over a collapsing row. */
+.hs-caps__services {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  gap: clamp(8px, 0.93vw, 14px);
+  list-style: none;
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(8px);
+  transition:
+    opacity 220ms ease-out,
+    filter 220ms ease-out,
+    transform 220ms ease-out;
+}
+
+.hs-caps__row[data-open="true"] .hs-caps__services {
+  opacity: 1;
+  filter: blur(0px);
+  transform: none;
+  transition-duration: 460ms;
+  transition-delay: 120ms;
+}
+
+.hs-caps__service {
+  color: var(--hs-caps-text);
+  font-size: var(--hs-caps-service);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* Cursor still. Portaled to the body; GSAP owns x/y.
+   Blur lives on the outer box. A filter on the clipping box lets the reel
+   paint outside the frame, so the crop is a separate element. */
+.hs-caps-preview {
+  position: fixed;
+  z-index: 40;
+  top: 0;
+  left: 0;
+  width: clamp(210px, 19.6vw, 294px);
+  opacity: 0;
+  pointer-events: none;
+  filter: blur(8px);
+  transition:
+    opacity 220ms ease-out,
+    filter 220ms ease-out;
+}
+
+.hs-caps-preview__clip {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  aspect-ratio: 16 / 9;
+  outline: 1px solid oklch(1 0 0 / 0.1);
+  outline-offset: -1px;
+  box-shadow:
+    0 18px 44px oklch(0 0 0 / 0.32),
+    0 2px 8px oklch(0 0 0 / 0.2);
+}
+
+.hs-caps-preview[data-on="true"] {
+  opacity: 1;
+  filter: blur(0px);
+  transition-duration: 320ms;
+}
+
+.hs-caps-preview__track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+}
+
+.hs-caps-preview__image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  flex: none;
+  object-fit: cover;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hs-caps__row,
+  .hs-caps__number,
+  .hs-caps__title,
+  .hs-caps__body,
+  .hs-caps__panel,
+  .hs-caps__services,
+  .hs-caps-preview {
+    transition: none;
+  }
+
+  .hs-caps__services {
+    filter: none;
+    transform: none;
+  }
+}
+
+@media (max-width: 699px) {
+  .hs-caps {
+    --hs-caps-number: 26vw;
+    --hs-caps-number-col: 27vw;
+    --hs-caps-gutter: 16px;
+    --hs-caps-title: 20px;
+    --hs-caps-service: 15px;
+  }
+
+  .hs-caps__heading {
+    font-size: clamp(40px, 12vw, 64px);
+  }
+}

@@ -26,7 +26,6 @@ export const experimentHeadlineDrumWords = [
 ] as const;
 
 export const experimentCursorRoster = [
-  { id: "kat", name: "Kat Guzman", text: "white" },
   { id: "johnny", name: "Johnny Martinez", text: "white" },
   { id: "mitra", name: "Mitra Raveendran", text: "white" },
   { id: "wendy", name: "Wendy Chan", text: "white" },

@@ -74,8 +74,8 @@ export const heroSequenceCursors = [
     text: "white",
   },
   {
-    id: "kat",
-    name: "Kat Guzman",
+    id: "johnny",
+    name: "Jonathan Martinez",
     slot: "c",
     text: "white",
   },
@@ -87,19 +87,197 @@ export const heroSequenceCursors = [
   },
 ] as const;
 
-/** Full team roster — slots cycle through everyone so the hero isn’t a fixed four. */
+/**
+ * Full team roster — slots cycle through everyone so the hero isn’t a fixed four.
+ * Names, roles, cities, and emails match the public team page.
+ * `portrait` is a stand-in stock photo until each person has their own.
+ * A single role keeps “ui/ux team” on the right. A manager title splits into two lines.
+ */
+const teamBio =
+  "Approaching every project with deep user-centered insight and overt passion for the craft, Sean has been the fresh creative force behind market-defining experiences for Coach and Kate Spade. His raw ability in both graphic, product design and leadership have had a profound effect on Tapestry's philosophy, work and culture.";
+
+const teamLabel = "ui/ux team";
+
 export const heroSequenceCursorRoster = [
-  { id: "kat", name: "Kat Guzman", text: "white" },
-  { id: "johnny", name: "Johnny Martinez", text: "white" },
-  { id: "mitra", name: "Mitra Raveendran", text: "white" },
-  { id: "wendy", name: "Wendy Chan", text: "white" },
-  { id: "sean", name: "Sean Kelly", text: "black" },
-  { id: "cong", name: "Cong Kim", text: "black" },
-  { id: "gulsheen", name: "Gulsheen Bhatia", text: "white" },
-  { id: "juliana", name: "Juliana Botero", text: "white" },
+  {
+    id: "sean",
+    name: "Sean Kelly",
+    given: "Sean",
+    family: "Kelly",
+    text: "black",
+    role: "ux director",
+    roleAside: teamLabel,
+    place: "chicago, il",
+    email: "sean.kelly@tapestry.com",
+    linkedin: "https://www.linkedin.com/in/seankellydesign",
+    bio: teamBio,
+    portrait:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=800&h=1060&q=80&crop=faces",
+  },
+  {
+    id: "wendy",
+    name: "Wendy Chan",
+    given: "Wendy",
+    family: "Chan",
+    text: "white",
+    role: "sr. manager",
+    roleAside: "digital designer",
+    place: "new york, ny",
+    email: "wendy.chan@tapestry.com",
+    linkedin: "https://www.linkedin.com/in/wendybydesign",
+    bio: teamBio,
+    portrait:
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=800&h=1060&q=80&crop=faces",
+  },
+  {
+    id: "cong",
+    name: "Cong Kim",
+    given: "Cong",
+    family: "Kim",
+    text: "black",
+    role: "sr. product designer",
+    roleAside: teamLabel,
+    place: "new york, ny",
+    email: "cong.kim@tapestry.com",
+    linkedin: "https://www.linkedin.com/in/congkim94",
+    bio: teamBio,
+    portrait:
+      "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&h=1060&q=80&crop=faces",
+  },
+  {
+    id: "johnny",
+    name: "Jonathan Martinez",
+    given: "Jonathan",
+    family: "Martinez",
+    text: "white",
+    role: "sr. product designer",
+    roleAside: teamLabel,
+    place: "buenos aires, argentina",
+    email: "jonathan.martinez@tapestry.com",
+    linkedin: "https://www.linkedin.com/in/thisisjohnnym",
+    bio: teamBio,
+    portrait:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&h=1060&q=80&crop=faces",
+  },
+  {
+    id: "mitra",
+    name: "Mitra Raveendran",
+    given: "Mitra",
+    family: "Raveendran",
+    text: "white",
+    role: "ux designer",
+    roleAside: teamLabel,
+    place: "new york, ny",
+    email: "mitra.raveendran@tapestry.com",
+    linkedin: "https://www.linkedin.com/in/mitraraveendran",
+    bio: teamBio,
+    portrait:
+      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&h=1060&q=80&crop=faces",
+  },
+  {
+    id: "juliana",
+    name: "Juliana Botero",
+    given: "Juliana",
+    family: "Botero",
+    text: "white",
+    role: "product designer",
+    roleAside: teamLabel,
+    place: "sarasota, fl",
+    email: "juliana.botero@tapestry.com",
+    linkedin: "https://www.linkedin.com/in/juliana-botero-a2605ba",
+    bio: teamBio,
+    portrait:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&h=1060&q=80&crop=faces",
+  },
+  {
+    id: "gulsheen",
+    name: "Gulsheen Bhatia",
+    given: "Gulsheen",
+    family: "Bhatia",
+    text: "white",
+    role: "ux designer",
+    roleAside: teamLabel,
+    place: "new york, ny",
+    email: "gulsheen.bhatia@tapestry.com",
+    linkedin: "https://www.linkedin.com/in/gulsheen-kaur-bhatia-9682a0227",
+    bio: teamBio,
+    portrait:
+      "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=800&h=1060&q=80&crop=faces",
+  },
 ] as const;
 
 export const heroSequenceCursorSlots = ["a", "b", "c", "d"] as const;
+
+/** Shared card chrome. Member lines live on each roster entry. */
+export const heroSequenceTeamCard = {
+  pattern: "/team/card-pattern.png",
+  mark: "tapestry design team / ui / ux",
+} as const;
+
+/** Capabilities accordion. `number` is the cropped display numeral on the left.
+ *  `image` is a stand-in still until final service photography is ready. */
+export const heroSequenceCapabilities = [
+  {
+    id: "experience",
+    number: "01",
+    title: "Experience Design",
+    image:
+      "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?auto=format&fit=crop&w=960&h=540&q=80",
+    services: [
+      "UX Design",
+      "UI Design",
+      "Interaction Design",
+      "Accessibility",
+      "Information Architecture",
+      "Prototyping",
+    ],
+  },
+  {
+    id: "visual",
+    number: "02",
+    title: "Visual & Brand",
+    image:
+      "https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=960&h=540&q=80",
+    services: [
+      "Visual Design",
+      "Art Direction",
+      "Motion",
+      "Illustration",
+      "Photography Direction",
+      "Content Design",
+    ],
+  },
+  {
+    id: "commerce",
+    number: "03",
+    title: "Commerce & Innovation",
+    image:
+      "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=960&h=540&q=80",
+    services: [
+      "AI Experiences",
+      "Personalization",
+      "Product Discovery",
+      "Product Pages",
+      "Checkout",
+      "Omnichannel",
+    ],
+  },
+  {
+    id: "research",
+    number: "04",
+    title: "Research & Systems",
+    image:
+      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=960&h=540&q=80",
+    services: [
+      "UX Research",
+      "Analytics",
+      "A/B Testing",
+      "Design Systems",
+      "Components",
+      "Design Tokens",
+    ],
+  },
+] as const;
 
 export const heroSequenceCards = [
   { title: "Grid System", href: "#" },
