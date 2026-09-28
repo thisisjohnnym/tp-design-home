@@ -100,19 +100,11 @@ export const teamEntrance = {
   /** Title offset below centre at pan start, as a fraction of height. */
   titleFrom: 0.25,
   /**
-   * Pin progress where the exit pan begins.
-   * Fan cycling finishes just before this; the rest is the camera continuing up.
+   * Pin progress where the exit begins. Fan cycling finishes just before
+   * this; the rest is the orbit → zoom → fade handoff (see teamExit).
+   * 550svh of cycling out of the 710svh runway keeps the fan's pace as before.
    */
-  exitAt: 0.86,
-  /**
-   * Exit rise as a fraction of viewport height (layers move up).
-   * Title leads the spheres slightly so parallax continues on the way out —
-   * not a separate fast exit.
-   */
-  titleLeave: 0.72,
-  leadLeave: 0.48,
-  accentLeave: 0.58,
-  cardLeave: 0.7,
+  exitAt: 550 / 710,
 } as const;
 
 /**
@@ -199,4 +191,33 @@ export const teamAccentOrb = {
   yRest: 0.92,
   yFan: 0.1843,
   scale: 925 / 1104,
+} as const;
+
+/**
+ * Exit handoff from the Paper "meet the team card" frames 1–3:
+ * the spheres orbit the headline (lead recedes behind it, accent swings in
+ * front of the card), then the camera zooms into the accent sphere until it
+ * fills the screen, and a short scroll more fades the scene out to reveal
+ * the section below. Positions are fractions from the viewport centre; scales
+ * map the full exports (801 / 1104 wide) onto the storyboard discs.
+ */
+export const teamExit = {
+  /** Share of the exit (0–1) spent orbiting and zooming. The rest fades. */
+  fadeAt: 0.69,
+  /** Where frame 2 lands inside the orbit + zoom stretch (0–1). */
+  orbitAt: 0.45,
+  ease: "sine.inOut",
+  fadeEase: "power1.in",
+  lead: {
+    x: [teamLeadOrb.x, -0.2616, -0.065],
+    scale: [teamLeadOrb.scale, 497 / 801, 497 / 801],
+    /** Slight rise mid-orbit so the path arcs instead of sliding flat. */
+    lift: 0.025,
+  },
+  accent: {
+    x: [teamAccentOrb.x, 0.274, 0.1465],
+    scale: [teamAccentOrb.scale, 1519 / 1104, 4263 / 1104],
+    /** Extra blur at full zoom, in art px (before the scale is applied). */
+    blur: 7,
+  },
 } as const;

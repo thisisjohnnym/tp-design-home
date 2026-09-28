@@ -23,7 +23,7 @@
   --hs-caps-ease: cubic-bezier(0.2, 0, 0, 1);
 
   position: relative;
-  /* Above the departing team pin so the handoff reads as one continuous scroll. */
+  /* Under the team pin while it zooms and fades (it lifts to 4), which reveals this section. */
   z-index: 3;
   display: flex;
   flex-direction: column;

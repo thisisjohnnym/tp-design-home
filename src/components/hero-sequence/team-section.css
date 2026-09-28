@@ -10,17 +10,19 @@
    */
   margin-top: -50vh;
   /*
-   * Exit pan lifts the team layers (~0.5–0.7vh). Pull the next section up by
-   * the same amount so it meets the rising scene instead of sitting in a void.
+   * The exit zooms into the accent sphere and fades out. Pull the next
+   * section up a full screen so it already sits under the pin, ready for
+   * the fade to reveal it.
    */
-  margin-bottom: -52vh;
+  margin-bottom: -100svh;
   /* Glass from the restyled card: 10% gray fill, 14% white hairline. */
   --hs-team-glass: rgb(177 177 177 / 10%);
   --hs-team-glass-line: rgb(255 255 255 / 14%);
   --hs-team-radius: 16px;
   --hs-team-card-width: clamp(200px, 20.77vw, 314px);
-  /* Extra scroll while the fan is pinned. Shorter runway, softer station glides. */
-  --hs-team-runway: 640svh;
+  /* Extra scroll while the fan is pinned: 550svh of cycling, then the
+     orbit → zoom → fade exit (teamEntrance.exitAt). */
+  --hs-team-runway: 710svh;
   /* Cycle progress bar (Paper team frame): track + fill tip glow. */
   --hs-team-progress: 0;
   --hs-team-progress-track: #545454;
@@ -416,6 +418,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hs-team {
+    margin-bottom: 0;
+  }
+
   .hs-team__runway {
     height: 0;
   }

@@ -9,6 +9,7 @@ import {
   curtainReveal,
   teamAccentOrb,
   teamEntrance,
+  teamExit,
   teamFanLayouts,
   teamFanReadyOffset,
   teamFanStoryWidth,
@@ -27,6 +28,25 @@ gsap.registerPlugin(ScrollTrigger);
 
 const introEase = gsap.parseEase(teamFanTiming.introEase);
 const accentPanEase = gsap.parseEase(teamOrbMomentum.accentPanEase);
+const exitEase = gsap.parseEase(teamExit.ease);
+const fadeEase = gsap.parseEase(teamExit.fadeEase);
+
+/** Frame 1 → 2 → 3 of the exit storyboard, with frame 2 at `orbitAt`. */
+function throughFrames(values: readonly number[], amount: number) {
+  const split = teamExit.orbitAt;
+  return amount <= split
+    ? gsap.utils.interpolate(values[0], values[1], amount / split)
+    : gsap.utils.interpolate(
+        values[1],
+        values[2],
+        (amount - split) / (1 - split),
+      );
+}
+
+/** Scale through the frames in log space so the zoom reads as a steady push. */
+function zoomThroughFrames(values: readonly number[], amount: number) {
+  return Math.exp(throughFrames(values.map(Math.log), amount));
+}
 
 function samplePose(poses: readonly FanPose[], slot: number): FanPose {
   const max = poses.length - 1;
@@ -167,11 +187,16 @@ export function bindTeamFan(
   const title = select(".hs-team__title")[0] as HTMLElement | undefined;
   const titleLines = select(".hs-team__title-line") as HTMLElement[];
   const progress = select(".hs-team__progress")[0] as HTMLElement | undefined;
+  /* The next section is hidden while the spheres are still orbiting so it
+     never shows through the gaps. It appears once the accent covers the view. */
+  const nextSection = section?.nextElementSibling as HTMLElement | null;
 
   if (!section || !pin || cards.length === 0) {
     return () => {};
   }
 
+  const sectionEl = section;
+  const pinEl = pin;
   const { poses, center } = teamFanLayouts[options.layout];
   const readyOffset = teamFanReadyOffset[options.layout];
   const count = cards.length;
@@ -251,6 +276,7 @@ export function bindTeamFan(
   let arrive = options.reduceMotion ? 1 : 0;
   let fan = options.reduceMotion ? settledFanProgress(count) : 0;
   let titleRevealStarted = false;
+  let pinAlpha = 1;
   let progressRevealStarted = false;
   const titleRevealTl = createCurtainReveal(titleLines, teamTitleReveal, {
     reduceMotion: options.reduceMotion,
@@ -267,11 +293,21 @@ export function bindTeamFan(
     const width = window.innerWidth;
     const height = window.innerHeight;
     const pan = introEase(gsap.utils.clamp(0, 1, arrive));
-    /* Fan uses the pin up to exitAt; the rest keeps the camera rising out. */
+    /* Fan uses the pin up to exitAt; the rest is the orbit → zoom → fade. */
     const exitAt = teamEntrance.exitAt;
     const cycleFan = Math.min(1, fan / exitAt);
     const leave =
-      fan <= exitAt ? 0 : introEase((fan - exitAt) / (1 - exitAt));
+      fan <= exitAt
+        ? 0
+        : gsap.utils.clamp(0, 1, (fan - exitAt) / (1 - exitAt));
+    const orbit = exitEase(Math.min(1, leave / teamExit.fadeAt));
+    const fade = fadeEase(
+      gsap.utils.clamp(
+        0,
+        1,
+        (leave - teamExit.fadeAt) / (1 - teamExit.fadeAt),
+      ),
+    );
 
     for (let index = 0; index < count; index += 1) {
       const slot = slotForCard(
@@ -288,9 +324,7 @@ export function bindTeamFan(
       const scale = 1 - depth * 0.05;
 
       setX[index](pose.x * width);
-      setY[index](
-        pose.y * height - leave * teamEntrance.cardLeave * height,
-      );
+      setY[index](pose.y * height);
       setZ[index](pose.z);
       setRotation[index](pose.rotation);
       setScaleX[index](scale);
@@ -311,9 +345,7 @@ export function bindTeamFan(
 
     if (setTitleY) {
       setTitleY(
-        ((1 - pan) * teamEntrance.titleFrom -
-          leave * teamEntrance.titleLeave) *
-          height,
+        (1 - pan) * teamEntrance.titleFrom * height,
       );
     }
 
@@ -327,13 +359,13 @@ export function bindTeamFan(
     }
 
     if (setLeadX && setLeadScaleX && setLeadScaleY) {
-      const leadScale = unit * teamLeadOrb.scale;
+      const leadScale = unit * zoomThroughFrames(teamExit.lead.scale, orbit);
       const leadY =
         (gsap.utils.interpolate(teamLeadOrb.yRest, teamLeadOrb.yFan, pan) -
           cycleFan * teamOrbMomentum.fanDrift -
-          leave * teamEntrance.leadLeave) *
+          Math.sin(orbit * Math.PI) * teamExit.lead.lift) *
         height;
-      setLeadX(teamLeadOrb.x * width);
+      setLeadX(throughFrames(teamExit.lead.x, orbit) * width);
       setLeadScaleX(leadScale);
       setLeadScaleY(leadScale);
       if (leadYTo) leadYTo(leadY);
@@ -341,21 +373,50 @@ export function bindTeamFan(
     }
 
     if (setAccentX && setAccentScaleX && setAccentScaleY) {
-      const accentScale = unit * teamAccentOrb.scale;
+      const accentScale =
+        unit * zoomThroughFrames(teamExit.accent.scale, orbit);
       const accentY =
         (gsap.utils.interpolate(
           teamAccentOrb.yRest,
           teamAccentOrb.yFan,
           accentPanEase(pan),
         ) -
-          cycleFan * teamOrbMomentum.fanDrift * 1.25 -
-          leave * teamEntrance.accentLeave) *
+          cycleFan * teamOrbMomentum.fanDrift * 1.25) *
         height;
-      setAccentX(teamAccentOrb.x * width);
+      setAccentX(throughFrames(teamExit.accent.x, orbit) * width);
       setAccentScaleX(accentScale);
       setAccentScaleY(accentScale);
       if (accentYTo) accentYTo(accentY);
       else setAccentY?.(accentY);
+    }
+
+    if (accent) {
+      /* Blur only builds through the zoom half, after frame 2. */
+      const zoom = gsap.utils.clamp(
+        0,
+        1,
+        (orbit - teamExit.orbitAt) / (1 - teamExit.orbitAt),
+      );
+      const blur = zoom * zoom * teamExit.accent.blur;
+      const filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : "";
+      if (accent.style.filter !== filter) accent.style.filter = filter;
+    }
+
+    /* Sit above the next section while exiting so the zoom covers it, then
+       fade out to reveal it. autoAlpha frees the pointer once it's gone. */
+    const exiting = leave > 0;
+    const zIndex = exiting ? "4" : "";
+    if (sectionEl.style.zIndex !== zIndex) sectionEl.style.zIndex = zIndex;
+    const alpha = 1 - fade;
+    if (alpha !== pinAlpha) {
+      pinAlpha = alpha;
+      gsap.set(pinEl, { autoAlpha: alpha });
+    }
+    if (nextSection) {
+      const hidden = exiting && leave < teamExit.fadeAt ? "hidden" : "";
+      if (nextSection.style.visibility !== hidden) {
+        nextSection.style.visibility = hidden;
+      }
     }
 
     if (progress) {
@@ -475,6 +536,10 @@ export function bindTeamFan(
     progressRevealTl?.kill();
     holo.destroy();
     if (title) gsap.set(title, { xPercent: -50, yPercent: -50, y: 0 });
+    gsap.set(pinEl, { clearProps: "opacity,visibility" });
+    if (accent) accent.style.filter = "";
+    sectionEl.style.zIndex = "";
+    if (nextSection) nextSection.style.visibility = "";
     titleLines.forEach(clearCurtainState);
     if (progress) clearCurtainState(progress);
   };
