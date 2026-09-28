@@ -1,21 +1,36 @@
-/* Capabilities accordion. Geometry follows the desktop storyboard (1512 wide):
-   500px numerals in a 560px column, 200px gutter, 232px closed / 345px open rows. */
+/* Capabilities accordion (Paper 7NG-0, 1512 wide): a 361px lead column, 120px
+   gutter, then rows of a 501px title block with the open row's services set
+   beside it. Only the open row is lit; the rest sit at 10%. */
 
 .hs-caps {
   --hs-caps-text: #f8f8f8;
-  --hs-caps-number: clamp(132px, 33.07vw, 500px);
-  --hs-caps-number-col: clamp(148px, 37.04vw, 560px);
-  --hs-caps-gutter: clamp(20px, 13.23vw, 200px);
-  --hs-caps-row-closed: clamp(104px, 15.34vw, 232px);
-  --hs-caps-row-open: clamp(200px, 22.82vw, 345px);
-  --hs-caps-row-top: clamp(16px, 1.32vw, 20px);
-  --hs-caps-row-bottom: clamp(12px, 1.59vw, 24px);
-  --hs-caps-row-bottom-open: clamp(8px, 1.06vw, 16px);
-  /* Open rows hold the title at the top and drop the list to the baseline. */
-  --hs-caps-lead: clamp(28px, 5.03vw, 76px);
-  --hs-caps-title: clamp(20px, 1.85vw, 28px);
+  --hs-caps-rule: var(--hs-logo-bloom);
+  --hs-caps-intro-col: clamp(240px, 23.88vw, 361px);
+  --hs-caps-gutter: clamp(32px, 7.94vw, 120px);
+  --hs-caps-head-col: clamp(240px, 33.13vw, 501px);
+  --hs-caps-col-gap: 16px;
+  --hs-caps-lead: clamp(17px, 1.32vw, 20px);
+  --hs-caps-index: clamp(17px, 1.32vw, 20px);
+  --hs-caps-head-gap: clamp(10px, 1.06vw, 16px);
+  --hs-caps-title: clamp(40px, 5.29vw, 80px);
   --hs-caps-service: clamp(15px, 1.19vw, 18px);
-  --hs-caps-dim: 0.2;
+  --hs-caps-service-gap: clamp(8px, 0.93vw, 14px);
+  /* Services start a little under the title's cap height, as in the frame. */
+  --hs-caps-services-top: clamp(40px, 4.37vw, 66px);
+  --hs-caps-row-bottom: clamp(20px, 2.12vw, 32px);
+  --hs-caps-dim: 0.1;
+  /* Closed rows are the index + two title lines; open rows fit six services. */
+  --hs-caps-row-closed: calc(
+    var(--hs-caps-index) * 1.2 + var(--hs-caps-head-gap) +
+      var(--hs-caps-title) * 2 + 8px
+  );
+  --hs-caps-row-open: max(
+    var(--hs-caps-row-closed),
+    calc(
+      var(--hs-caps-services-top) + var(--hs-caps-service) * 7.2 +
+        var(--hs-caps-service-gap) * 5
+    )
+  );
   /* One duration for both directions: a hover swap closes one row while it
      opens another, so unequal timings would shift the rows below mid-flight
      and slide the next row under the cursor. */
@@ -26,98 +41,126 @@
   /* Under the team pin while it zooms and fades (it lifts to 4), which reveals this section. */
   z-index: 3;
   display: flex;
-  flex-direction: column;
-  gap: clamp(48px, 7.94vw, 120px);
+  align-items: flex-start;
+  gap: var(--hs-caps-gutter);
   /* Less top pad — the section already sits up under the team exit pan. */
   padding: clamp(64px, 8vw, 120px) var(--hs-gutter);
+  /* The orbs bleed past the page edge and the section's foot. */
+  overflow: clip;
 }
 
-.hs-caps__heading {
+/* ------------------------------------------------------------------ */
+/* Orbs — GSAP drifts them on scroll (yPercent)                        */
+/* ------------------------------------------------------------------ */
+
+.hs-caps__orb {
+  display: block;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hs-caps__orb--lead {
+  width: clamp(160px, 18.52vw, 280px);
+  margin-top: clamp(24px, 2.51vw, 38px);
+  /* Half the disc hangs off the left edge of the page. */
+  margin-left: calc(-1 * (var(--hs-gutter) + clamp(76px, 8.8vw, 133px)));
+}
+
+.hs-caps__orb--accent {
+  position: absolute;
+  z-index: 0;
+  top: clamp(200px, 20vw, 302px);
+  right: -32.54vw;
+  width: 61.18vw;
+  filter: blur(clamp(12px, 1.32vw, 20px));
+}
+
+/* ------------------------------------------------------------------ */
+/* Lead column                                                         */
+/* ------------------------------------------------------------------ */
+
+.hs-caps__intro {
+  position: relative;
+  z-index: 1;
+  width: var(--hs-caps-intro-col);
+  flex: none;
+}
+
+.hs-caps__lead {
   margin: 0;
   color: var(--hs-light);
-  font-size: clamp(48px, 6.61vw, 100px);
-  font-weight: 400;
+  font-size: var(--hs-caps-lead);
   letter-spacing: -0.04em;
-  line-height: 0.8;
+  line-height: 1.2;
+  text-transform: capitalize;
+  text-wrap: pretty;
 }
+
+/* ------------------------------------------------------------------ */
+/* Rows                                                                */
+/* ------------------------------------------------------------------ */
 
 .hs-caps__list {
+  position: relative;
+  z-index: 1;
   display: flex;
+  min-width: 0;
+  flex: 1;
   flex-direction: column;
-  gap: clamp(24px, 3.7vw, 56px);
+  gap: clamp(24px, 2.65vw, 40px);
 }
 
+/* The row height rides on min-height rather than on the services: a hover
+   swap then loses and gains the same pixels at the same rate, so the rows below
+   never slide out from under the pointer. */
 .hs-caps__row {
   position: relative;
-  padding-left: calc(var(--hs-caps-number-col) + var(--hs-caps-gutter));
-  border-bottom: 1px solid var(--hs-hairline);
-  /* The numeral overflows every row height by design — clip, never grow. */
-  overflow: clip;
-  transition: border-bottom-color var(--hs-caps-move) var(--hs-caps-ease);
+  min-height: calc(var(--hs-caps-row-closed) + var(--hs-caps-row-bottom));
+  padding-bottom: var(--hs-caps-row-bottom);
+  border-bottom: 1px solid var(--hs-caps-rule);
+  transition: min-height var(--hs-caps-move) var(--hs-caps-ease);
 }
 
 .hs-caps__row[data-open="true"] {
-  border-bottom-color: var(--hs-white);
+  min-height: calc(var(--hs-caps-row-open) + var(--hs-caps-row-bottom));
+}
+
+.hs-caps__head {
+  display: flex;
+  width: var(--hs-caps-head-col);
+  flex-direction: column;
+  gap: var(--hs-caps-head-gap);
+  opacity: var(--hs-caps-dim);
+  color: var(--hs-light);
+  transition: opacity var(--hs-caps-move) var(--hs-caps-ease);
+}
+
+.hs-caps__row[data-open="true"] .hs-caps__head {
+  opacity: 1;
 }
 
 .hs-caps__number {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: var(--hs-caps-number-col);
-  opacity: var(--hs-caps-dim);
-  color: var(--hs-light);
-  font-size: var(--hs-caps-number);
-  font-weight: 300;
+  font-size: var(--hs-caps-index);
   letter-spacing: -0.04em;
-  line-height: 0.8;
-  pointer-events: none;
-  transition: opacity var(--hs-caps-move) var(--hs-caps-ease);
-}
-
-.hs-caps__row[data-open="true"] .hs-caps__number {
-  opacity: 1;
-}
-
-/* The row height rides on min-height rather than the growing panel: a hover
-   swap then loses and gains the same pixels at the same rate, so the rows below
-   never slide out from under the pointer. Taller content still wins. */
-.hs-caps__body {
-  display: flex;
-  min-height: var(--hs-caps-row-closed);
-  flex-direction: column;
-  /* Closed rows sit their title on the baseline of the row; the growing panel
-     lifts it to the top as the row opens. */
-  justify-content: flex-end;
-  padding-top: var(--hs-caps-row-top);
-  padding-bottom: var(--hs-caps-row-bottom);
-  transition:
-    min-height var(--hs-caps-move) var(--hs-caps-ease),
-    padding-bottom var(--hs-caps-move) var(--hs-caps-ease);
-}
-
-.hs-caps__row[data-open="true"] .hs-caps__body {
-  min-height: var(--hs-caps-row-open);
-  padding-bottom: var(--hs-caps-row-bottom-open);
+  line-height: 1.2;
 }
 
 .hs-caps__title {
-  margin: 0;
-  opacity: var(--hs-caps-dim);
-  color: var(--hs-caps-text);
+  margin: 0 0 8px;
   font-size: var(--hs-caps-title);
-  font-weight: 400;
-  letter-spacing: -0.01em;
-  line-height: 1.15;
-  text-wrap: balance;
-  transition: opacity var(--hs-caps-move) var(--hs-caps-ease);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  line-height: 1;
 }
 
-.hs-caps__row[data-open="true"] .hs-caps__title {
-  opacity: 1;
+.hs-caps__title-line {
+  display: block;
+  white-space: nowrap;
 }
 
 .hs-caps__trigger {
+  display: block;
   padding: 0;
   border: 0;
   margin: 0;
@@ -134,19 +177,15 @@
   outline-offset: 6px;
 }
 
+/* Services sit beside the title block, out of flow so min-height alone sizes the row. */
 .hs-caps__panel {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows var(--hs-caps-move) var(--hs-caps-ease);
-}
-
-.hs-caps__row[data-open="true"] .hs-caps__panel {
-  grid-template-rows: 1fr;
+  position: absolute;
+  top: 0;
+  left: calc(var(--hs-caps-head-col) + var(--hs-caps-col-gap));
 }
 
 .hs-caps__panel-inner {
-  overflow: hidden;
-  padding-top: var(--hs-caps-lead);
+  padding-top: var(--hs-caps-services-top);
 }
 
 /* The list resolves out of a blur once the row has begun to open, and clears
@@ -156,7 +195,7 @@
   flex-direction: column;
   padding: 0;
   margin: 0;
-  gap: clamp(8px, 0.93vw, 14px);
+  gap: var(--hs-caps-service-gap);
   list-style: none;
   opacity: 0;
   filter: blur(8px);
@@ -180,6 +219,7 @@
   font-size: var(--hs-caps-service);
   font-weight: 500;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 /* Cursor still. Portaled to the body; GSAP owns x/y.
@@ -236,9 +276,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hs-caps__row,
-  .hs-caps__number,
-  .hs-caps__title,
-  .hs-caps__body,
+  .hs-caps__head,
   .hs-caps__panel,
   .hs-caps__services,
   .hs-caps-preview {
@@ -251,16 +289,68 @@
   }
 }
 
-@media (max-width: 699px) {
+/* Lead stacks over the list; the lead orb tucks behind it at the right edge. */
+@media (max-width: 899px) {
   .hs-caps {
-    --hs-caps-number: 26vw;
-    --hs-caps-number-col: 27vw;
-    --hs-caps-gutter: 16px;
-    --hs-caps-title: 20px;
-    --hs-caps-service: 15px;
+    flex-direction: column;
+    gap: clamp(40px, 8vw, 64px);
   }
 
-  .hs-caps__heading {
-    font-size: clamp(40px, 12vw, 64px);
+  .hs-caps__intro {
+    width: min(100%, 420px);
+    position: static;
+  }
+
+  .hs-caps__orb--lead {
+    position: absolute;
+    z-index: 0;
+    top: clamp(32px, 6vw, 64px);
+    right: -14vw;
+    width: 38vw;
+    margin: 0;
+  }
+
+  .hs-caps__lead {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hs-caps__list {
+    align-self: stretch;
+  }
+
+  .hs-caps__orb--accent {
+    top: auto;
+    bottom: -20vw;
+    right: -50vw;
+    width: 100vw;
+  }
+}
+
+/* Phones: services drop under the title and the row grows to fit them. */
+@media (max-width: 599px) {
+  .hs-caps {
+    --hs-caps-head-col: 100%;
+    --hs-caps-services-top: 20px;
+  }
+
+  .hs-caps__row,
+  .hs-caps__row[data-open="true"] {
+    min-height: 0;
+  }
+
+  .hs-caps__panel {
+    position: static;
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--hs-caps-move) var(--hs-caps-ease);
+  }
+
+  .hs-caps__row[data-open="true"] .hs-caps__panel {
+    grid-template-rows: 1fr;
+  }
+
+  .hs-caps__panel-inner {
+    overflow: hidden;
   }
 }

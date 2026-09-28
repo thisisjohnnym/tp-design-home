@@ -102,9 +102,9 @@ export const teamEntrance = {
   /**
    * Pin progress where the exit begins. Fan cycling finishes just before
    * this; the rest is the orbit → zoom → fade handoff (see teamExit).
-   * 550svh of cycling out of the 710svh runway keeps the fan's pace as before.
+   * 550svh of cycling out of the 750svh runway keeps the fan's pace as before.
    */
-  exitAt: 550 / 710,
+  exitAt: 550 / 750,
 } as const;
 
 /**
@@ -202,8 +202,14 @@ export const teamAccentOrb = {
  * map the full exports (801 / 1104 wide) onto the storyboard discs.
  */
 export const teamExit = {
-  /** Share of the exit (0–1) spent orbiting and zooming. The rest fades. */
-  fadeAt: 0.69,
+  /**
+   * Share of the exit (0–1) spent orbiting and zooming. The exit is 200svh:
+   * 110 orbiting and zooming, 50 fading, then 40 of clear scroll so the
+   * zoomed sphere is gone before the services rise into view.
+   */
+  fadeAt: 110 / 200,
+  /** Share of the exit (0–1) where the fade finishes. */
+  fadeEnd: 160 / 200,
   /** Where frame 2 lands inside the orbit + zoom stretch (0–1). */
   orbitAt: 0.45,
   ease: "sine.inOut",

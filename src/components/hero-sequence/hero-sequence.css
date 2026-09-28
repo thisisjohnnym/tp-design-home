@@ -1387,8 +1387,22 @@ html.hs-has-pointer * {
   /* Paper mockup #FFCD00 — same family as --hs-logo-bloom / --color-accent. */
   width: 11px;
   height: 11px;
+}
+
+/* The fill lives on a pseudo-element: GSAP owns the dot's own transform (and
+   writes `scale: none` inline), so hiding has to happen one layer down. */
+.hs-pointer__dot::before {
+  position: absolute;
+  inset: 0;
   border-radius: 800px;
   background: #ffcd00;
+  content: "";
+  transition: scale 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* The capability preview frame stands in for the dot while it is shown. */
+.hs-preview-on .hs-pointer__dot::before {
+  scale: 0;
 }
 
 .hs-pointer__svg {

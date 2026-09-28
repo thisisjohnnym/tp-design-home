@@ -305,7 +305,7 @@ export function bindTeamFan(
       gsap.utils.clamp(
         0,
         1,
-        (leave - teamExit.fadeAt) / (1 - teamExit.fadeAt),
+        (leave - teamExit.fadeAt) / (teamExit.fadeEnd - teamExit.fadeAt),
       ),
     );
 
@@ -407,6 +407,7 @@ export function bindTeamFan(
     const exiting = leave > 0;
     const zIndex = exiting ? "4" : "";
     if (sectionEl.style.zIndex !== zIndex) sectionEl.style.zIndex = zIndex;
+    sectionEl.toggleAttribute("data-exiting", exiting);
     const alpha = 1 - fade;
     if (alpha !== pinAlpha) {
       pinAlpha = alpha;
@@ -539,6 +540,7 @@ export function bindTeamFan(
     gsap.set(pinEl, { clearProps: "opacity,visibility" });
     if (accent) accent.style.filter = "";
     sectionEl.style.zIndex = "";
+    sectionEl.removeAttribute("data-exiting");
     if (nextSection) nextSection.style.visibility = "";
     titleLines.forEach(clearCurtainState);
     if (progress) clearCurtainState(progress);

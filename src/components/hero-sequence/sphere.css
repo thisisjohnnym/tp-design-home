@@ -8,7 +8,9 @@
   display: block;
   max-width: none;
   pointer-events: none;
+  -webkit-user-select: none;
   user-select: none;
+  -webkit-user-drag: none;
 }
 
 .hs-sphere--lead {

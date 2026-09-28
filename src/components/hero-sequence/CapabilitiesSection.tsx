@@ -1,9 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useGSAP } from "@gsap/react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CapabilityPreview } from "./CapabilityPreview";
-import { heroSequenceCapabilities } from "./content";
+import {
+  heroSequenceCapabilities,
+  heroSequenceCapabilitiesIntro,
+} from "./content";
 import "./capabilities-section.css";
+
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 /** Long enough to cross the gap between rows without the frame blinking off. */
 const PREVIEW_LEAVE_MS = 160;
@@ -14,7 +22,19 @@ const PREVIEW_LEAVE_MS = 160;
  */
 const ON_SCREEN_INSET = "-8% 0px -8% 0px";
 
+function TitleLines({ lines }: { lines: readonly string[] }) {
+  return lines.map((line, index) => (
+    <span className="hs-caps__title-line" key={index}>
+      {line}
+    </span>
+  ));
+}
+
+/** Orb drift across the section's pass through the viewport, in % of own height. */
+const ORB_DRIFT = { lead: -18, accent: -36 } as const;
+
 export function CapabilitiesSection() {
+  const sectionRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   /* Hover picks one row; the last hovered stays open when the pointer leaves. */
   const [hoveredId, setHoveredId] = useState<string>(
@@ -85,11 +105,65 @@ export function CapabilitiesSection() {
     return () => observer.disconnect();
   }, [scrollDriven]);
 
+  useGSAP(
+    () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      (Object.keys(ORB_DRIFT) as (keyof typeof ORB_DRIFT)[]).forEach((key) => {
+        gsap.fromTo(
+          `.hs-caps__orb--${key}`,
+          { yPercent: 0 },
+          {
+            yPercent: ORB_DRIFT[key],
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: true,
+            },
+          },
+        );
+      });
+    },
+    { scope: sectionRef },
+  );
+
   return (
-    <section className="hs-caps" aria-labelledby="hs-caps-heading">
-      <h2 className="hs-caps__heading" id="hs-caps-heading">
-        We are experts in
-      </h2>
+    <section
+      className="hs-caps"
+      aria-labelledby="hs-caps-heading"
+      ref={sectionRef}
+    >
+      <img
+        alt=""
+        aria-hidden="true"
+        className="hs-caps__orb hs-caps__orb--accent"
+        decoding="async"
+        draggable={false}
+        height={974}
+        loading="lazy"
+        src="/services/orb-right.png"
+        width={925}
+      />
+
+      <div className="hs-caps__intro">
+        <h2 className="hs-sr-only" id="hs-caps-heading">
+          Capabilities
+        </h2>
+        <p className="hs-caps__lead">{heroSequenceCapabilitiesIntro}</p>
+        <img
+          alt=""
+          aria-hidden="true"
+          className="hs-caps__orb hs-caps__orb--lead"
+          decoding="async"
+          draggable={false}
+          height={560}
+          loading="lazy"
+          src="/services/orb-left.png"
+          width={560}
+        />
+      </div>
 
       <div className="hs-caps__list" ref={listRef}>
         {heroSequenceCapabilities.map((capability) => {
@@ -119,15 +193,14 @@ export function CapabilitiesSection() {
                 }, PREVIEW_LEAVE_MS);
               }}
             >
-              <span className="hs-caps__number" aria-hidden="true">
-                {capability.number}
-              </span>
-
-              <div className="hs-caps__body">
+              <div className="hs-caps__head">
+                <span className="hs-caps__number" aria-hidden="true">
+                  {capability.number}
+                </span>
                 <h3 className="hs-caps__title">
                   {scrollDriven ? (
                     /* Scrolling drives the panel, so there is nothing to press. */
-                    capability.title
+                    <TitleLines lines={capability.titleLines} />
                   ) : (
                     <button
                       aria-controls={panelId}
@@ -137,25 +210,25 @@ export function CapabilitiesSection() {
                       onFocus={() => setHoveredId(capability.id)}
                       type="button"
                     >
-                      {capability.title}
+                      <TitleLines lines={capability.titleLines} />
                     </button>
                   )}
                 </h3>
+              </div>
 
-                <div
-                  className="hs-caps__panel"
-                  id={panelId}
-                  inert={!open && !scrollDriven}
-                >
-                  <div className="hs-caps__panel-inner">
-                    <ul className="hs-caps__services">
-                      {capability.services.map((service) => (
-                        <li className="hs-caps__service" key={service}>
-                          {service}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+              <div
+                className="hs-caps__panel"
+                id={panelId}
+                inert={!open && !scrollDriven}
+              >
+                <div className="hs-caps__panel-inner">
+                  <ul className="hs-caps__services">
+                    {capability.services.map((service) => (
+                      <li className="hs-caps__service" key={service}>
+                        {service}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
             </div>

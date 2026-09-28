@@ -66,6 +66,14 @@ export function CapabilityPreview({
     setMounted(true);
   }, []);
 
+  /* The still takes over from the pointer's yellow dot while it is up. */
+  const showing = index >= 0;
+  useEffect(() => {
+    if (!showing) return;
+    document.documentElement.classList.add("hs-preview-on");
+    return () => document.documentElement.classList.remove("hs-preview-on");
+  }, [showing]);
+
   useGSAP(
     () => {
       const frame = frameRef.current;

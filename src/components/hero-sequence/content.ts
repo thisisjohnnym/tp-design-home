@@ -212,13 +212,19 @@ export const heroSequenceTeamCard = {
   pattern: "/team/card-pattern.webp",
 } as const;
 
-/** Capabilities accordion. `number` is the cropped display numeral on the left.
+/** Lead paragraph beside the capabilities list (Paper 7NG-0). */
+export const heroSequenceCapabilitiesIntro =
+  "Bringing together brand, product, customer insight, and design to turn ambitious ideas into world-class retail experiences";
+
+/** Capabilities accordion. `number` is the small index above each title;
+ *  `titleLines` sets the display break (Paper 7NG-0).
  *  `image` is a stand-in still until final service photography is ready. */
 export const heroSequenceCapabilities = [
   {
     id: "experience",
     number: "01",
     title: "Experience Design",
+    titleLines: ["Experience", "Design"],
     image:
       "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?auto=format&fit=crop&w=960&h=540&q=80",
     services: [
@@ -234,6 +240,7 @@ export const heroSequenceCapabilities = [
     id: "visual",
     number: "02",
     title: "Visual & Brand",
+    titleLines: ["Visual &", "Brand"],
     image:
       "https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=960&h=540&q=80",
     services: [
@@ -249,6 +256,7 @@ export const heroSequenceCapabilities = [
     id: "commerce",
     number: "03",
     title: "Commerce & Innovation",
+    titleLines: ["Commerce", "& Innovation"],
     image:
       "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=960&h=540&q=80",
     services: [
@@ -264,6 +272,7 @@ export const heroSequenceCapabilities = [
     id: "research",
     number: "04",
     title: "Research & Systems",
+    titleLines: ["Research", "& Systems"],
     image:
       "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=960&h=540&q=80",
     services: [

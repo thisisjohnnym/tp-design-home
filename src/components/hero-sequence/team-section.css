@@ -21,8 +21,8 @@
   --hs-team-radius: 16px;
   --hs-team-card-width: clamp(200px, 20.77vw, 314px);
   /* Extra scroll while the fan is pinned: 550svh of cycling, then the
-     orbit → zoom → fade exit (teamEntrance.exitAt). */
-  --hs-team-runway: 710svh;
+     orbit → zoom → fade exit and a clear tail (teamEntrance.exitAt). */
+  --hs-team-runway: 750svh;
   /* Cycle progress bar (Paper team frame): track + fill tip glow. */
   --hs-team-progress: 0;
   --hs-team-progress-track: #545454;
@@ -34,6 +34,13 @@
   position: relative;
   z-index: 1;
   background: transparent;
+}
+
+/* The exit lifts this section over the next one (z-index 4) and the negative
+   margin keeps its box there, so let the pointer through to the rows below. */
+.hs-team[data-exiting],
+.hs-team[data-exiting] * {
+  pointer-events: none;
 }
 
 .hs-team__pin {
@@ -51,6 +58,8 @@
   inset: 0;
   overflow: visible;
   pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
   visibility: hidden;
 }
 
