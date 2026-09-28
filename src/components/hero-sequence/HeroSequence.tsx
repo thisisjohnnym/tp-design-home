@@ -231,8 +231,6 @@ export function HeroSequence() {
       let headlineVerbIntro: gsap.core.Timeline | undefined;
       let headlineVerbRunning = false;
       let headlineVerbIntroduced = false;
-      let navCurtainTl: gsap.core.Timeline | undefined;
-
       /* Keep fixed line breaks; scale the whole shatter block to the viewport
          width so words never wrap onto a new row when space gets tight. */
       const fitShatterHeadline = () => {
@@ -275,7 +273,7 @@ export function HeroSequence() {
         );
       }
 
-      navCurtainTl = createCurtainReveal(navCurtains, curtainReveal, {
+      const navCurtainTl = createCurtainReveal(navCurtains, curtainReveal, {
         reduceMotion: prefersReducedMotion,
         paused: true,
       });

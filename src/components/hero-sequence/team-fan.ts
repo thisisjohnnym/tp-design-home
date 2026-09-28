@@ -251,8 +251,16 @@ export function bindTeamFan(
   let fan = options.reduceMotion ? settledFanProgress(count) : 0;
   let titleRevealStarted = false;
   let progressRevealStarted = false;
-  let titleRevealTl: gsap.core.Timeline | undefined;
-  let progressRevealTl: gsap.core.Timeline | undefined;
+  const titleRevealTl = createCurtainReveal(titleLines, teamTitleReveal, {
+    reduceMotion: options.reduceMotion,
+    paused: true,
+  });
+  const progressRevealTl = progress
+    ? createCurtainReveal([progress], curtainReveal, {
+        reduceMotion: options.reduceMotion,
+        paused: true,
+      })
+    : undefined;
 
   function place() {
     const width = window.innerWidth;
@@ -381,18 +389,6 @@ export function bindTeamFan(
         progress.dataset.revealed = "true";
       }
     }
-  }
-
-  titleRevealTl = createCurtainReveal(titleLines, teamTitleReveal, {
-    reduceMotion: options.reduceMotion,
-    paused: true,
-  });
-
-  if (progress) {
-    progressRevealTl = createCurtainReveal([progress], curtainReveal, {
-      reduceMotion: options.reduceMotion,
-      paused: true,
-    });
   }
 
   place();
