@@ -26,6 +26,7 @@ export type { TeamLayout };
 gsap.registerPlugin(ScrollTrigger);
 
 const introEase = gsap.parseEase(teamFanTiming.introEase);
+const accentPanEase = gsap.parseEase(teamOrbMomentum.accentPanEase);
 
 function samplePose(poses: readonly FanPose[], slot: number): FanPose {
   const max = poses.length - 1;
@@ -345,7 +346,7 @@ export function bindTeamFan(
         (gsap.utils.interpolate(
           teamAccentOrb.yRest,
           teamAccentOrb.yFan,
-          pan,
+          accentPanEase(pan),
         ) -
           cycleFan * teamOrbMomentum.fanDrift * 1.25 -
           leave * teamEntrance.accentLeave) *
@@ -449,6 +450,7 @@ export function bindTeamFan(
         end: "bottom bottom",
         pin,
         pinSpacing: false,
+        anticipatePin: 1,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
           arrive = 1;

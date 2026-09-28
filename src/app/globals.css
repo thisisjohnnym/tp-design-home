@@ -10,11 +10,16 @@ body {
   background: #080806;
 }
 
-/* Document overscroll — no rubber-band / edge glow (see disableOverscroll.ts). */
+/* Document overscroll — no rubber-band / edge glow (see disableOverscroll.ts).
+   Only the real scrolling element needs this. .hs-smooth-wrapper/.hs-smooth-content
+   are ScrollSmoother's fixed, non-scrolling layers (it moves .hs-smooth-content via
+   a CSS transform, not native scrollTop) — putting overscroll-behavior:none on them
+   made Chrome treat that fixed box as its own scroll-chain boundary: since it never
+   has native scroll room, wheel input landed there and had nowhere left to chain to,
+   silently eating all scroll input over the hero (Chrome/Firefox only; Safari
+   tolerated it). */
 html.no-overscroll,
-html.no-overscroll body,
-html.no-overscroll .hs-smooth-wrapper,
-html.no-overscroll .hs-smooth-content {
+html.no-overscroll body {
   overscroll-behavior: none;
   overscroll-behavior-y: none;
 }

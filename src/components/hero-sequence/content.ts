@@ -359,11 +359,11 @@ export const sphereFrames: Record<
  */
 export const heroSequenceBeats = {
   shatterStart: 0,
-  /** Longer span — premium soft lift, not a snap exit. */
-  shatterEnd: 26,
-  /** Gentle cascade; last word starts at stagger × 7 ≈ 4.3. */
-  shatterStagger: 0.62,
-  cursorsOutEnd: 18,
+  /** Stretch across most of the scrub so the break matches page pace. */
+  shatterEnd: 88,
+  /** Gentle cascade across the longer exit. */
+  shatterStagger: 1.4,
+  cursorsOutEnd: 62,
   /**
    * Spheres rise with the last departing word so the handoff stays continuous.
    */
@@ -457,3 +457,59 @@ export const heroSequenceIntro = {
   revealDuration: 0.68,
   logoMoveDuration: 0.78,
 } as const;
+
+/**
+ * Parallax collage before the team section (Paper 6WC-0).
+ * `speed` drives scroll depth: under 1 lags (far), over 1 leads (near).
+ * Pixel sizes are 1× frame exports used for intrinsic aspect hints.
+ */
+export const heroSequenceWorkGallery = [
+  {
+    id: "pdp",
+    src: "/gallery/pdp.webp",
+    alt: "Kate Spade product detail page for a black shoulder bag",
+    speed: 0.72,
+    pixelWidth: 883,
+    pixelHeight: 764,
+  },
+  {
+    id: "carousel",
+    src: "/gallery/carousel.webp",
+    alt: "Yellow product feature carousel cards",
+    speed: 0.88,
+    pixelWidth: 367,
+    pixelHeight: 437,
+  },
+  {
+    id: "cart",
+    src: "/gallery/cart.webp",
+    alt: "Kate Spade mobile cart with a rose smoke crossbody",
+    speed: 1,
+    pixelWidth: 736,
+    pixelHeight: 647,
+  },
+  {
+    id: "logo",
+    src: "/gallery/logo-c.webp",
+    alt: "Gold Coach C hardware on sage leather",
+    speed: 1.18,
+    pixelWidth: 269,
+    pixelHeight: 357,
+  },
+  {
+    id: "testimonial",
+    src: "/gallery/testimonial.webp",
+    alt: "Customer testimonials mobile screen",
+    speed: 1.32,
+    pixelWidth: 261,
+    pixelHeight: 344,
+  },
+  {
+    id: "lifestyle",
+    src: "/gallery/lifestyle.webp",
+    alt: "Model wearing a pink kate spade crossbody",
+    speed: 1.45,
+    pixelWidth: 139,
+    pixelHeight: 437,
+  },
+] as const;

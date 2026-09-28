@@ -1,0 +1,125 @@
+/* Work collage from Paper artboard 1512×1898 — tiles only, no plate/grid.
+   Positions are % of the stage so the composition scales with viewport width. */
+
+.hs-gallery {
+  /*
+   * Pull up by the scrub runway so the collage meets the hero exit.
+   * Above the team (z-index 1) while they overlap; under .hs-pin (3).
+   */
+  --hs-gallery-overlap-top: var(--hs-scrub-length);
+  --hs-gallery-pad-bottom: 0;
+  /*
+   * Artboard is 1512×1898, but tiles end ~88% down — crop the empty
+   * tail so the team section can meet the collage without a black void.
+   */
+  --hs-gallery-ratio: 1512 / 1620;
+
+  position: relative;
+  z-index: 2;
+  margin-top: calc(var(--hs-gallery-overlap-top) * -1);
+  padding-top: 0;
+  padding-bottom: var(--hs-gallery-pad-bottom);
+  overflow: visible;
+  pointer-events: none;
+}
+
+.hs-gallery__stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--hs-gallery-ratio);
+  max-width: 100%;
+  margin-inline: auto;
+  overflow: visible;
+}
+
+.hs-gallery__tile {
+  position: absolute;
+  z-index: 1;
+  margin: 0;
+  overflow: clip;
+  will-change: transform;
+}
+
+.hs-gallery__curtain {
+  width: 100%;
+  height: 100%;
+}
+
+.hs-gallery__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* Geometry from Paper 6WC-0 (left/top/width/height ÷ 1512×1898).
+   z-index rises toward the camera so nearer tiles paint over farther ones. */
+
+.hs-gallery__tile--pdp {
+  top: 47.52%;
+  left: 0;
+  z-index: 1;
+  width: 58.4%;
+  height: 40.25%;
+}
+
+.hs-gallery__tile--carousel {
+  top: 57.01%;
+  left: 66.53%;
+  z-index: 2;
+  width: 24.27%;
+  height: 23.02%;
+}
+
+.hs-gallery__tile--cart {
+  top: 4.06%;
+  left: 25.93%;
+  z-index: 3;
+  width: 48.68%;
+  height: 34.09%;
+}
+
+.hs-gallery__tile--logo {
+  top: 23.76%;
+  left: 0;
+  z-index: 4;
+  width: 17.79%;
+  height: 18.81%;
+}
+
+.hs-gallery__tile--testimonial {
+  top: 0;
+  left: 82.74%;
+  z-index: 5;
+  width: 17.26%;
+  height: 18.12%;
+}
+
+.hs-gallery__tile--lifestyle {
+  top: 25.97%;
+  left: 90.81%;
+  z-index: 6;
+  width: 9.19%;
+  height: 23.02%;
+}
+
+@media (max-width: 900px) {
+  .hs-gallery {
+    --hs-gallery-pad-bottom: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .hs-gallery {
+    --hs-gallery-pad-bottom: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hs-gallery__tile {
+    will-change: auto;
+  }
+}

@@ -2,8 +2,13 @@
    member card: 324×513, 16px outer radius, frosted fill, hairline rim. */
 
 .hs-team {
-  /* Slightly tighter than the old handoff; keep clear of the hero at rest. */
-  margin-top: -70vh;
+  /*
+   * Pull up under the gallery exit the same way the gallery meets the hero.
+   * Stay under .hs-gallery (z-index 2) so collage tiles are never covered.
+   * Shorter than the full runway — enough to meet the collage as it leaves
+   * without the fan's title/cards reading over still-visible tiles.
+   */
+  margin-top: -50vh;
   /*
    * Exit pan lifts the team layers (~0.5–0.7vh). Pull the next section up by
    * the same amount so it meets the rising scene instead of sitting in a void.
@@ -25,12 +30,13 @@
   --hs-team-progress-top: 86.05%;
 
   position: relative;
+  z-index: 1;
   background: transparent;
 }
 
 .hs-team__pin {
   position: relative;
-  z-index: 2;
+  z-index: 1;
   height: 100svh;
   /* Cards are clipped by the stage. The spheres stay outside that box so
      they can leave with the scene instead of being sliced at its edge. */

@@ -73,9 +73,10 @@ export const teamFanTiming = {
   cardAt: 0.12,
   /**
    * Share of pin progress before cycling begins.
-   * ~half a screen on the shortened runway.
+   * Short — just enough to read as a beat, not a dead stop right after the
+   * brisk entrance locks in.
    */
-  cycleAt: 0.06,
+  cycleAt: 0.02,
   /**
    * How strongly each station eases in/out (1 = linear-ish in-out, higher = softer arrival).
    * Single continuous curve — no mid-step pause before the centre.
@@ -91,9 +92,11 @@ export const teamFanTiming = {
 export const teamEntrance = {
   /**
    * When the pin's top hits this viewport line, the pan begins.
-   * Keep enough lag so the title stays below the fold until the hero leaves.
+   * Keep the original span so the spheres glide at the same pace as the
+   * headline scrub — the shorter .hs-team margin-top (not this value) is
+   * what keeps the fan from reading over still-visible collage tiles.
    */
-  start: "top 70%",
+  start: "top 92%",
   /** Title offset below centre at pan start, as a fraction of height. */
   titleFrom: 0.25,
   /**
@@ -142,6 +145,14 @@ export const teamOrbMomentum = {
   accent: 0.48,
   /** Extra rise after lock, as a fraction of height, scrubbed with the fan. */
   fanDrift: 0.045,
+  /**
+   * Eases the accent sphere's arrival against the same 0–1 pan the lead
+   * sphere uses linearly. A power-in curve holds it back through most of
+   * the scroll, then lets it catch up to its resting spot — the mismatched
+   * pace against the lead sphere is what reads as parallax depth; same
+   * speed reads flat.
+   */
+  accentPanEase: "power1.in",
 } as const;
 
 /**

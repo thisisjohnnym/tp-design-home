@@ -11,6 +11,7 @@ import { PointerEffect } from "./PointerEffect";
 import { PlateShader } from "./PlateShader";
 import { SequenceNav } from "./SequenceNav";
 import { TeamSection } from "./TeamSection";
+import { WorkGallery } from "./WorkGallery";
 import {
   clearCurtainState,
   createCurtainReveal,
@@ -256,7 +257,15 @@ export function HeroSequence() {
           : undefined;
       shatterFitObserver?.observe(shatter);
       requestAnimationFrame(fitShatterHeadline);
-      void document.fonts?.ready.then(() => fitShatterHeadline());
+      /* Variable-font swap reflows text below the hero (team bios, capability
+         lists). Without a refresh here, ScrollTrigger/ScrollSmoother keep the
+         shorter pre-swap measurements and the page stops scrolling wherever
+         that stale "end" landed — most visible in Chrome, where the fallback
+         face differs from HelveticaNowVar more than Safari's does. */
+      void document.fonts?.ready.then(() => {
+        fitShatterHeadline();
+        ScrollTrigger.refresh();
+      });
 
       if (curtainVerb) {
         headlineVerbCycle = createCurtainWordCycle(
@@ -338,8 +347,14 @@ export function HeroSequence() {
         startHeadlineVerb();
         fitShatterHeadline();
       } else {
+        /* overflow:hidden alone blocks all user-driven scroll during the
+           loader. We used to also call smoother.paused(true) here, but that
+           installs a GSAP Observer that force-reverts ANY scroll attempt
+           (wheel/touch/keyboard) back to the pre-pause position until
+           paused(false) runs — if the intro timeline ever stalls (a
+           backgrounded tab, a dropped frame) before reaching "reveal", the
+           page is left permanently unscrollable with no visible cause. */
         documentElement.style.overflow = "hidden";
-        smoother?.paused(true);
 
         gsap.set(navLogo, { autoAlpha: 0 });
         gsap.set(loader, { autoAlpha: 1, display: "grid" });
@@ -377,7 +392,6 @@ export function HeroSequence() {
           .call(
             () => {
               documentElement.style.removeProperty("overflow");
-              smoother?.paused(false);
               ScrollTrigger.refresh();
               startCursorRoster();
               revealNavCurtains();
@@ -495,8 +509,8 @@ export function HeroSequence() {
             },
           });
 
-          /* Beat 1 — headline shatters upward; cursors lift the same way, earlier.
-             Long scrub span + power2.in = soft start, eased acceleration. */
+          /* Beat 1 — headline shatters upward; cursors lift the same way.
+             Scrub span matches page pace (ease none, long runway). */
           const wordSpan = beats.shatterEnd - beats.shatterStart;
           const wordDuration = Math.max(
             0.01,
@@ -510,8 +524,8 @@ export function HeroSequence() {
               autoAlpha: 0,
               filter: `blur(${blurAmount(heroSequenceMotion.wordBlur)}px)`,
               duration: wordDuration,
-              // Scrubbed ease: slow lift at first, then accelerates away.
-              ease: "power2.in",
+              // Even scrub — matches the rest of the page’s scroll pace.
+              ease: "none",
               stagger: beats.shatterStagger,
             },
             beats.shatterStart,
@@ -525,8 +539,8 @@ export function HeroSequence() {
               autoAlpha: 0,
               filter: `blur(${blurAmount(heroSequenceMotion.cursorBlur)}px)`,
               duration: beats.cursorsOutEnd - beats.shatterStart,
-              ease: "power2.in",
-              stagger: { each: 0.9, from: "random" },
+              ease: "none",
+              stagger: { each: 1.6, from: "random" },
             },
             beats.shatterStart,
           );
@@ -593,6 +607,8 @@ export function HeroSequence() {
 
             <div className="hs-scrub-runway" aria-hidden="true" />
           </div>
+
+          <WorkGallery />
 
           <TeamSection />
 

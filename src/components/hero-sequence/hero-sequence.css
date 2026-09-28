@@ -14,8 +14,8 @@
 
   --hs-gutter: clamp(16px, 1.6vw, 24px);
   --hs-band-height: 480px;
-  /* Long enough for the shatter exit; a little room before the team arrives. */
-  --hs-scrub-length: 44svh;
+  /* Room for the shatter exit to match the page’s scroll pace. */
+  --hs-scrub-length: 100svh;
   /* Paper “grid” strokes: 12 cols, 8px gutters, 24px page inset. */
   --hs-grid-cols: 12;
   --hs-grid-gap: 8px;
@@ -132,7 +132,7 @@
 /* Hero stays pinned while the headline leaves. The team fan follows. */
 .hs-pin {
   position: sticky;
-  z-index: 2;
+  z-index: 3;
   top: 0;
   height: 100svh;
   overflow: visible;
@@ -1261,7 +1261,7 @@
   .hs-root {
     --hs-gutter: 16px;
     --hs-band-height: 336px;
-    --hs-scrub-length: 36svh;
+    --hs-scrub-length: 80svh;
     --hs-display: 15.4vw;
     --hs-title: 10.6vw;
     --hs-subhead: 4.4vw;
