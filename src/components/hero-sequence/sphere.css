@@ -1,239 +1,26 @@
 /*
- * Sphere illustration ported from the Paper "sphere vector" nodes. Every value
- * below is illustration geometry rather than layout, so it stays in the natural
- * 875x933 coordinate space of the source artwork; the scroll timeline only ever
- * scales and moves the wrapper. Blur radii are part of the artwork, not motion,
- * so they are never animated.
+ * Full-sphere exports shown at 1× art size (no object-fit crop).
+ * Fan scale maps them onto the reference-frame discs.
  */
 
 .hs-sphere {
-  --hs-sphere-violet: #cb46e5;
-  --hs-sphere-amber: #ffc43c;
-  --hs-sphere-ember: #f0d873;
-  --hs-sphere-indigo: #3e1aa1;
-  --hs-sphere-rim: #000000;
-  --hs-sphere-shade-deep: oklab(9.1% 0.02 -0.041);
-  --hs-sphere-shade-mid: oklab(23% 0.031 -0.11);
-  --hs-sphere-shade-lift: oklab(45.1% 0.048 -0.223);
-
-  position: relative;
-  width: 875px;
-  height: 933px;
-}
-
-.hs-sphere__core {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 539px;
-  height: 539px;
-  border-radius: 50%;
-  /*
-   * Keep centering on `transform` only. A separate `translate` plus
-   * `transform: translateZ(0)` was dropping the -50%/-50% offset in Chromium.
-   */
-  transform: translate(-50%, -50%) translateZ(0);
-  isolation: isolate;
-  /*
-   * Safari seam: overflow:clip + border-radius hard-cuts filter:blur() children
-   * into rectangular compositor tiles, which shows as a vertical black slit
-   * through the orb. Mask the disc after filters instead. Keep the mask hard
-   * (no feather) so the silhouette stays sharp like Paper’s overflow:clip.
-   */
-  overflow: visible;
-  -webkit-mask-image: radial-gradient(closest-side, #000 99.85%, #0000 100%);
-  mask-image: radial-gradient(closest-side, #000 99.85%, #0000 100%);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-}
-
-.hs-sphere--left .hs-sphere__core {
-  background: linear-gradient(
-    73.94deg in oklab,
-    var(--hs-sphere-shade-deep) 3.38%,
-    var(--hs-sphere-shade-mid) 46.36%,
-    var(--hs-sphere-shade-lift) 89.34%
-  );
-}
-
-.hs-sphere--right .hs-sphere__core {
-  background: linear-gradient(
-    73.94deg in oklab,
-    var(--hs-sphere-shade-lift) 3.38%,
-    var(--hs-sphere-shade-mid) 46.36%,
-    var(--hs-sphere-shade-deep) 89.34%
-  );
-}
-
-.hs-sphere__blob,
-.hs-sphere__spill {
   position: absolute;
   display: block;
-  border-radius: 800px;
-}
-
-.hs-sphere__blob--haze {
-  width: 215px;
-  height: 445px;
-  background: var(--hs-sphere-violet);
-  filter: blur(100px);
-}
-
-.hs-sphere__blob--violet {
-  width: 148px;
-  height: 405px;
-  background: var(--hs-sphere-violet);
-  filter: blur(50px);
-}
-
-.hs-sphere__blob--amber,
-.hs-sphere__blob--ember,
-.hs-sphere__blob--amber-top {
-  width: 101px;
-  height: 295px;
-  filter: blur(50px);
-}
-
-.hs-sphere__blob--amber,
-.hs-sphere__blob--amber-top {
-  background: var(--hs-sphere-amber);
-}
-
-.hs-sphere__blob--ember {
-  background: linear-gradient(
-    180deg in oklab,
-    oklab(85.2% 0.017 0.156) 0%,
-    oklab(68.4% 0.047 0.139) 100%
-  );
-}
-
-.hs-sphere__blob--core-light {
-  width: 51px;
-  height: 149px;
-  background: var(--hs-sphere-ember);
-  filter: blur(50px);
-}
-
-.hs-sphere__spill--warm {
-  width: 60px;
-  height: 98px;
-  background: var(--hs-sphere-ember);
-  filter: blur(50px);
-}
-
-.hs-sphere__spill--indigo {
-  width: 134px;
-  height: 57px;
-  background: var(--hs-sphere-indigo);
-  filter: blur(50px);
-}
-
-.hs-sphere__rim {
-  position: absolute;
-  width: 488px;
-  height: 898.203px;
-  filter: blur(60px);
-}
-
-/*
- * Procedural SVG noise (feTurbulence) — covers the disc in one continuous
- * field so scaled orbs never show image-tile seams.
- */
-.hs-sphere__grain {
-  position: absolute;
-  z-index: 5;
-  inset: 0;
-  display: block;
-  width: 100%;
-  height: 100%;
+  max-width: none;
   pointer-events: none;
-  border-radius: inherit;
-  opacity: 0.2;
-  mix-blend-mode: soft-light;
+  user-select: none;
 }
 
-.hs-sphere--right .hs-sphere__grain {
-  opacity: 0.16;
+.hs-sphere--lead {
+  top: 0;
+  left: 0;
+  width: 801px;
+  height: 798px;
 }
 
-/* Left sphere — light gathers on the trailing edge. */
-.hs-sphere--left .hs-sphere__blob--haze {
-  top: 106px;
-  left: 403px;
-}
-
-.hs-sphere--left .hs-sphere__blob--violet {
-  top: 126px;
-  left: 432px;
-}
-
-.hs-sphere--left .hs-sphere__blob--amber,
-.hs-sphere--left .hs-sphere__blob--ember,
-.hs-sphere--left .hs-sphere__blob--amber-top {
-  top: 181px;
-  left: 460px;
-}
-
-.hs-sphere--left .hs-sphere__blob--core-light {
-  top: 277px;
-  left: 501px;
-}
-
-.hs-sphere--left .hs-sphere__rim {
-  top: calc(50% + 67.59px);
-  left: 8px;
-  translate: 0 -50%;
-}
-
-.hs-sphere--left .hs-sphere__spill--warm {
-  top: 445px;
-  left: 648px;
-}
-
-.hs-sphere--left .hs-sphere__spill--indigo {
-  top: 225px;
-  left: 507px;
-}
-
-/* Right sphere — the same stack mirrored and rotated. */
-.hs-sphere--right .hs-sphere__blob--haze {
-  top: 252px;
-  left: -183px;
-}
-
-.hs-sphere--right .hs-sphere__blob--violet {
-  top: 272px;
-  left: -154px;
-}
-
-.hs-sphere--right .hs-sphere__blob--amber,
-.hs-sphere--right .hs-sphere__blob--ember,
-.hs-sphere--right .hs-sphere__blob--amber-top {
-  top: 327px;
-  left: -126px;
-}
-
-.hs-sphere--right .hs-sphere__blob--core-light {
-  top: 423px;
-  left: -85px;
-}
-
-.hs-sphere--right .hs-sphere__rim {
-  top: calc(50% + 780.594px);
-  left: 502px;
-  rotate: 180deg;
-  transform-origin: 0% 0%;
-  translate: 0 -50%;
-}
-
-.hs-sphere--right .hs-sphere__spill--warm {
-  top: 522px;
-  left: 186px;
-}
-
-.hs-sphere--right .hs-sphere__spill--indigo {
-  top: 677px;
-  left: 493px;
+.hs-sphere--accent {
+  top: 0;
+  left: 0;
+  width: 1104px;
+  height: 989px;
 }

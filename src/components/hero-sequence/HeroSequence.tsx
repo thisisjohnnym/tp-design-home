@@ -7,6 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { CapabilitiesSection } from "./CapabilitiesSection";
 import { LoaderIntro } from "./LoaderIntro";
+import { PointerEffect } from "./PointerEffect";
+import { PlateShader } from "./PlateShader";
 import { SequenceNav } from "./SequenceNav";
 import { TeamSection } from "./TeamSection";
 import { bindTeamFan } from "./team-fan";
@@ -603,15 +605,12 @@ export function HeroSequence() {
 
   return (
     <div className="hs-root" ref={rootRef}>
-      {/* Stack (back → front): canvas → grid → fine noise → UI. */}
-      <div className="hs-backdrop" aria-hidden="true" />
+      {/* Stack (back → front): Paper HalftoneDots plate → grid → UI. */}
+      <PlateShader />
       <div className="hs-grid" aria-hidden="true">
         {Array.from({ length: 12 }, (_, index) => (
           <div className="hs-grid__col" key={index} />
         ))}
-      </div>
-      <div className="hs-noise" aria-hidden="true">
-        <div className="hs-noise__drift" />
       </div>
 
       <div className="hs-smooth-wrapper">
@@ -620,7 +619,9 @@ export function HeroSequence() {
             <div className="hs-pin">
               <div className="hs-band">
                 <div className="hs-band__inner">
-                  <SequenceNav />
+                  {/* Reserves the nav’s expanded height so the hero scene does
+                      not jump when the fixed overlay is moved out of flow. */}
+                  <div className="hs-nav-spacer" aria-hidden="true" />
 
                   <div className="hs-scene">
                     <ShatterHeadline />
@@ -638,8 +639,11 @@ export function HeroSequence() {
         </div>
       </div>
 
-      {/* Fixed loader stays outside ScrollSmoother content. */}
+      {/* Fixed chrome stays outside ScrollSmoother so it is not trapped by the
+          smoothed transform layer. */}
+      <SequenceNav />
       <LoaderIntro />
+      <PointerEffect />
     </div>
   );
 }

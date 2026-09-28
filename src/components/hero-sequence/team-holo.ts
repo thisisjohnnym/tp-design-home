@@ -10,12 +10,15 @@ type Axis = {
   tween?: gsap.core.Tween;
 };
 
-const restOpacity = 0.42;
+export type TeamHoloApi = {
+  lean: (index: number, x: number, y: number) => void;
+  destroy: () => void;
+};
+
+const restLight = 0;
+const hoverLight = 1;
 const tiltMax = 7;
-/* How far the painted sheet slides across the face, matching the old
-   sparkle-layer travel from one edge of the pointer to the other. */
-const foilTravel = { x: 0.26, y0: 0.09, y1: -0.114 };
-const glareRestY = 46;
+const glareRestY = 50;
 /* How far a full bottom tilt slides the painted card, as a share of its height.
    Face-up cards slide about twice as far as face-down ones under this perspective. */
 const tiltSlide = { front: 0.031, back: 0.016 };
@@ -24,15 +27,14 @@ const tiltSlide = { front: 0.031, back: 0.016 };
 const stickyPad = 36;
 
 /**
- * Pointer foil for the team cards.
- * The rainbow is a static sheet in CSS. GSAP only slides that sheet and the
- * glare with transform, and only while the pointer is on a card.
+ * Soft pointer light for the team cards.
+ * GSAP slides the glare with transform, and only while the pointer is on a card.
  */
 export function bindTeamHolo(
   section: HTMLElement,
   cards: HTMLElement[],
   reduceMotion: boolean,
-) {
+): TeamHoloApi {
   if (reduceMotion || cards.length === 0) {
     return {
       lean(index: number, x: number, y: number) {
@@ -44,57 +46,38 @@ export function bindTeamHolo(
     };
   }
 
-  const foils = cards.map(
-    (card) => [...card.querySelectorAll(".hs-team__foil")] as HTMLElement[],
-  );
   const glares = cards.map(
     (card) => [...card.querySelectorAll(".hs-team__glare-spot")] as HTMLElement[],
   );
-  const sheetSize = cards.map(() => [] as Glint[]);
   const glareSize = cards.map(() => [] as Glint[]);
   const measure = (index: number) => {
-    sheetSize[index] = foils[index].map((node) => ({
-      x: node.parentElement?.clientWidth || 1,
-      y: node.parentElement?.clientHeight || 1,
-    }));
     glareSize[index] = glares[index].map((node) => ({
       x: node.parentElement?.clientWidth || 1,
       y: node.parentElement?.clientHeight || 1,
     }));
   };
   cards.forEach((_, index) => measure(index));
-  for (const node of foils.flat()) gsap.set(node, { force3D: true });
   for (const node of glares.flat()) gsap.set(node, { force3D: true });
 
-  const setFoilX = foils.map((nodes) => nodes.map((node) => gsap.quickSetter(node, "x", "px")));
-  const setFoilY = foils.map((nodes) => nodes.map((node) => gsap.quickSetter(node, "y", "px")));
   const setGlareX = glares.map((nodes) => nodes.map((node) => gsap.quickSetter(node, "x", "px")));
   const setGlareY = glares.map((nodes) => nodes.map((node) => gsap.quickSetter(node, "y", "px")));
 
   const live = cards.map(() => ({
-    foilX: 0,
-    foilY: 0,
     glareX: 0,
     glareY: 0,
-    o: restOpacity,
+    light: restLight,
   }));
 
   const axes = cards.map((card, index) => {
     const current = live[index];
     const write = () => {
-      const sheets = sheetSize[index];
-      for (let layer = 0; layer < foils[index].length; layer += 1) {
-        const box = sheets[layer] ?? { x: 1, y: 1 };
-        setFoilX[index][layer](current.foilX * box.x);
-        setFoilY[index][layer](current.foilY * box.y);
-      }
       const spots = glareSize[index];
       for (let layer = 0; layer < glares[index].length; layer += 1) {
         const box = spots[layer] ?? { x: 1, y: 1 };
         setGlareX[index][layer](current.glareX * box.x);
         setGlareY[index][layer](current.glareY * box.y);
       }
-      card.style.setProperty("--hs-holo-opacity", current.o.toFixed(3));
+      card.style.setProperty("--hs-glare", current.light.toFixed(3));
     };
     const glide = {
       duration: 0.55,
@@ -103,11 +86,9 @@ export function bindTeamHolo(
     };
     write();
     return {
-      foilX: gsap.quickTo(current, "foilX", glide) as Axis,
-      foilY: gsap.quickTo(current, "foilY", glide) as Axis,
       glareX: gsap.quickTo(current, "glareX", glide) as Axis,
       glareY: gsap.quickTo(current, "glareY", glide) as Axis,
-      o: gsap.quickTo(current, "o", {
+      light: gsap.quickTo(current, "light", {
         duration: 0.35,
         ease: "power2.out",
         onUpdate: write,
@@ -172,11 +153,9 @@ export function bindTeamHolo(
     if (hovered < 0) return;
     const index = hovered;
     hovered = -1;
-    axes[index].foilX(0);
-    axes[index].foilY(0);
     axes[index].glareX(0);
     axes[index].glareY(0);
-    axes[index].o(restOpacity);
+    axes[index].light(restLight);
     tilts[index].x(0);
     tilts[index].y(0);
   };
@@ -250,13 +229,9 @@ export function bindTeamHolo(
       100,
       ((event.clientY - rect.top) / height) * 100,
     );
-    axes[index].foilX(((50 - pointerX) / 50) * foilTravel.x);
-    axes[index].foilY(
-      foilTravel.y0 + (pointerY / 100) * (foilTravel.y1 - foilTravel.y0),
-    );
     axes[index].glareX((pointerX - 50) / 100);
     axes[index].glareY((pointerY - glareRestY) / 100);
-    axes[index].o(0.7);
+    axes[index].light(hoverLight);
     const fromCenterX = (pointerX - 50) / 50;
     const fromCenterY = (pointerY - 50) / 50;
     const facing = flips[index]?.getAttribute("data-face") === "back" ? -1 : 1;
@@ -292,11 +267,9 @@ export function bindTeamHolo(
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("resize", onResize);
       for (const axis of axes) {
-        axis.foilX.tween?.kill();
-        axis.foilY.tween?.kill();
         axis.glareX.tween?.kill();
         axis.glareY.tween?.kill();
-        axis.o.tween?.kill();
+        axis.light.tween?.kill();
       }
       for (const tilt of tilts) {
         tilt.x.tween?.kill();

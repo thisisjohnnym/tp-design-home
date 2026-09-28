@@ -1,0 +1,20 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  /* Match Paper HalftoneDots plate (#080806) — ScrollSmoother makes .hs-root
+     viewport-tall only, so body must carry the same color or a hard seam shows. */
+  background: #080806;
+}
+
+/* Document overscroll — no rubber-band / edge glow (see disableOverscroll.ts). */
+html.no-overscroll,
+html.no-overscroll body,
+html.no-overscroll .hs-smooth-wrapper,
+html.no-overscroll .hs-smooth-content {
+  overscroll-behavior: none;
+  overscroll-behavior-y: none;
+}

@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import "./experiment.css";
+import { DisableOverscroll } from "@/components/DisableOverscroll";
+import "./globals.css";
 
 const helveticaNow = localFont({
   src: "../../public/fonts/HelveticaNowVar.ttf",
-  variable: "--font-experiment-sans",
-  display: "swap",
-});
-
-const lokanova = localFont({
-  src: "../../public/fonts/Lokanova-Std.otf",
-  variable: "--font-experiment-display",
+  variable: "--font-hs-sans",
   display: "swap",
 });
 
@@ -25,8 +20,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${helveticaNow.variable} ${lokanova.variable}`}>
+    <html lang="en" className="no-overscroll">
+      <body className={helveticaNow.variable}>
+        <DisableOverscroll />
         {children}
       </body>
     </html>

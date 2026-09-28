@@ -1,11 +1,16 @@
 .hs-root {
-  --hs-canvas: #06010d;
+  /* Paper HalftoneDots plate canvas (#080806). */
+  --hs-canvas: #080806;
   --hs-light: #dfdfdf;
   --hs-white: #ffffff;
+  /* Tapestry yellow (Paper mockup / brand accent). */
+  --hs-yellow: #ffcd00;
+  /* Studio yellow accent (Paper --color-accent). */
+  --hs-logo-bloom: #ffcb00;
   --hs-muted: rgba(223, 223, 223, 0.6);
   --hs-card-well: #1e1e1e;
   --hs-hairline: rgba(223, 223, 223, 0.18);
-  --hs-scrim: rgba(10, 4, 20, 0.92);
+  --hs-scrim: color-mix(in srgb, var(--hs-canvas) 92%, transparent);
 
   --hs-gutter: clamp(16px, 1.6vw, 24px);
   --hs-band-height: 480px;
@@ -53,18 +58,26 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Site plate — canvas → grid → fine noise → UI                        */
+/* Site plate — HalftoneDots shader → grid → UI                        */
 /* ------------------------------------------------------------------ */
 
-.hs-backdrop {
+.hs-plate {
   position: fixed;
   z-index: 0;
   inset: 0;
+  overflow: hidden;
   pointer-events: none;
+  /* Matches Paper HalftoneDots frame backgroundColor. */
   background: var(--hs-canvas);
 }
 
-/* Paper “grid” strokes — behind noise so grain sits on top of the lines. */
+.hs-plate__shader {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Paper “grid” strokes — on top of the shader plate. */
 .hs-grid {
   position: fixed;
   z-index: 1;
@@ -85,51 +98,6 @@
   align-self: stretch;
   min-width: 0;
   border-left: 1px solid var(--hs-white);
-}
-
-.hs-noise {
-  --hs-noise-tile: 640px;
-  --hs-noise-drift: 160s;
-
-  position: fixed;
-  /* Above grid, below UI (smoother wrapper is z-index 3). */
-  z-index: 2;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.hs-noise__drift {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: calc(100% + var(--hs-noise-tile));
-  background-image: url("/textures/noise-gray-tile.jpg");
-  background-repeat: repeat;
-  background-size: var(--hs-noise-tile) var(--hs-noise-tile);
-  background-position: 0 0;
-  /* Paper “Gray surface”: luminosity @ ~10%. */
-  opacity: 0.12;
-  mix-blend-mode: luminosity;
-  will-change: transform;
-  animation: hs-noise-drift var(--hs-noise-drift) linear infinite;
-}
-
-@keyframes hs-noise-drift {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-
-  to {
-    transform: translate3d(0, calc(-1 * var(--hs-noise-tile)), 0);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hs-noise__drift {
-    animation: none;
-  }
 }
 
 .hs-sr-only {
@@ -257,14 +225,28 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Nav — snap logo + link columns to the 12-col grid                   */
+/* Nav — fixed chrome; logo + link columns snap to the 12-col grid     */
 /* ------------------------------------------------------------------ */
 
+.hs-nav-spacer {
+  flex-shrink: 0;
+  height: var(--hs-nav-height, 8.5rem);
+  pointer-events: none;
+  visibility: hidden;
+}
+
 .hs-nav {
+  position: fixed;
+  top: var(--hs-gutter);
+  right: var(--hs-gutter);
+  left: var(--hs-gutter);
+  z-index: 45;
   display: grid;
   grid-template-columns: repeat(var(--hs-grid-cols), minmax(0, 1fr));
   column-gap: var(--hs-grid-gap);
   align-items: start;
+  /* Empty grid tracks must not block the page underneath. */
+  pointer-events: none;
 }
 
 .hs-nav__logo-target {
@@ -273,6 +255,7 @@
   flex-shrink: 0;
   aspect-ratio: 454 / 62;
   container-type: inline-size;
+  pointer-events: auto;
 }
 
 /*
@@ -280,15 +263,22 @@
  * so the hand-off from the intro animation is invisible.
  */
 .hs-nav__logo {
-  display: flex;
+  display: block;
   width: 100%;
   height: 100%;
-  align-items: flex-start;
   color: var(--hs-white);
   font-size: 12.99cqw;
   letter-spacing: -0.03em;
   line-height: 0.8;
   white-space: nowrap;
+}
+
+.hs-nav__logo-lockup {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: flex-start;
 }
 
 .hs-nav__logo-img {
@@ -308,6 +298,46 @@
   flex: 0 0 37.89%;
 }
 
+/* Orange sphere, masked to the wordmark. It grows from the pointer on hover,
+   holds briefly, then blurs and fades (~800ms). Leave early skips the hold. */
+.hs-nav__logo-bloom {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.hs-nav__logo-bloom-clip {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: flex-start;
+  clip-path: circle(0px at 50% 50%);
+}
+
+.hs-nav__logo-img--bloom {
+  background-color: var(--hs-logo-bloom);
+  filter: none;
+  -webkit-mask-image: url("/brand/tapestry-logo.svg");
+  mask-image: url("/brand/tapestry-logo.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: left top;
+  mask-position: left top;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-mode: alpha;
+  mask-mode: alpha;
+}
+
+.hs-nav__logo-img--bloom img {
+  opacity: 0;
+}
+
+.hs-nav__logo-bloom .hs-nav__logo-suffix {
+  color: var(--hs-logo-bloom);
+}
+
 /* Flatten so each link group is a direct grid item on .hs-nav. */
 .hs-nav__links {
   display: contents;
@@ -318,6 +348,8 @@
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+  pointer-events: auto;
+  transition: gap 220ms ease-out;
 }
 
 /* Resources → col 10 (spans into 11 for long labels). Contact → col 12. */
@@ -347,11 +379,27 @@
   line-height: 16px;
   list-style: none;
   text-transform: capitalize;
+  transition: gap 220ms ease-out;
 }
 
 .hs-nav__list--contact {
   font-style: normal;
   text-transform: none;
+}
+
+.hs-nav__item {
+  overflow: hidden;
+  max-height: 1.5rem;
+  opacity: 1;
+  filter: blur(0);
+  transform: translateY(0);
+  /* Interruptible compact / expand — retargets mid-flight. */
+  transition:
+    opacity 280ms ease-out,
+    filter 280ms ease-out,
+    transform 280ms ease-out,
+    max-height 280ms ease-out,
+    margin 280ms ease-out;
 }
 
 .hs-nav__list a {
@@ -364,6 +412,90 @@
 .hs-nav__list a:focus-visible {
   text-decoration: underline;
   text-underline-offset: 0.2em;
+}
+
+/* Past-hero compact: hide sublinks last → first. Group hover / focus restores. */
+.hs-nav--compact .hs-nav__group {
+  gap: 0;
+}
+
+.hs-nav--compact .hs-nav__group:not(:hover):not(:focus-within) .hs-nav__list {
+  gap: 0;
+}
+
+.hs-nav--compact .hs-nav__group:not(:hover):not(:focus-within) .hs-nav__item {
+  max-height: 0;
+  margin: 0;
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(-4px);
+  pointer-events: none;
+}
+
+.hs-nav--compact .hs-nav__group:not(:hover):not(:focus-within) .hs-nav__item:nth-last-child(1) {
+  transition-delay: 0ms;
+}
+
+.hs-nav--compact .hs-nav__group:not(:hover):not(:focus-within) .hs-nav__item:nth-last-child(2) {
+  transition-delay: 55ms;
+}
+
+.hs-nav--compact .hs-nav__group:not(:hover):not(:focus-within) .hs-nav__item:nth-last-child(3) {
+  transition-delay: 110ms;
+}
+
+.hs-nav--compact .hs-nav__group:not(:hover):not(:focus-within) .hs-nav__item:nth-last-child(4) {
+  transition-delay: 165ms;
+}
+
+/* Reveal (hover / scroll-up expand): first → last. */
+.hs-nav__item:nth-child(1) {
+  transition-delay: 0ms;
+}
+
+.hs-nav__item:nth-child(2) {
+  transition-delay: 55ms;
+}
+
+.hs-nav__item:nth-child(3) {
+  transition-delay: 110ms;
+}
+
+.hs-nav__item:nth-child(4) {
+  transition-delay: 165ms;
+}
+
+.hs-nav--compact .hs-nav__group:hover .hs-nav__item:nth-child(1),
+.hs-nav--compact .hs-nav__group:focus-within .hs-nav__item:nth-child(1) {
+  transition-delay: 0ms;
+}
+
+.hs-nav--compact .hs-nav__group:hover .hs-nav__item:nth-child(2),
+.hs-nav--compact .hs-nav__group:focus-within .hs-nav__item:nth-child(2) {
+  transition-delay: 55ms;
+}
+
+.hs-nav--compact .hs-nav__group:hover .hs-nav__item:nth-child(3),
+.hs-nav--compact .hs-nav__group:focus-within .hs-nav__item:nth-child(3) {
+  transition-delay: 110ms;
+}
+
+.hs-nav--compact .hs-nav__group:hover .hs-nav__item:nth-child(4),
+.hs-nav--compact .hs-nav__group:focus-within .hs-nav__item:nth-child(4) {
+  transition-delay: 165ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hs-nav__group,
+  .hs-nav__list,
+  .hs-nav__item {
+    transition: none;
+  }
+
+  .hs-nav--compact .hs-nav__group:not(:hover):not(:focus-within) .hs-nav__item {
+    filter: none;
+    transform: none;
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -978,7 +1110,7 @@
   inset: 0;
   display: grid;
   overflow: clip;
-  background: var(--hs-white);
+  background: var(--hs-yellow);
   color: var(--hs-canvas);
   place-items: center;
 }
@@ -1115,6 +1247,7 @@
   .hs-nav__links {
     display: flex;
     gap: 24px;
+    pointer-events: auto;
   }
 
   .hs-nav__links > .hs-nav__group:first-child,
@@ -1185,4 +1318,45 @@
   .hs-brand__option {
     font-size: 0.46em;
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Custom pointer (Paper 6FY-0) — Mac arrow + lagging yellow trail     */
+/* ------------------------------------------------------------------ */
+
+html.hs-has-pointer,
+html.hs-has-pointer * {
+  cursor: none !important;
+}
+
+.hs-pointer {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hs-pointer__arrow,
+.hs-pointer__dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  will-change: transform;
+}
+
+.hs-pointer__dot {
+  /* Paper mockup #FFCD00 — same family as --hs-logo-bloom / --color-accent. */
+  width: 11px;
+  height: 11px;
+  border-radius: 800px;
+  background: #ffcd00;
+}
+
+.hs-pointer__svg {
+  display: block;
+  width: 18px;
+  height: 24px;
+  overflow: visible;
 }

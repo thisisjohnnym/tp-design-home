@@ -23,11 +23,13 @@
   --hs-caps-ease: cubic-bezier(0.2, 0, 0, 1);
 
   position: relative;
-  z-index: 2;
+  /* Above the departing team pin so the handoff reads as one continuous scroll. */
+  z-index: 3;
   display: flex;
   flex-direction: column;
   gap: clamp(48px, 7.94vw, 120px);
-  padding: clamp(96px, 12vw, 180px) var(--hs-gutter);
+  /* Less top pad — the section already sits up under the team exit pan. */
+  padding: clamp(64px, 8vw, 120px) var(--hs-gutter);
 }
 
 .hs-caps__heading {

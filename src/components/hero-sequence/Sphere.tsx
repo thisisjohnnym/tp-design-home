@@ -1,100 +1,39 @@
 /**
- * Vector rebuild of the two Paper sphere illustrations. The storyboard frames
- * used raster fills only because Paper previews scaled bitmaps poorly, so the
- * source of truth here is the native effect stack: a hard-clipped gradient disc
- * with blurred glow capsules and a black rim stroke (blurred for soft shading).
- * The disc silhouette itself is not blurred — only the inner glow layers are.
- *
- * The markup stays at its natural 875x933 size; the scroll timeline scales and
- * moves the wrapper, which keeps every gradient and blur resolution independent.
+ * Exact Paper exports (2× PNGs). CSS displays at 1× art size; fan scale maps
+ * onto the reference-frame discs without object-fit cropping.
  */
 
-type SphereProps = {
-  variant: "left" | "right";
-};
+const ASSET_V = "20260928a";
 
-function SphereRim() {
-  return (
-    <svg
-      className="hs-sphere__rim"
-      viewBox="-100.5 -416.101 488 898.203"
-      width="488"
-      height="898.203"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <path
-        fillRule="evenodd"
-        d="M310.267 360.322C-202.26 261.629 27.311 -74.417 180.359 -298.447"
-        fill="none"
-        stroke="var(--hs-sphere-rim)"
-        strokeWidth="73"
-      />
-    </svg>
-  );
-}
-
-function SphereGrain({ variant }: SphereProps) {
-  const filterId = `hs-sphere-noise-${variant}`;
-
-  return (
-    <svg
-      className="hs-sphere__grain"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <defs>
-        <filter
-          id={filterId}
-          x="0%"
-          y="0%"
-          width="100%"
-          height="100%"
-          colorInterpolationFilters="sRGB"
-        >
-          {/* Procedural noise — no image tiles, so no repeat seams. */}
-          {/* Higher frequency so GSAP scale-up still reads as fine grit. */}
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="1.55"
-            numOctaves="3"
-            stitchTiles="stitch"
-            result="noise"
-          />
-          <feColorMatrix type="saturate" values="0" in="noise" />
-        </filter>
-      </defs>
-      <rect width="100%" height="100%" filter={`url(#${filterId})`} />
-    </svg>
-  );
-}
-
-function Sphere({ variant }: SphereProps) {
-  return (
-    <div className={`hs-sphere hs-sphere--${variant}`} aria-hidden="true">
-      <div className="hs-sphere__core">
-        <span className="hs-sphere__blob hs-sphere__blob--haze" />
-        <span className="hs-sphere__blob hs-sphere__blob--violet" />
-        <span className="hs-sphere__blob hs-sphere__blob--amber" />
-        <span className="hs-sphere__blob hs-sphere__blob--ember" />
-        <span className="hs-sphere__blob hs-sphere__blob--amber-top" />
-        <span className="hs-sphere__blob hs-sphere__blob--core-light" />
-        <SphereRim />
-        <SphereGrain variant={variant} />
-      </div>
-
-      <span className="hs-sphere__spill hs-sphere__spill--warm" />
-      <span className="hs-sphere__spill hs-sphere__spill--indigo" />
-    </div>
-  );
-}
+/** 1× size of Frame@2x (6).png (1602×1596). */
+const leadArt = { width: 801, height: 798 } as const;
+/** 1× size of Frame@2x (7).png (2208×1978). */
+const accentArt = { width: 1104, height: 989 } as const;
 
 export function SphereLeft() {
-  return <Sphere variant="left" />;
+  return (
+    <img
+      className="hs-sphere hs-sphere--lead"
+      src={`/team/orb-lead.png?v=${ASSET_V}`}
+      alt=""
+      width={leadArt.width}
+      height={leadArt.height}
+      decoding="async"
+      draggable={false}
+    />
+  );
 }
 
 export function SphereRight() {
-  return <Sphere variant="right" />;
+  return (
+    <img
+      className="hs-sphere hs-sphere--accent"
+      src={`/team/orb-accent.png?v=${ASSET_V}`}
+      alt=""
+      width={accentArt.width}
+      height={accentArt.height}
+      decoding="async"
+      draggable={false}
+    />
+  );
 }

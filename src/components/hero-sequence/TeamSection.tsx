@@ -3,16 +3,11 @@ import { SphereLeft, SphereRight } from "./Sphere";
 import "./sphere.css";
 import "./team-section.css";
 
-function TeamFoil() {
+function TeamLight({ back = false }: { back?: boolean }) {
   return (
-    <>
-      <span className="hs-team__shine">
-        <span className="hs-team__foil" />
-      </span>
-      <span className="hs-team__glare">
-        <span className="hs-team__glare-spot" />
-      </span>
-    </>
+    <span className={back ? "hs-team__glare hs-team__glare--back" : "hs-team__glare"}>
+      <span className="hs-team__glare-spot" />
+    </span>
   );
 }
 
@@ -27,7 +22,9 @@ export function TeamSection() {
         </div>
 
         <h2 className="hs-team__title" id="hs-team-heading">
-          Our Team
+          Meet the team
+          <br />
+          behind the work
         </h2>
 
         <ol className="hs-team__stage">
@@ -41,7 +38,6 @@ export function TeamSection() {
                 <div className="hs-team__tilt">
                 <div className="hs-team__face hs-team__face--front">
                   <div className="hs-team__shell">
-                  <div className="hs-team__plate">
                     <div className="hs-team__portrait">
                       <div className="hs-team__art">
                         <img
@@ -49,7 +45,7 @@ export function TeamSection() {
                           src={person.portrait}
                           alt=""
                         />
-                        <TeamFoil />
+                        <span className="hs-team__wash" />
                       </div>
                       <div className="hs-team__copy">
                         <div className="hs-team__meta">
@@ -82,24 +78,19 @@ export function TeamSection() {
                         </div>
                       </div>
                     </div>
-                    <p className="hs-team__bio">
-                      <TeamFoil />
-                      <span className="hs-team__bio-text">{person.bio}</span>
-                    </p>
-                  </div>
-                  <p className="hs-team__mark">{heroSequenceTeamCard.mark}</p>
+                    <p className="hs-team__bio">{person.bio}</p>
+                    <TeamLight />
                   </div>
                 </div>
                 <div className="hs-team__face hs-team__face--back" aria-hidden="true">
                   <div className="hs-team__shell">
-                    <div className="hs-team__logos">
-                      <img
-                        className="hs-team__pattern"
-                        src={heroSequenceTeamCard.pattern}
-                        alt=""
-                      />
-                      <TeamFoil />
-                    </div>
+                    <img
+                      className="hs-team__pattern"
+                      src={heroSequenceTeamCard.pattern}
+                      alt=""
+                      decoding="async"
+                    />
+                    <TeamLight back />
                   </div>
                 </div>
                 </div>
@@ -112,6 +103,16 @@ export function TeamSection() {
           <div className="hs-team__orb hs-team__orb--accent">
             <SphereRight />
           </div>
+        </div>
+
+        {/* Paper team artboard progress — appears when the fan starts cycling. */}
+        <div
+          className="hs-team__progress"
+          aria-hidden="true"
+          data-on="false"
+        >
+          <div className="hs-team__progress-fill" />
+          <div className="hs-team__progress-glow" />
         </div>
       </div>
 

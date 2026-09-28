@@ -1,28 +1,28 @@
-/* Team fan. Width follows the fan storyboard. The face matches the restyled
-   member card: 324×548, 16px outer radius, gray rim. */
+/* Team fan. Width follows the fan storyboard. The face matches the glass
+   member card: 324×513, 16px outer radius, frosted fill, hairline rim. */
 
 .hs-team {
-  /* Starts while the hero is leaving so the first card is not a screen below it. */
-  margin-top: -72vh;
-  /* Rim from the restyled card front. Back ground stays on the card back. */
-  --hs-team-rim: #dadada;
-  --hs-team-back: #262626;
-  --hs-team-card: #878787;
-  --hs-team-card-soft: #cacaca;
-  --hs-team-card-mid: #9b9b9b;
-  --hs-team-card-back: #5a5a5a;
+  /* Overlaps the end of the hero just enough for a continuous handoff. */
+  margin-top: -64vh;
+  /*
+   * Exit pan lifts the team layers (~0.5–0.7vh). Pull the next section up by
+   * the same amount so it meets the rising scene instead of sitting in a void.
+   */
+  margin-bottom: -52vh;
+  /* Glass from the restyled card: 10% gray fill, 14% white hairline. */
+  --hs-team-glass: rgb(177 177 177 / 10%);
+  --hs-team-glass-line: rgb(255 255 255 / 14%);
   --hs-team-radius: 16px;
   --hs-team-card-width: clamp(200px, 20.77vw, 314px);
-  /* V-holo spectrum and grain. Raw on purpose: this is the foil light, not interface color. */
-  --hs-holo-1: hsl(2 100% 73%);
-  --hs-holo-2: hsl(53 100% 69%);
-  --hs-holo-3: hsl(93 100% 69%);
-  --hs-holo-4: hsl(176 100% 76%);
-  --hs-holo-5: hsl(228 100% 74%);
-  --hs-holo-6: hsl(283 100% 73%);
-  --hs-holo-grain: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iNTAwIiBoZWlnaHQ9IjUwMCI+CjxmaWx0ZXIgaWQ9Im4iPgo8ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjciIG51bU9jdGF2ZXM9IjEwIiBzdGl0Y2hUaWxlcz0ic3RpdGNoIj48L2ZlVHVyYnVsZW5jZT4KPC9maWx0ZXI+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWxsPSIjMDAwIj48L3JlY3Q+CjxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iNTAwIiBmaWx0ZXI9InVybCgjbikiIG9wYWNpdHk9IjAuMyI+PC9yZWN0Pgo8L3N2Zz4=");
-  /* Extra scroll while the fan is pinned. About one screen per teammate. */
-  --hs-team-runway: 800svh;
+  /* Extra scroll while the fan is pinned. Shorter runway, softer station glides. */
+  --hs-team-runway: 640svh;
+  /* Cycle progress bar (Paper team frame): track + fill tip glow. */
+  --hs-team-progress: 0;
+  --hs-team-progress-track: #545454;
+  --hs-team-progress-width: 180px;
+  --hs-team-progress-height: 3px;
+  /* 845 / 982 on the desktop storyboard. */
+  --hs-team-progress-top: 86.05%;
 
   position: relative;
   background: transparent;
@@ -55,20 +55,26 @@
   top: 50%;
   left: 50%;
   z-index: 1;
-  width: 875px;
-  height: 933px;
   margin: 0;
   pointer-events: none;
   will-change: transform;
 }
 
+/* Full export frames at 1× — lead 801×798, accent 1104×989. */
+.hs-team__orb--lead {
+  width: 801px;
+  height: 798px;
+}
+
 .hs-team__orb--accent {
   z-index: 6;
-  filter: blur(20px);
+  width: 1104px;
+  height: 989px;
 }
 
 .hs-team__title {
   position: absolute;
+  /* Above the back sphere, below the cards. The front sphere still overlaps the fan. */
   z-index: 2;
   top: 50%;
   left: 50%;
@@ -78,6 +84,7 @@
   font-weight: 400;
   letter-spacing: -0.04em;
   line-height: 0.8;
+  text-align: center;
   pointer-events: none;
   white-space: nowrap;
 }
@@ -96,12 +103,12 @@
 }
 
 .hs-team__card {
-  --hs-holo-opacity: 0.22;
+  --hs-glare: 0;
   position: absolute;
   top: 50%;
   left: 50%;
   width: var(--hs-team-card-width);
-  aspect-ratio: 324 / 548;
+  aspect-ratio: 324 / 513;
   margin: 0;
   container-type: inline-size;
   perspective: 1400px;
@@ -131,6 +138,10 @@
   position: absolute;
   inset: 0;
   border-radius: var(--hs-team-radius);
+  background: var(--hs-team-glass);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  box-shadow: inset 0 0 0 1px var(--hs-team-glass-line);
 }
 
 /* Hide the face that is turned away. backface-visibility flickers the bottom
@@ -140,50 +151,29 @@
   visibility: hidden;
 }
 
-.hs-team__face--front {
-  background: var(--hs-team-rim);
-}
-
-.hs-team__face--back {
-  background: var(--hs-team-back);
-}
-
 .hs-team__shell {
   position: absolute;
   inset: 0;
   overflow: hidden;
   border-radius: inherit;
-  background: var(--hs-team-rim);
-}
-
-.hs-team__face--back .hs-team__shell {
-  background: var(--hs-team-back);
 }
 
 .hs-team__face--front .hs-team__shell {
   display: flex;
   flex-direction: column;
-  padding: 3.7cqi 3.7cqi 0;
-}
-
-.hs-team__plate {
-  position: relative;
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
-  border-radius: 8px;
-  background: #fff;
+  gap: 3.7cqi;
+  padding: 3.7cqi;
 }
 
 .hs-team__portrait {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
+  overflow: hidden;
+  border-radius: 1.85cqi;
 }
 
-/* Foil is isolated here so blend modes stay on the artwork. Type sits outside this box. */
+/* Photo fills the portrait. Type sits on top of it. */
 .hs-team__art {
   position: absolute;
   inset: 0;
@@ -201,18 +191,11 @@
   object-position: center center;
 }
 
-.hs-team__logos {
+.hs-team__wash {
   position: absolute;
   inset: 0;
-  isolation: isolate;
-  -webkit-mask-image: url("/team/card-pattern.png");
-  mask-image: url("/team/card-pattern.png");
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: 398.6% 232.84%;
-  mask-size: 398.6% 232.84%;
+  background: #000;
+  opacity: 0.3;
 }
 
 .hs-team__pattern {
@@ -222,8 +205,10 @@
   width: 398.6%;
   height: 232.84%;
   object-fit: fill;
-  filter: invert(20%);
+  opacity: 0.16;
+  filter: invert(100%);
   translate: -50% -50%;
+  pointer-events: none;
 }
 
 .hs-team__copy {
@@ -235,7 +220,7 @@
   gap: 3.7cqi;
   height: 100%;
   min-height: 0;
-  padding: 5.56cqi;
+  padding: 3.7cqi;
 }
 
 .hs-team__meta,
@@ -252,7 +237,6 @@
 .hs-team__given,
 .hs-team__family,
 .hs-team__bio,
-.hs-team__mark,
 .hs-team__link {
   margin: 0;
 }
@@ -283,16 +267,15 @@
 .hs-team__name {
   display: flex;
   flex-direction: column;
-  gap: 0.06em;
 }
 
 .hs-team__given,
 .hs-team__family {
-  color: var(--hs-light);
+  color: #fff;
   font-size: 14.81cqi;
   font-weight: 400;
   letter-spacing: -0.04em;
-  line-height: 1;
+  line-height: 0.9;
 }
 
 .hs-team__family {
@@ -319,11 +302,8 @@
 
 .hs-team__bio {
   position: relative;
-  isolation: isolate;
+  z-index: 1;
   flex: 0 0 auto;
-  overflow: hidden;
-  padding: 5.56cqi;
-  background: #191919;
   color: #fff;
   font-size: 4.32cqi;
   font-weight: 400;
@@ -332,130 +312,95 @@
   text-wrap: balance;
 }
 
-.hs-team__bio-text {
-  position: relative;
-  z-index: 1;
-  text-wrap: balance;
-}
-
-.hs-team__shine,
 .hs-team__glare {
   position: absolute;
   inset: 0;
+  z-index: 2;
   overflow: hidden;
   border-radius: inherit;
+  mix-blend-mode: screen;
+  opacity: calc(var(--hs-glare) * 0.15);
   pointer-events: none;
-}
-
-/* Foil is painted once, larger than the face, then slid with transform.
-   Moving the gradient center repainted every card during scroll. */
-.hs-team__foil {
-  --hs-holo-space: 5%;
-  --hs-holo-angle: 133deg;
-  position: absolute;
-  top: -40%;
-  left: -40%;
-  width: 180%;
-  height: 180%;
-  background-image:
-    var(--hs-holo-grain),
-    repeating-linear-gradient(
-      0deg,
-      var(--hs-holo-1) calc(var(--hs-holo-space) * 1),
-      var(--hs-holo-2) calc(var(--hs-holo-space) * 2),
-      var(--hs-holo-3) calc(var(--hs-holo-space) * 3),
-      var(--hs-holo-4) calc(var(--hs-holo-space) * 4),
-      var(--hs-holo-5) calc(var(--hs-holo-space) * 5),
-      var(--hs-holo-6) calc(var(--hs-holo-space) * 6),
-      var(--hs-holo-1) calc(var(--hs-holo-space) * 7)
-    ),
-    repeating-linear-gradient(
-      var(--hs-holo-angle),
-      #0e152e 0%,
-      hsl(180 10% 60%) 3.8%,
-      hsl(180 29% 66%) 4.5%,
-      hsl(180 10% 60%) 5.2%,
-      #0e152e 10%,
-      #0e152e 12%
-    ),
-    radial-gradient(
-      farthest-corner circle at 50% 46%,
-      hsl(0 0% 0% / 0.1) 12%,
-      hsl(0 0% 0% / 0.15) 20%,
-      hsl(0 0% 0% / 0.25) 120%
-    );
-  background-blend-mode: screen, hue, hard-light;
-  background-repeat: no-repeat;
-  /* Sizes are the old face-relative sizes, rewritten for this 180% sheet.
-     Positions crop the sheet back to the resting foil (pointer at 50%, 46%). */
-  background-size: 500px 55.5556%, 111.1111% 388.8889%, 166.6667% 88.8889%, 111.1111% 88.8889%;
-  background-position: center, -200% 48.43%, 50% 54.08%, 50% 54.08%;
-  filter: brightness(0.9) contrast(1.15) saturate(0.65);
-  will-change: transform;
-}
-
-.hs-team__shine {
-  mix-blend-mode: color-dodge;
-  opacity: var(--hs-holo-opacity);
-}
-
-.hs-team__glare {
-  z-index: 1;
-  mix-blend-mode: soft-light;
-  opacity: calc(var(--hs-holo-opacity) * 0.35);
 }
 
 .hs-team__glare-spot {
   position: absolute;
-  /* 240% sheet, centered on the resting hotspot (50%, 46% of the face). */
-  top: -74%;
-  left: -70%;
-  width: 240%;
-  height: 240%;
-  background-image: radial-gradient(
-    farthest-corner circle at 50% 50%,
-    hsl(0 0% 100%) 0%,
-    hsl(210 3% 54% / 0.33) 18.75%,
-    hsl(0 0% 20% / 0.9) 54.2%
+  /* Oversized so the glow can slide and still cover the face. */
+  top: -45%;
+  left: -45%;
+  width: 190%;
+  height: 190%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    hsl(0 0% 100% / 0.98) 0%,
+    hsl(0 0% 100% / 0.55) 14%,
+    hsl(0 0% 100% / 0) 38%
   );
-  filter: contrast(1.15);
   will-change: transform;
-}
-
-.hs-team__mark {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.85cqi 2cqi;
-  color: #000;
-  font-size: 1.15cqi;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  text-align: center;
-  text-transform: uppercase;
 }
 
 .hs-team__face--back {
   transform: rotateY(180deg);
 }
 
-/* One mask on the logo group. A second mask on the foil was drawing each word again. */
-.hs-team__face--back .hs-team__foil,
-.hs-team__face--back .hs-team__glare-spot {
-  filter: none;
+.hs-team__face--back .hs-team__glare--back {
+  mix-blend-mode: screen;
+  opacity: calc(var(--hs-glare) * 0.15);
 }
 
-.hs-team__face--back .hs-team__shine {
-  mix-blend-mode: screen;
-  opacity: 0.4;
+.hs-team__progress {
+  position: absolute;
+  z-index: 7;
+  top: var(--hs-team-progress-top);
+  left: 50%;
+  width: var(--hs-team-progress-width);
+  height: var(--hs-team-progress-height);
+  translate: -50% 0;
+  overflow: visible;
+  background: var(--hs-team-progress-track);
+  opacity: 0;
+  filter: blur(8px);
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 220ms ease-out,
+    filter 220ms ease-out,
+    visibility 220ms ease-out;
 }
 
-.hs-team__face--back .hs-team__glare {
-  mix-blend-mode: screen;
-  opacity: 0.28;
+.hs-team__progress[data-on="true"] {
+  opacity: 1;
+  filter: blur(0);
+  visibility: visible;
+  transition-duration: 320ms;
+}
+
+.hs-team__progress-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: calc(var(--hs-team-progress) * 100%);
+  overflow: clip;
+  background: var(--hs-yellow);
+}
+
+/* Soft tip glow — sits ahead of the fill edge (Paper glow frame). */
+.hs-team__progress-glow {
+  position: absolute;
+  top: -6px;
+  left: calc(var(--hs-team-progress) * 100% - 34px);
+  width: 41px;
+  height: 16px;
+  overflow: clip;
+  opacity: 0.3;
+  filter: blur(5px);
+  background-image: linear-gradient(
+    90deg,
+    transparent 21.43%,
+    var(--hs-yellow) 78.57%
+  );
+  pointer-events: none;
 }
 
 .hs-team__runway {
@@ -468,8 +413,8 @@
     height: 0;
   }
 
-  .hs-team__card {
-    --hs-holo-opacity: 0.2;
+  .hs-team__progress {
+    transition: none;
   }
 }
 

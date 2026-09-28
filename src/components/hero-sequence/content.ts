@@ -94,7 +94,7 @@ export const heroSequenceCursors = [
  * A single role keeps “ui/ux team” on the right. A manager title splits into two lines.
  */
 const teamBio =
-  "Approaching every project with deep user-centered insight and overt passion for the craft, Sean has been the fresh creative force behind market-defining experiences for Coach and Kate Spade. His raw ability in both graphic, product design and leadership have had a profound effect on Tapestry's philosophy, work and culture.";
+  "Approaching every project with deep user-centered insight and overt passion for the craft, Sean has been the fresh creative force behind market-defining experiences for Coach and Kate Spade.";
 
 const teamLabel = "ui/ux team";
 
@@ -210,8 +210,7 @@ export const heroSequenceCursorSlots = ["a", "b", "c", "d"] as const;
 
 /** Shared card chrome. Member lines live on each roster entry. */
 export const heroSequenceTeamCard = {
-  pattern: "/team/card-pattern.png",
-  mark: "tapestry design team / ui / ux",
+  pattern: "/team/card-pattern.webp",
 } as const;
 
 /** Capabilities accordion. `number` is the cropped display numeral on the left.
@@ -438,6 +437,9 @@ export const heroSequenceMotion = {
   brandCharacterDuration: 0.36,
   brandCharacterStagger: 0.045,
   brandCharacterBlur: 10,
+  /** Custom pointer — yellow trail ease (seconds). Arrow stays nearly live. */
+  pointerLag: 0.55,
+  pointerArrowLag: 0.08,
   /** Multipliers applied when the visitor prefers reduced motion. */
   reduced: {
     blur: 0.35,

@@ -5,9 +5,9 @@
 html,
 body {
   margin: 0;
-  /* Match hero canvas (#06010d) — ScrollSmoother makes .hs-root viewport-tall
-     only, so body must carry the same color or a hard seam shows on scroll. */
-  background: #06010d;
+  /* Match Paper HalftoneDots plate (#080806) — ScrollSmoother makes .hs-root
+     viewport-tall only, so body must carry the same color or a hard seam shows. */
+  background: #080806;
 }
 
 .experiment-shell {

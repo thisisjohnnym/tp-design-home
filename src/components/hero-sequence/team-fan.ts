@@ -3,11 +3,13 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { bindTeamHolo } from "./team-holo";
 import {
   teamAccentOrb,
+  teamEntrance,
   teamFanLayouts,
-  teamFanPeek,
+  teamFanReadyOffset,
   teamFanStoryWidth,
   teamFanTiming,
   teamLeadOrb,
+  teamOrbMomentum,
   teamQueueTilt,
   type FanPose,
   type TeamLayout,
@@ -36,32 +38,22 @@ function samplePose(poses: readonly FanPose[], slot: number): FanPose {
   };
 }
 
-function mixPose(from: FanPose, to: FanPose, amount: number): FanPose {
-  return {
-    x: gsap.utils.interpolate(from.x, to.x, amount),
-    y: gsap.utils.interpolate(from.y, to.y, amount),
-    rotation: gsap.utils.interpolate(from.rotation, to.rotation, amount),
-    z: gsap.utils.interpolate(from.z, to.z, amount),
-  };
-}
-
 /**
- * Park on the current station, then ease into the next one.
- * Keeps a card sitting in the centre for most of its step.
+ * One continuous ease between stations. Soft arrival, soft departure —
+ * no mid-step pause that felt like a second stop before the centre.
  */
 function linger(slot: number) {
   if (slot <= 0) return slot;
 
   const base = Math.floor(slot);
   const fraction = slot - base;
+  const strength = teamFanTiming.stationEase;
+  const eased =
+    fraction < 0.5
+      ? Math.pow(2 * fraction, strength) / 2
+      : 1 - Math.pow(2 * (1 - fraction), strength) / 2;
 
-  if (fraction < teamFanTiming.hold) {
-    return base + (fraction / teamFanTiming.hold) * 0.08;
-  }
-
-  const travel = (fraction - teamFanTiming.hold) / (1 - teamFanTiming.hold);
-  const eased = travel * travel * (3 - 2 * travel);
-  return base + 0.08 + eased * 0.92;
+  return base + eased;
 }
 
 /**
@@ -95,45 +87,63 @@ function queueLean(slot: number, center: number) {
 }
 
 /**
- * Backs on the lower left, flip to the front as the card arrives in the
- * centre, then stay face-up through the upper-right exit.
+ * Face-down on the left, flip up as the card reaches centre, then stay
+ * face-up through the upper-right exit. Sean waits on the left still backed.
  */
 function rotationYFor(slot: number, center: number) {
-  const start = center - 0.42;
+  const start = center - 0.5;
   const end = center - 0.08;
   const amount = gsap.utils.clamp(0, 1, (slot - start) / (end - start));
   const eased = amount * amount * (3 - 2 * amount);
   return 180 - eased * 180;
 }
 
+/**
+ * Assemble parks Sean (card 0) on the left of the arc as the section enters.
+ * Cycling only starts after pin progress clears `cycleAt`.
+ */
 function slotForCard(
-  progress: number,
+  arrive: number,
+  fan: number,
   index: number,
   count: number,
   center: number,
+  readyOffset: number,
 ) {
-  const introFrom = center - index - 3;
-  const parked = center - index;
+  const readyHead = center + readyOffset;
+  const readySlot = readyHead - index;
+  /* Start further down the entry arc so assemble reads as travel, not a pop. */
+  const introFrom = readySlot - 2.4;
 
-  if (progress <= teamFanTiming.intro) {
-    const amount = introEase(progress / teamFanTiming.intro);
-    if (index === 0) return { intro: amount, slot: center };
-    return {
-      intro: null,
-      slot: gsap.utils.interpolate(introFrom, parked, amount),
-    };
+  /* Into view: scrub into the ready fan. Sean ends left, waiting to flip. */
+  if (arrive < 1) {
+    if (arrive <= teamFanTiming.cardAt) {
+      return introFrom;
+    }
+
+    const local =
+      (arrive - teamFanTiming.cardAt) / (1 - teamFanTiming.cardAt);
+    return gsap.utils.interpolate(introFrom, readySlot, introEase(local));
   }
 
-  const cycle = (progress - teamFanTiming.intro) / (1 - teamFanTiming.intro);
-  const head = gsap.utils.interpolate(center, center + (count - 1), cycle);
-  return { intro: null, slot: linger(head - index) };
+  /* Scene locked — hold until cycling is allowed. */
+  if (fan <= teamFanTiming.cycleAt) {
+    return readySlot;
+  }
+
+  const cycle =
+    (fan - teamFanTiming.cycleAt) / (1 - teamFanTiming.cycleAt);
+  const head = gsap.utils.interpolate(
+    readyHead,
+    center + (count - 1),
+    cycle,
+  );
+  return linger(head - index);
 }
 
-/** Progress that parks a middle card in the centre — the settled fan. */
-export function settledFanProgress(count: number) {
-  const featured = Math.min(3, count - 1);
-  const cycle = count <= 1 ? 0 : featured / (count - 1);
-  return teamFanTiming.intro + (1 - teamFanTiming.intro) * cycle;
+/** Progress that parks the ready fan — centre card plus neighbours both sides. */
+export function settledFanProgress(_count: number) {
+  return 0;
 }
 
 export function bindTeamFan(
@@ -148,12 +158,14 @@ export function bindTeamFan(
   const lead = select(".hs-team__orb--lead")[0] as HTMLElement | undefined;
   const accent = select(".hs-team__orb--accent")[0] as HTMLElement | undefined;
   const title = select(".hs-team__title")[0] as HTMLElement | undefined;
+  const progress = select(".hs-team__progress")[0] as HTMLElement | undefined;
 
   if (!section || !pin || cards.length === 0) {
     return () => {};
   }
 
   const { poses, center } = teamFanLayouts[options.layout];
+  const readyOffset = teamFanReadyOffset[options.layout];
   const count = cards.length;
 
   gsap.set(cards, {
@@ -180,17 +192,39 @@ export function bindTeamFan(
     });
   }
   if (title) {
-    gsap.set(title, { xPercent: -50, yPercent: -50, y: 0 });
+    gsap.set(title, {
+      xPercent: -50,
+      yPercent: -50,
+      y: options.reduceMotion
+        ? 0
+        : window.innerHeight * teamEntrance.titleFrom,
+    });
   }
 
   const setLeadX = lead ? gsap.quickSetter(lead, "x", "px") : null;
-  const setLeadY = lead ? gsap.quickSetter(lead, "y", "px") : null;
   const setLeadScaleX = lead ? gsap.quickSetter(lead, "scaleX") : null;
   const setLeadScaleY = lead ? gsap.quickSetter(lead, "scaleY") : null;
   const setAccentX = accent ? gsap.quickSetter(accent, "x", "px") : null;
-  const setAccentY = accent ? gsap.quickSetter(accent, "y", "px") : null;
   const setAccentScaleX = accent ? gsap.quickSetter(accent, "scaleX") : null;
   const setAccentScaleY = accent ? gsap.quickSetter(accent, "scaleY") : null;
+  const setTitleY = title ? gsap.quickSetter(title, "y", "px") : null;
+  /* Soft catch-up on Y so the spheres keep a little momentum after scroll. */
+  const leadYTo =
+    lead && !options.reduceMotion
+      ? gsap.quickTo(lead, "y", {
+          duration: teamOrbMomentum.lead,
+          ease: "power3.out",
+        })
+      : null;
+  const accentYTo =
+    accent && !options.reduceMotion
+      ? gsap.quickTo(accent, "y", {
+          duration: teamOrbMomentum.accent,
+          ease: "power3.out",
+        })
+      : null;
+  const setLeadY = lead ? gsap.quickSetter(lead, "y", "px") : null;
+  const setAccentY = accent ? gsap.quickSetter(accent, "y", "px") : null;
 
   const setX = cards.map((card) => gsap.quickSetter(card, "x", "px"));
   const setY = cards.map((card) => gsap.quickSetter(card, "y", "px"));
@@ -206,92 +240,118 @@ export function bindTeamFan(
   const setFlip = flips.map((flip) => gsap.quickSetter(flip, "rotationY", "deg"));
   const holo = bindTeamHolo(section, cards, options.reduceMotion);
 
-  const place = (progress: number) => {
+  let arrive = options.reduceMotion ? 1 : 0;
+  let fan = options.reduceMotion ? settledFanProgress(count) : 0;
+
+  function place() {
     const width = window.innerWidth;
     const height = window.innerHeight;
+    const pan = introEase(gsap.utils.clamp(0, 1, arrive));
+    /* Fan uses the pin up to exitAt; the rest keeps the camera rising out. */
+    const exitAt = teamEntrance.exitAt;
+    const cycleFan = Math.min(1, fan / exitAt);
+    const leave =
+      fan <= exitAt ? 0 : introEase((fan - exitAt) / (1 - exitAt));
 
     for (let index = 0; index < count; index += 1) {
-      const placed = slotForCard(progress, index, count, center);
-      const pose =
-        placed.intro === null
-          ? samplePose(poses, placed.slot)
-          : mixPose(teamFanPeek, samplePose(poses, center), placed.intro);
-      const visual =
-        placed.intro === null
-          ? placed.slot
-          : gsap.utils.interpolate(center - 0.85, center, placed.intro);
-      const rotationY =
-        placed.intro === null
-          ? rotationYFor(placed.slot, center)
-          : gsap.utils.interpolate(180, 0, placed.intro);
-      const depth = Math.min(Math.abs(visual - center) / 3.2, 1);
+      const slot = slotForCard(
+        arrive,
+        cycleFan,
+        index,
+        count,
+        center,
+        readyOffset,
+      );
+      const pose = samplePose(poses, slot);
+      const rotationY = rotationYFor(slot, center);
+      const depth = Math.min(Math.abs(slot - center) / 3.2, 1);
       const scale = 1 - depth * 0.05;
 
       setX[index](pose.x * width);
-      setY[index](pose.y * height);
+      setY[index](
+        pose.y * height - leave * teamEntrance.cardLeave * height,
+      );
       setZ[index](pose.z);
       setRotation[index](pose.rotation);
       setScaleX[index](scale);
       setScaleY[index](scale);
-      const depthIndex = Math.round(200 - Math.abs(visual - center) * 24);
+      const depthIndex = Math.round(200 - Math.abs(slot - center) * 24);
       if (cards[index].style.zIndex !== String(depthIndex)) {
         setZIndex[index](depthIndex);
       }
       setFlip[index](rotationY);
       const face = rotationY > 90 ? "back" : "front";
       if (flips[index].dataset.face !== face) flips[index].dataset.face = face;
-      const lean = queueLean(
-        placed.intro === null ? placed.slot : visual,
-        center,
-      );
+      const lean = queueLean(slot, center);
       const facing = rotationY > 90 ? -1 : 1;
       holo.lean(index, lean.x * facing, lean.y);
     }
 
-    const introT =
-      progress <= teamFanTiming.intro
-        ? introEase(progress / teamFanTiming.intro)
-        : 1;
-    const accentT =
-      progress <= teamAccentOrb.travel
-        ? introEase(progress / teamAccentOrb.travel)
-        : 1;
     const unit = width / teamFanStoryWidth;
 
-    if (setLeadX && setLeadY && setLeadScaleX && setLeadScaleY) {
-      const leadScale = unit * teamLeadOrb.scale;
-      setLeadX(teamLeadOrb.x * width);
-      setLeadY(
-        gsap.utils.interpolate(teamLeadOrb.yRest, teamLeadOrb.yFan, introT) *
+    if (setTitleY) {
+      setTitleY(
+        ((1 - pan) * teamEntrance.titleFrom -
+          leave * teamEntrance.titleLeave) *
           height,
       );
+    }
+
+    if (setLeadX && setLeadScaleX && setLeadScaleY) {
+      const leadScale = unit * teamLeadOrb.scale;
+      const leadY =
+        (gsap.utils.interpolate(teamLeadOrb.yRest, teamLeadOrb.yFan, pan) -
+          cycleFan * teamOrbMomentum.fanDrift -
+          leave * teamEntrance.leadLeave) *
+        height;
+      setLeadX(teamLeadOrb.x * width);
       setLeadScaleX(leadScale);
       setLeadScaleY(leadScale);
+      if (leadYTo) leadYTo(leadY);
+      else setLeadY?.(leadY);
     }
 
-    if (setAccentX && setAccentY && setAccentScaleX && setAccentScaleY) {
+    if (setAccentX && setAccentScaleX && setAccentScaleY) {
       const accentScale = unit * teamAccentOrb.scale;
-      setAccentX(teamAccentOrb.x * width);
-      setAccentY(
-        gsap.utils.interpolate(
+      const accentY =
+        (gsap.utils.interpolate(
           teamAccentOrb.yRest,
           teamAccentOrb.yFan,
-          accentT,
-        ) * height,
-      );
+          pan,
+        ) -
+          cycleFan * teamOrbMomentum.fanDrift * 1.25 -
+          leave * teamEntrance.accentLeave) *
+        height;
+      setAccentX(teamAccentOrb.x * width);
       setAccentScaleX(accentScale);
       setAccentScaleY(accentScale);
+      if (accentYTo) accentYTo(accentY);
+      else setAccentY?.(accentY);
     }
-  };
 
-  const progress = options.reduceMotion ? settledFanProgress(count) : 0;
-  place(progress);
+    if (progress) {
+      const cycleAt = teamFanTiming.cycleAt;
+      const amount =
+        cycleFan <= cycleAt
+          ? 0
+          : gsap.utils.clamp(
+              0,
+              1,
+              (cycleFan - cycleAt) / (1 - cycleAt),
+            );
+      progress.style.setProperty("--hs-team-progress", String(amount));
+      /* Show once cycling starts; fade out when the exit pan begins. */
+      const on = cycleFan > cycleAt && leave <= 0 ? "true" : "false";
+      if (progress.dataset.on !== on) progress.dataset.on = on;
+    }
+  }
+
+  place();
   gsap.set(cards, { autoAlpha: 1 });
 
   const orbGroups = select(".hs-team__orbs") as HTMLElement[];
 
-  /* Stay hidden through the hero. Fade in only as this scene takes the screen,
-     then leave with the cards because the orbs live inside the scrolling pin. */
+  /* Fade in with the camera pan so the spheres are visible as the scene rises. */
   const reveal =
     options.reduceMotion || orbGroups.length === 0
       ? undefined
@@ -303,7 +363,7 @@ export function bindTeamFan(
             ease: "none",
             scrollTrigger: {
               trigger: pin,
-              start: "top 55%",
+              start: teamEntrance.start,
               end: "top top",
               scrub: true,
             },
@@ -313,6 +373,27 @@ export function bindTeamFan(
   if (options.reduceMotion && orbGroups.length > 0) {
     gsap.set(orbGroups, { autoAlpha: 1 });
   }
+
+  const entrance =
+    options.reduceMotion
+      ? undefined
+      : ScrollTrigger.create({
+          trigger: pin,
+          start: teamEntrance.start,
+          end: "top top",
+          scrub: true,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            arrive = self.progress;
+            fan = 0;
+            place();
+          },
+          onRefresh: (self) => {
+            arrive = self.progress;
+            if (self.progress < 1) fan = 0;
+            place();
+          },
+        });
 
   const trigger = options.reduceMotion
     ? undefined
@@ -324,41 +405,25 @@ export function bindTeamFan(
         pin,
         pinSpacing: false,
         invalidateOnRefresh: true,
-        onUpdate: (self) => place(self.progress),
-        onRefresh: (self) => place(self.progress),
+        onUpdate: (self) => {
+          arrive = 1;
+          fan = self.progress;
+          place();
+        },
+        onRefresh: (self) => {
+          if (self.progress > 0 || self.isActive) arrive = 1;
+          fan = self.progress;
+          place();
+        },
       });
-
-  /* Lag the headline behind scroll until the scene locks. A fixed offset,
-     scrubbed, so it does not read layout or whip ahead of the hero break. */
-  const titleTween =
-    options.reduceMotion || !title
-      ? undefined
-      : gsap.fromTo(
-          title,
-          { xPercent: -50, yPercent: -50, y: () => window.innerHeight * 0.42 },
-          {
-            xPercent: -50,
-            yPercent: -50,
-            y: 0,
-            ease: "none",
-            scrollTrigger: {
-              trigger: pin,
-              start: "top bottom",
-              end: "top top",
-              scrub: true,
-              invalidateOnRefresh: true,
-            },
-          },
-        );
 
   ScrollTrigger.refresh();
 
   return () => {
+    entrance?.kill();
     trigger?.kill();
     reveal?.scrollTrigger?.kill();
     reveal?.kill();
-    titleTween?.scrollTrigger?.kill();
-    titleTween?.kill();
     holo.destroy();
     if (title) gsap.set(title, { xPercent: -50, yPercent: -50, y: 0 });
   };

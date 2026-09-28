@@ -88,7 +88,7 @@ export function CapabilitiesSection() {
   return (
     <section className="hs-caps" aria-labelledby="hs-caps-heading">
       <h2 className="hs-caps__heading" id="hs-caps-heading">
-        Our Capabilities
+        We are experts in
       </h2>
 
       <div className="hs-caps__list" ref={listRef}>
