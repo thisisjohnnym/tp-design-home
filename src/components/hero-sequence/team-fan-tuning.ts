@@ -91,11 +91,11 @@ export const teamFanTiming = {
 export const teamEntrance = {
   /**
    * When the pin's top hits this viewport line, the pan begins.
-   * Later = less overlap with the departing hero headline.
+   * Keep enough lag so the title stays below the fold until the hero leaves.
    */
-  start: "top 68%",
+  start: "top 70%",
   /** Title offset below centre at pan start, as a fraction of height. */
-  titleFrom: 0.28,
+  titleFrom: 0.25,
   /**
    * Pin progress where the exit pan begins.
    * Fan cycling finishes just before this; the rest is the camera continuing up.
@@ -110,6 +110,27 @@ export const teamEntrance = {
   leadLeave: 0.48,
   accentLeave: 0.58,
   cardLeave: 0.7,
+} as const;
+
+/**
+ * Shared yellow curtain timing (right → left):
+ * 1px fade → expand over hidden content → shrink to reveal.
+ * One-shot, not scrubbed.
+ */
+export const curtainReveal = {
+  ease: "power2.inOut",
+  stagger: 0.12,
+  /** ~1.2s per line: appear + expand + shrink. */
+  appearDuration: 0.22,
+  expandDuration: 0.42,
+  shrinkDuration: 0.56,
+} as const;
+
+/** Team heading — same curtain, fired early in the entrance pan. */
+export const teamTitleReveal = {
+  ...curtainReveal,
+  /** Entrance progress (0–1) when the one-shot curtain begins. */
+  playAt: 0.2,
 } as const;
 
 /**

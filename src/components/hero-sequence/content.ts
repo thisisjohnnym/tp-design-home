@@ -17,7 +17,7 @@ export const heroSequenceContact = {
  * Frame 1 headline. Words are individual nodes so the shatter beat can move
  * them at different rates. Lines are fixed — the block scales to fit the
  * viewport instead of reflowing words onto new rows.
- * The first slot is a drum that cycles `heroSequenceHeadlineDrumWords`.
+ * The first slot cycles `heroSequenceHeadlineDrumWords` via yellow curtain.
  */
 export const heroSequenceHeadlineLines = [
   ["Building", "what's"],
@@ -27,9 +27,8 @@ export const heroSequenceHeadlineLines = [
 
 export const heroSequenceHeadline = heroSequenceHeadlineLines.flat();
 
-/** Triangular drum faces for the first headline word (120° roll steps). */
+/** Verbs cycled on the first headline word (curtain cover → swap → uncover). */
 export const heroSequenceHeadlineDrumWords = [
-  "Designing",
   "Crafting",
   "Building",
 ] as const;
@@ -152,7 +151,7 @@ export const heroSequenceCursorRoster = [
     text: "white",
     role: "sr. product designer",
     roleAside: teamLabel,
-    place: "buenos aires, argentina",
+    place: "argentina, ba",
     email: "jonathan.martinez@tapestry.com",
     linkedin: "https://www.linkedin.com/in/thisisjohnnym",
     bio: teamBio,

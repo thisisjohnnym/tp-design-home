@@ -1,5 +1,6 @@
 import { heroSequenceCursorRoster, heroSequenceTeamCard } from "./content";
 import { SphereLeft, SphereRight } from "./Sphere";
+import "./curtain-reveal.css";
 import "./sphere.css";
 import "./team-section.css";
 
@@ -22,9 +23,14 @@ export function TeamSection() {
         </div>
 
         <h2 className="hs-team__title" id="hs-team-heading">
-          Meet the team
-          <br />
-          behind the work
+          <span className="hs-team__title-line hs-curtain">
+            <span className="hs-curtain__content">Meet the team</span>
+            <span className="hs-curtain__mask" aria-hidden="true" />
+          </span>
+          <span className="hs-team__title-line hs-curtain">
+            <span className="hs-curtain__content">behind the work</span>
+            <span className="hs-curtain__mask" aria-hidden="true" />
+          </span>
         </h2>
 
         <ol className="hs-team__stage">
@@ -105,14 +111,18 @@ export function TeamSection() {
           </div>
         </div>
 
-        {/* Paper team artboard progress — appears when the fan starts cycling. */}
+        {/* Paper team artboard progress — curtain-revealed when cycling starts. */}
         <div
-          className="hs-team__progress"
+          className="hs-team__progress hs-curtain"
           aria-hidden="true"
           data-on="false"
+          data-revealed="false"
         >
-          <div className="hs-team__progress-fill" />
-          <div className="hs-team__progress-glow" />
+          <div className="hs-curtain__content hs-team__progress-body">
+            <div className="hs-team__progress-fill" />
+            <div className="hs-team__progress-glow" />
+          </div>
+          <span className="hs-curtain__mask" aria-hidden="true" />
         </div>
       </div>
 

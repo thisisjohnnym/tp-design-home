@@ -4,6 +4,7 @@ import {
   heroSequenceHeadlineDrumWords,
   heroSequenceHeadlineLines,
 } from "./content";
+import "./curtain-reveal.css";
 
 function CursorArrow() {
   return (
@@ -26,41 +27,25 @@ function CursorArrow() {
   );
 }
 
-function DrumWord() {
+/** First headline verb — curtain-cycled instead of the old 3D drum. */
+function CurtainVerb() {
   return (
-    <span className="hs-shatter__word hs-shatter__word--drum" aria-hidden="true">
-      <span className="hs-headline-drum">
-        <span className="hs-headline-drum__track">
-          <span className="hs-headline-drum__window">
-            <span className="hs-headline-drum__rotor">
-              {heroSequenceHeadlineDrumWords.map((word, faceIndex) => (
-                <span
-                  className="hs-headline-drum__face"
-                  data-face={faceIndex}
-                  key={word}
-                >
-                  {Array.from(word).map((character, characterIndex) => (
-                    <span
-                      className="hs-headline-drum__character"
-                      key={`${word}-${characterIndex}`}
-                    >
-                      {character}
-                    </span>
-                  ))}
-                </span>
-              ))}
-            </span>
+    <span
+      className="hs-shatter__word hs-shatter__word--curtain hs-curtain hs-curtain--inline"
+      aria-hidden="true"
+      data-curtain-verb="true"
+    >
+      <span className="hs-curtain__sizers" aria-hidden="true">
+        {heroSequenceHeadlineDrumWords.map((word) => (
+          <span className="hs-curtain__sizer" key={`sizer-${word}`}>
+            {word}
           </span>
-        </span>
-
-        <span className="hs-headline-drum__sizers">
-          {heroSequenceHeadlineDrumWords.map((word) => (
-            <span className="hs-headline-drum__sizer" key={`sizer-${word}`}>
-              {word}
-            </span>
-          ))}
-        </span>
+        ))}
       </span>
+      <span className="hs-curtain__content">
+        {heroSequenceHeadlineDrumWords[0]}
+      </span>
+      <span className="hs-curtain__mask" aria-hidden="true" />
     </span>
   );
 }
@@ -77,7 +62,7 @@ export function ShatterHeadline() {
             <span className="hs-shatter__line" key={`line-${lineIndex}`}>
               {line.map((word, wordIndex) => {
                 if (lineIndex === 0 && wordIndex === 0) {
-                  return <DrumWord key="drum" />;
+                  return <CurtainVerb key="curtain-verb" />;
                 }
 
                 return (

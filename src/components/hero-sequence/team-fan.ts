@@ -1,7 +1,12 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import {
+  clearCurtainState,
+  createCurtainReveal,
+} from "./curtain-reveal";
 import { bindTeamHolo } from "./team-holo";
 import {
+  curtainReveal,
   teamAccentOrb,
   teamEntrance,
   teamFanLayouts,
@@ -11,6 +16,7 @@ import {
   teamLeadOrb,
   teamOrbMomentum,
   teamQueueTilt,
+  teamTitleReveal,
   type FanPose,
   type TeamLayout,
 } from "./team-fan-tuning";
@@ -158,6 +164,7 @@ export function bindTeamFan(
   const lead = select(".hs-team__orb--lead")[0] as HTMLElement | undefined;
   const accent = select(".hs-team__orb--accent")[0] as HTMLElement | undefined;
   const title = select(".hs-team__title")[0] as HTMLElement | undefined;
+  const titleLines = select(".hs-team__title-line") as HTMLElement[];
   const progress = select(".hs-team__progress")[0] as HTMLElement | undefined;
 
   if (!section || !pin || cards.length === 0) {
@@ -242,6 +249,10 @@ export function bindTeamFan(
 
   let arrive = options.reduceMotion ? 1 : 0;
   let fan = options.reduceMotion ? settledFanProgress(count) : 0;
+  let titleRevealStarted = false;
+  let progressRevealStarted = false;
+  let titleRevealTl: gsap.core.Timeline | undefined;
+  let progressRevealTl: gsap.core.Timeline | undefined;
 
   function place() {
     const width = window.innerWidth;
@@ -297,6 +308,15 @@ export function bindTeamFan(
       );
     }
 
+    if (
+      titleRevealTl &&
+      !titleRevealStarted &&
+      arrive >= teamTitleReveal.playAt
+    ) {
+      titleRevealStarted = true;
+      titleRevealTl.play(0);
+    }
+
     if (setLeadX && setLeadScaleX && setLeadScaleY) {
       const leadScale = unit * teamLeadOrb.scale;
       const leadY =
@@ -340,10 +360,39 @@ export function bindTeamFan(
               (cycleFan - cycleAt) / (1 - cycleAt),
             );
       progress.style.setProperty("--hs-team-progress", String(amount));
-      /* Show once cycling starts; fade out when the exit pan begins. */
+      /* Show while cycling; curtain plays once the first time it turns on. */
       const on = cycleFan > cycleAt && leave <= 0 ? "true" : "false";
       if (progress.dataset.on !== on) progress.dataset.on = on;
+
+      if (
+        on === "true" &&
+        !progressRevealStarted &&
+        progressRevealTl
+      ) {
+        progressRevealStarted = true;
+        progress.dataset.revealed = "true";
+        progressRevealTl.play(0);
+      } else if (
+        on === "true" &&
+        !progressRevealStarted &&
+        options.reduceMotion
+      ) {
+        progressRevealStarted = true;
+        progress.dataset.revealed = "true";
+      }
     }
+  }
+
+  titleRevealTl = createCurtainReveal(titleLines, teamTitleReveal, {
+    reduceMotion: options.reduceMotion,
+    paused: true,
+  });
+
+  if (progress) {
+    progressRevealTl = createCurtainReveal([progress], curtainReveal, {
+      reduceMotion: options.reduceMotion,
+      paused: true,
+    });
   }
 
   place();
@@ -424,7 +473,11 @@ export function bindTeamFan(
     trigger?.kill();
     reveal?.scrollTrigger?.kill();
     reveal?.kill();
+    titleRevealTl?.kill();
+    progressRevealTl?.kill();
     holo.destroy();
     if (title) gsap.set(title, { xPercent: -50, yPercent: -50, y: 0 });
+    titleLines.forEach(clearCurtainState);
+    if (progress) clearCurtainState(progress);
   };
 }

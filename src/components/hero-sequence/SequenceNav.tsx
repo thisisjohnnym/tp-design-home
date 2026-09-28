@@ -1,13 +1,23 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, type PointerEvent } from "react";
+import { useRef, type PointerEvent, type ReactNode } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { heroSequenceContact, heroSequenceResources } from "./content";
+import "./curtain-reveal.css";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
+
+function CurtainLabel({ children }: { children: ReactNode }) {
+  return (
+    <span className="hs-curtain hs-curtain--inline hs-nav__curtain">
+      <span className="hs-curtain__content">{children}</span>
+      <span className="hs-curtain__mask" aria-hidden="true" />
+    </span>
+  );
+}
 
 export function SequenceNav() {
   const navRef = useRef<HTMLElement>(null);
@@ -237,24 +247,30 @@ export function SequenceNav() {
 
       <div className="hs-nav__links">
         <div className="hs-nav__group">
-          <p className="hs-nav__group-title">Resources</p>
+          <p className="hs-nav__group-title">
+            <CurtainLabel>Resources</CurtainLabel>
+          </p>
           <ul className="hs-nav__list">
             {heroSequenceResources.map((resource) => (
               <li key={resource} className="hs-nav__item">
-                <a href="#resources">{resource}</a>
+                <a href="#resources">
+                  <CurtainLabel>{resource}</CurtainLabel>
+                </a>
               </li>
             ))}
           </ul>
         </div>
 
         <div className="hs-nav__group">
-          <p className="hs-nav__group-title">Contact</p>
+          <p className="hs-nav__group-title">
+            <CurtainLabel>Contact</CurtainLabel>
+          </p>
           <address className="hs-nav__list hs-nav__list--contact">
             <a className="hs-nav__item" href={`mailto:${heroSequenceContact.email}`}>
-              {heroSequenceContact.email}
+              <CurtainLabel>{heroSequenceContact.email}</CurtainLabel>
             </a>
             <a className="hs-nav__item" href={heroSequenceContact.phoneHref}>
-              {heroSequenceContact.phoneLabel}
+              <CurtainLabel>{heroSequenceContact.phoneLabel}</CurtainLabel>
             </a>
           </address>
         </div>

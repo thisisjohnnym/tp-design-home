@@ -1,0 +1,41 @@
+/* Shared yellow curtain reveal — 1px → expand RTL → shrink RTL. */
+
+.hs-curtain {
+  --hs-curtain-wipe: 0;
+  --hs-curtain-mask-opacity: 0;
+  --hs-curtain-content-opacity: 0;
+  --hs-curtain-origin: right center;
+  position: relative;
+  display: block;
+  overflow: clip;
+}
+
+.hs-curtain--inline {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: top;
+}
+
+.hs-curtain__content {
+  display: block;
+  opacity: var(--hs-curtain-content-opacity);
+}
+
+.hs-curtain__mask {
+  position: absolute;
+  inset: 0;
+  background: var(--hs-yellow);
+  opacity: var(--hs-curtain-mask-opacity);
+  transform: scaleX(var(--hs-curtain-wipe));
+  transform-origin: var(--hs-curtain-origin);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hs-curtain {
+    --hs-curtain-wipe: 0;
+    --hs-curtain-mask-opacity: 0;
+    --hs-curtain-content-opacity: 1;
+  }
+}

@@ -11,8 +11,16 @@ import { PointerEffect } from "./PointerEffect";
 import { PlateShader } from "./PlateShader";
 import { SequenceNav } from "./SequenceNav";
 import { TeamSection } from "./TeamSection";
+import {
+  clearCurtainState,
+  createCurtainReveal,
+  createCurtainWordCycle,
+  playCurtainWordIntro,
+  restCurtainWord,
+} from "./curtain-reveal";
 import { bindTeamFan } from "./team-fan";
 import { ShatterHeadline } from "./ShatterHeadline";
+import { curtainReveal } from "./team-fan-tuning";
 import {
   heroSequenceBeats as beats,
   heroSequenceCursorRoster,
@@ -39,24 +47,10 @@ export function HeroSequence() {
       const pin = select(".hs-pin")[0] as HTMLElement;
       const shatter = select(".hs-shatter")[0] as HTMLElement;
       const words = select(".hs-shatter__word") as HTMLElement[];
-      const headlineDrumTrack = select(
-        ".hs-headline-drum__track",
+      const curtainVerb = select(
+        '[data-curtain-verb="true"]',
       )[0] as HTMLElement | undefined;
-      const headlineRotor = select(
-        ".hs-headline-drum__rotor",
-      )[0] as HTMLElement | undefined;
-      const headlineFaces = select(
-        ".hs-headline-drum__face",
-      ) as HTMLElement[];
-      const headlineSizers = select(
-        ".hs-headline-drum__sizer",
-      ) as HTMLElement[];
-      const headlineFaceCharacters = headlineFaces.map(
-        (face) =>
-          gsap.utils.toArray<HTMLElement>(
-            face.querySelectorAll(".hs-headline-drum__character"),
-          ),
-      );
+      const navCurtains = select(".hs-nav__curtain") as HTMLElement[];
       const cursors = select(".hs-cursor") as HTMLElement[];
       const cursorLabels = select(".hs-cursor__label") as HTMLElement[];
       const navLinks = select(".hs-nav__links")[0] as HTMLElement;
@@ -230,10 +224,14 @@ export function HeroSequence() {
       };
 
       /* ---------------------------------------------------------------- */
-      /* Headline drum — roll verbs on “Building”, soft-push “what's”     */
+      /* Headline verb curtain + nav link curtains (replace drumroll)      */
       /* ---------------------------------------------------------------- */
 
-      let headlineLoop: gsap.core.Timeline | undefined;
+      let headlineVerbCycle: gsap.core.Timeline | undefined;
+      let headlineVerbIntro: gsap.core.Timeline | undefined;
+      let headlineVerbRunning = false;
+      let headlineVerbIntroduced = false;
+      let navCurtainTl: gsap.core.Timeline | undefined;
 
       /* Keep fixed line breaks; scale the whole shatter block to the viewport
          width so words never wrap onto a new row when space gets tight. */
@@ -262,122 +260,75 @@ export function HeroSequence() {
       requestAnimationFrame(fitShatterHeadline);
       void document.fonts?.ready.then(() => fitShatterHeadline());
 
-      const syncHeadlineDrumWidth = (faceIndex: number, animate: boolean) => {
-        if (!headlineDrumTrack || !headlineSizers[faceIndex]) return;
-        const nextWidth = headlineSizers[faceIndex].offsetWidth;
+      if (curtainVerb) {
+        headlineVerbCycle = createCurtainWordCycle(
+          curtainVerb,
+          heroSequenceHeadlineDrumWords,
+          {
+            ...curtainReveal,
+            holdDuration: heroSequenceMotion.headlineWordHold,
+          },
+          {
+            reduceMotion: prefersReducedMotion,
+            onWordChange: fitShatterHeadline,
+          },
+        );
+      }
 
-        if (!animate || prefersReducedMotion) {
-          gsap.set(headlineDrumTrack, { width: nextWidth });
-          fitShatterHeadline();
+      navCurtainTl = createCurtainReveal(navCurtains, curtainReveal, {
+        reduceMotion: prefersReducedMotion,
+        paused: true,
+      });
+
+      const startHeadlineVerb = () => {
+        if (!headlineVerbCycle || prefersReducedMotion || headlineVerbRunning) {
+          return;
+        }
+        headlineVerbRunning = true;
+
+        if (!headlineVerbIntroduced && curtainVerb) {
+          headlineVerbIntroduced = true;
+          headlineVerbIntro?.kill();
+          headlineVerbIntro = playCurtainWordIntro(
+            curtainVerb,
+            curtainReveal,
+            headlineVerbCycle,
+            fitShatterHeadline,
+          );
           return;
         }
 
-        // Soft width change reflows “what's” beside the drum — no extra x nudge
-        // (that would double-push on top of layout).
-        gsap.to(headlineDrumTrack, {
-          width: nextWidth,
-          duration: heroSequenceMotion.headlineWidthDuration,
-          ease: "power2.inOut",
-          overwrite: "auto",
-          onUpdate: fitShatterHeadline,
-          onComplete: fitShatterHeadline,
-        });
-      };
-
-      if (headlineRotor && headlineDrumTrack && headlineFaces.length > 0) {
-        gsap.set(headlineRotor, {
-          rotationX: 0,
-          transformOrigin: "center center",
-        });
-        headlineFaceCharacters.forEach((characters, faceIndex) => {
-          gsap.set(characters, {
-            autoAlpha: faceIndex === 0 ? 1 : 0,
-            filter: "blur(0px)",
-            yPercent: 0,
-          });
-        });
-        syncHeadlineDrumWidth(0, false);
-
-        if (!prefersReducedMotion) {
-          headlineLoop = gsap.timeline({ paused: true, repeat: -1 });
-
-          heroSequenceHeadlineDrumWords.forEach((_, faceIndex) => {
-            const stepLabel = `headline-face-${faceIndex}`;
-            const nextIndex =
-              (faceIndex + 1) % heroSequenceHeadlineDrumWords.length;
-            const rotationX =
-              (-360 / heroSequenceHeadlineDrumWords.length) * (faceIndex + 1);
-            const outgoing = headlineFaceCharacters[faceIndex];
-            const incoming = headlineFaceCharacters[nextIndex];
-
-            headlineLoop!
-              .addLabel(stepLabel, `+=${heroSequenceMotion.headlineWordHold}`)
-              .call(() => {
-                syncHeadlineDrumWidth(nextIndex, true);
-              }, [], stepLabel)
-              .to(
-                headlineRotor,
-                {
-                  rotationX,
-                  duration: heroSequenceMotion.headlineRollDuration,
-                  ease: "power3.inOut",
-                },
-                stepLabel,
-              )
-              .to(
-                outgoing,
-                {
-                  autoAlpha: 0,
-                  filter: `blur(${heroSequenceMotion.headlineCharacterBlur}px)`,
-                  yPercent: 18,
-                  duration: heroSequenceMotion.headlineCharacterDuration,
-                  ease: "power2.in",
-                  stagger: heroSequenceMotion.headlineCharacterStagger,
-                },
-                stepLabel,
-              )
-              .fromTo(
-                incoming,
-                {
-                  autoAlpha: 0,
-                  filter: `blur(${heroSequenceMotion.headlineCharacterBlur}px)`,
-                  yPercent: -18,
-                },
-                {
-                  autoAlpha: 1,
-                  filter: "blur(0px)",
-                  yPercent: 0,
-                  duration: heroSequenceMotion.headlineCharacterDuration,
-                  ease: "power2.out",
-                  stagger: heroSequenceMotion.headlineCharacterStagger,
-                  immediateRender: false,
-                },
-                `${stepLabel}+=0.08`,
-              );
-          });
-
-          // After a full turn, snap rotor back so the next loop doesn’t unwind.
-          headlineLoop.call(() => {
-            gsap.set(headlineRotor, { rotationX: 0 });
-            headlineFaceCharacters.forEach((characters, faceIndex) => {
-              gsap.set(characters, {
-                autoAlpha: faceIndex === 0 ? 1 : 0,
-                filter: "blur(0px)",
-                yPercent: 0,
-              });
-            });
-            syncHeadlineDrumWidth(0, true);
-          });
+        if (curtainVerb) {
+          const content = curtainVerb.querySelector(".hs-curtain__content");
+          if (content) {
+            content.textContent = heroSequenceHeadlineDrumWords[0] ?? "";
+          }
+          restCurtainWord(curtainVerb);
         }
-      }
-
-      const startHeadlineDrum = () => {
-        if (!headlineLoop || prefersReducedMotion) return;
-        headlineLoop.play(0);
+        headlineVerbCycle.restart(true);
+        fitShatterHeadline();
       };
 
-      const stopHeadlineDrum = () => {
-        headlineLoop?.pause();
+      const stopHeadlineVerb = () => {
+        if (!headlineVerbRunning) return;
+        headlineVerbRunning = false;
+        headlineVerbIntro?.pause(0);
+        headlineVerbIntro?.kill();
+        headlineVerbIntro = undefined;
+        headlineVerbCycle?.pause();
+        if (curtainVerb) restCurtainWord(curtainVerb);
+      };
+
+      const revealNavCurtains = () => {
+        if (prefersReducedMotion || !navCurtainTl) {
+          navCurtains.forEach((line) => {
+            line.style.setProperty("--hs-curtain-content-opacity", "1");
+            line.style.setProperty("--hs-curtain-mask-opacity", "0");
+            line.style.setProperty("--hs-curtain-wipe", "0");
+          });
+          return;
+        }
+        navCurtainTl.play(0);
       };
 
       if (skipIntro) {
@@ -385,7 +336,8 @@ export function HeroSequence() {
         gsap.set([shatter, navLinks, navLogo], { autoAlpha: 1, y: 0 });
         ScrollTrigger.refresh();
         startCursorRoster();
-        startHeadlineDrum();
+        revealNavCurtains();
+        startHeadlineVerb();
         fitShatterHeadline();
       } else {
         documentElement.style.overflow = "hidden";
@@ -394,7 +346,9 @@ export function HeroSequence() {
         gsap.set(navLogo, { autoAlpha: 0 });
         gsap.set(loader, { autoAlpha: 1, display: "grid" });
         gsap.set(firstWord, { autoAlpha: 0, filter: "blur(18px)", y: 10 });
-        gsap.set([shatter, navLinks], { autoAlpha: 0, y: 28 });
+        gsap.set(shatter, { autoAlpha: 0, y: 28 });
+        /* Links stay in place; curtains reveal the labels. */
+        gsap.set(navLinks, { autoAlpha: 1, y: 0 });
 
         const intro = gsap.timeline({ defaults: { ease: "power3.inOut" } });
 
@@ -428,7 +382,8 @@ export function HeroSequence() {
               smoother?.paused(false);
               ScrollTrigger.refresh();
               startCursorRoster();
-              startHeadlineDrum();
+              revealNavCurtains();
+              startHeadlineVerb();
               fitShatterHeadline();
             },
             [],
@@ -465,13 +420,12 @@ export function HeroSequence() {
             `reveal+=${heroSequenceIntro.revealDuration}`,
           )
           .to(
-            [shatter, navLinks],
+            shatter,
             {
               autoAlpha: 1,
               y: 0,
               duration: heroSequenceIntro.revealDuration,
               ease: "expo.out",
-              stagger: 0.08,
             },
             "reveal",
           )
@@ -532,8 +486,12 @@ export function HeroSequence() {
                 ) {
                   stopCursorRoster();
                 }
-                // Stop the verb drum once shatter owns the headline motion.
-                if (self.progress > 0.002) stopHeadlineDrum();
+                /*
+                 * Pause the verb cycle while shatter owns the headline;
+                 * restart cleanly when the hero returns to rest.
+                 */
+                if (self.progress > 0.002) stopHeadlineVerb();
+                else startHeadlineVerb();
 
               },
             },
@@ -594,7 +552,12 @@ export function HeroSequence() {
         documentElement.style.removeProperty("overflow");
         stopCursorRoster();
         cursorRosterTick.kill();
-        headlineLoop?.kill();
+        stopHeadlineVerb();
+        headlineVerbIntro?.kill();
+        headlineVerbCycle?.kill();
+        navCurtainTl?.kill();
+        navCurtains.forEach(clearCurtainState);
+        if (curtainVerb) clearCurtainState(curtainVerb);
         shatterFitObserver?.disconnect();
         smoother?.kill();
         media.revert();

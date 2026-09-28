@@ -14,7 +14,8 @@
 
   --hs-gutter: clamp(16px, 1.6vw, 24px);
   --hs-band-height: 480px;
-  --hs-scrub-length: 48svh;
+  /* Long enough for the shatter exit; a little room before the team arrives. */
+  --hs-scrub-length: 44svh;
   /* Paper “grid” strokes: 12 cols, 8px gutters, 24px page inset. */
   --hs-grid-cols: 12;
   --hs-grid-gap: 8px;
@@ -547,6 +548,42 @@
   flex-shrink: 0;
   padding-inline: 0.02em;
   will-change: filter, opacity, transform;
+}
+
+.hs-shatter__word--curtain.hs-curtain {
+  /*
+   * Sizers + content + mask share one grid cell so width = longest verb
+   * and height stays a single line (column stack was blowing the mask up).
+   */
+  display: inline-grid;
+  vertical-align: baseline;
+  line-height: inherit;
+  overflow: clip;
+}
+
+.hs-shatter__word--curtain .hs-curtain__sizers {
+  display: contents;
+}
+
+.hs-shatter__word--curtain .hs-curtain__content,
+.hs-shatter__word--curtain .hs-curtain__mask,
+.hs-shatter__word--curtain .hs-curtain__sizer {
+  grid-area: 1 / 1;
+}
+
+.hs-shatter__word--curtain .hs-curtain__sizer {
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.hs-shatter__word--curtain .hs-curtain__content {
+  white-space: nowrap;
+}
+
+.hs-nav__curtain {
+  /* Keep nav rows from growing when the yellow mask paints on. */
+  width: 100%;
 }
 
 .hs-shatter__word--drum {
@@ -1224,7 +1261,7 @@
   .hs-root {
     --hs-gutter: 16px;
     --hs-band-height: 336px;
-    --hs-scrub-length: 40svh;
+    --hs-scrub-length: 36svh;
     --hs-display: 15.4vw;
     --hs-title: 10.6vw;
     --hs-subhead: 4.4vw;

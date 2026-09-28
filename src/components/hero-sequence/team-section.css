@@ -2,8 +2,8 @@
    member card: 324×513, 16px outer radius, frosted fill, hairline rim. */
 
 .hs-team {
-  /* Overlaps the end of the hero just enough for a continuous handoff. */
-  margin-top: -64vh;
+  /* Slightly tighter than the old handoff; keep clear of the hero at rest. */
+  margin-top: -70vh;
   /*
    * Exit pan lifts the team layers (~0.5–0.7vh). Pull the next section up by
    * the same amount so it meets the rising scene instead of sitting in a void.
@@ -78,6 +78,9 @@
   z-index: 2;
   top: 50%;
   left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin: 0;
   color: var(--hs-light);
   font-size: clamp(48px, 6.61vw, 100px);
@@ -356,23 +359,21 @@
   width: var(--hs-team-progress-width);
   height: var(--hs-team-progress-height);
   translate: -50% 0;
+  /* Visible so the tip glow can sit past the track; mask still clips to inset. */
   overflow: visible;
-  background: var(--hs-team-progress-track);
-  opacity: 0;
-  filter: blur(8px);
-  visibility: hidden;
   pointer-events: none;
-  transition:
-    opacity 220ms ease-out,
-    filter 220ms ease-out,
-    visibility 220ms ease-out;
+  visibility: hidden;
 }
 
 .hs-team__progress[data-on="true"] {
-  opacity: 1;
-  filter: blur(0);
   visibility: visible;
-  transition-duration: 320ms;
+}
+
+.hs-team__progress-body {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  background: var(--hs-team-progress-track);
 }
 
 .hs-team__progress-fill {
@@ -416,6 +417,7 @@
   .hs-team__progress {
     transition: none;
   }
+
 }
 
 @media (max-width: 699px) {
