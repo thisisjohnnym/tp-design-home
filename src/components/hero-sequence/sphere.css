@@ -17,17 +17,12 @@
   will-change: transform;
 }
 
-.hs-sphere--lead {
-  top: 0;
-  left: 0;
-  width: 801px;
-  height: 798px;
-}
-
+/* Fill the orb box, which team-fan sizes per layout (--hs-orb-art). */
+.hs-sphere--lead,
 .hs-sphere--accent {
   top: 0;
   left: 0;
-  width: 1104px;
-  height: 989px;
+  width: 100%;
+  height: 100%;
 }
 

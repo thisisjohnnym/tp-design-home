@@ -6,6 +6,16 @@ import { HalftoneDots } from "@paper-design/shaders-react";
  * Site plate shader — Paper HalftoneDots frame (Hero sequence).
  * Sits behind the grid strokes; params match the design export.
  */
+/**
+ * Cap the plate at 2× device pixels. It only draws a faint grain, and at a
+ * 3× phone's full density its WebGL buffers were a large share of the memory
+ * that got iOS Safari's tab killed. Not rendered into markup, so SSR is safe.
+ */
+const maxPixelCount =
+  typeof window === "undefined"
+    ? undefined
+    : Math.round(window.screen.width * window.screen.height * 4);
+
 export function PlateShader() {
   return (
     <div className="hs-plate" aria-hidden="true">
@@ -27,6 +37,7 @@ export function PlateShader() {
         grainMixer={0.03}
         width="100%"
         height="100%"
+        maxPixelCount={maxPixelCount}
       />
     </div>
   );

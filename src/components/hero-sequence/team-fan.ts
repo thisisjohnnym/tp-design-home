@@ -12,6 +12,7 @@ import {
   teamFanLayouts,
   teamFanReadyOffset,
   teamFanTiming,
+  teamOrbArtScale,
   teamOrbLayouts,
   teamOrbMomentum,
   teamQueueTilt,
@@ -198,6 +199,8 @@ export function bindTeamFan(
   const { poses, center } = teamFanLayouts[options.layout];
   const readyOffset = teamFanReadyOffset[options.layout];
   const orbs = teamOrbLayouts[options.layout];
+  const orbArt = teamOrbArtScale[options.layout];
+  sectionEl.style.setProperty("--hs-orb-art", String(orbArt));
   const count = cards.length;
 
   gsap.set(cards, {
@@ -361,7 +364,8 @@ export function bindTeamFan(
     }
 
     if (setLeadX && setLeadScaleX && setLeadScaleY) {
-      const leadScale = unit * zoomThroughFrames(orbs.lead.scale, orbit);
+      const leadScale =
+        (unit * zoomThroughFrames(orbs.lead.scale, orbit)) / orbArt;
       const leadY =
         (gsap.utils.interpolate(orbs.lead.yRest, orbs.lead.yFan, pan) -
           cycleFan * teamOrbMomentum.fanDrift -
@@ -376,7 +380,7 @@ export function bindTeamFan(
 
     if (setAccentX && setAccentScaleX && setAccentScaleY) {
       const accentScale =
-        unit * zoomThroughFrames(orbs.accent.scale, orbit);
+        (unit * zoomThroughFrames(orbs.accent.scale, orbit)) / orbArt;
       const accentY =
         (gsap.utils.interpolate(
           orbs.accent.yRest,
@@ -554,6 +558,7 @@ export function bindTeamFan(
     if (title) gsap.set(title, { xPercent: -50, yPercent: -50, y: 0 });
     gsap.set(pinEl, { clearProps: "opacity,visibility" });
     if (accentArt) accentArt.style.opacity = "";
+    sectionEl.style.removeProperty("--hs-orb-art");
     sectionEl.removeAttribute("data-covered");
     sectionEl.style.zIndex = "";
     sectionEl.removeAttribute("data-exiting");

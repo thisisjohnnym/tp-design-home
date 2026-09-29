@@ -93,15 +93,17 @@
 }
 
 /* Full export frames at 1× — lead 801×798, accent 1104×989. */
+/* --hs-orb-art (set per layout in team-fan.ts) shrinks the rendered box; the
+   fan scale grows by the same factor, so the on-screen size is unchanged. */
 .hs-team__orb--lead {
-  width: 801px;
-  height: 798px;
+  width: calc(801px * var(--hs-orb-art, 1));
+  height: calc(798px * var(--hs-orb-art, 1));
 }
 
 .hs-team__orb--accent {
   z-index: 6;
-  width: 1104px;
-  height: 989px;
+  width: calc(1104px * var(--hs-orb-art, 1));
+  height: calc(989px * var(--hs-orb-art, 1));
 }
 
 .hs-team__title {

@@ -293,6 +293,20 @@ const phoneOrbs = {
   },
 } as const;
 
+/**
+ * Sphere boxes render at this share of the full 1× art size, and the scale
+ * setters divide by it, so on-screen size is unchanged. WebKit rasterizes a
+ * layer at its box size × device pixels, ignoring a downscaling transform, so
+ * a full-size box on a 3× phone held ~150MB of sphere bitmaps. Keep it at or
+ * above each layout's resting sphere scale so they stay crisp at rest; the
+ * exit zoom upscales past it, which only softens the already-soft art.
+ */
+export const teamOrbArtScale: Record<TeamLayout, number> = {
+  desktop: 0.85,
+  tablet: 0.85,
+  phone: 0.5,
+};
+
 export const teamOrbLayouts: Record<
   TeamLayout,
   { storyWidth: number; lead: TeamOrbPath; accent: TeamOrbPath }
