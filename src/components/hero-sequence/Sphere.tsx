@@ -24,16 +24,32 @@ export function SphereLeft() {
   );
 }
 
+/** Accent art pre-blurred at the exit's full 7px, padded 21px for the halo. */
+const accentBlurArt = { width: 1146, height: 1031 } as const;
+
 export function SphereRight() {
   return (
-    <img
-      className="hs-sphere hs-sphere--accent"
-      src={`/team/orb-accent.png?v=${ASSET_V}`}
-      alt=""
-      width={accentArt.width}
-      height={accentArt.height}
-      decoding="async"
-      draggable={false}
-    />
+    <>
+      <img
+        className="hs-sphere hs-sphere--accent"
+        src={`/team/orb-accent.png?v=${ASSET_V}`}
+        alt=""
+        width={accentArt.width}
+        height={accentArt.height}
+        decoding="async"
+        draggable={false}
+      />
+      {/* Cross-faded in during the exit zoom instead of a live CSS blur, which
+          on a zoomed layer blew past iOS Safari's memory limit. */}
+      <img
+        className="hs-sphere hs-sphere--accent-blur"
+        src={`/team/orb-accent-blur.webp?v=${ASSET_V}`}
+        alt=""
+        width={accentBlurArt.width}
+        height={accentBlurArt.height}
+        decoding="async"
+        draggable={false}
+      />
+    </>
   );
 }

@@ -26,3 +26,15 @@
   width: 1104px;
   height: 989px;
 }
+
+/* Pre-blurred accent. plus-lighter sums the two layers, so sharp at 1 − t and
+   blurred at t is a true crossfade with no dip in the sphere's opacity. */
+.hs-sphere--accent-blur {
+  top: -21px;
+  left: -21px;
+  width: 1146px;
+  height: 1031px;
+  opacity: 0;
+  visibility: hidden;
+  mix-blend-mode: plus-lighter;
+}

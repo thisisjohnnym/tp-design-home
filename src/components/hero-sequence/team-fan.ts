@@ -233,6 +233,13 @@ export function bindTeamFan(
     });
   }
 
+  /* Exit blur is a crossfade to a pre-blurred copy (see SphereRight). */
+  const accentSharp = accent?.querySelector<HTMLElement>(".hs-sphere--accent");
+  const accentBlurred = accent?.querySelector<HTMLElement>(
+    ".hs-sphere--accent-blur",
+  );
+  let accentBlur = 0;
+
   const setLeadX = lead ? gsap.quickSetter(lead, "x", "px") : null;
   const setLeadScaleX = lead ? gsap.quickSetter(lead, "scaleX") : null;
   const setLeadScaleY = lead ? gsap.quickSetter(lead, "scaleY") : null;
@@ -396,9 +403,18 @@ export function bindTeamFan(
         1,
         (orbit - teamExit.orbitAt) / (1 - teamExit.orbitAt),
       );
-      const blur = zoom * zoom * teamExit.accent.blur;
-      const filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : "";
-      if (accent.style.filter !== filter) accent.style.filter = filter;
+      const blur = Math.round(zoom * zoom * 1000) / 1000;
+      if (blur !== accentBlur) {
+        accentBlur = blur;
+        if (accentSharp) {
+          accentSharp.style.opacity = String(1 - blur);
+          accentSharp.style.visibility = blur < 1 ? "" : "hidden";
+        }
+        if (accentBlurred) {
+          accentBlurred.style.opacity = String(blur);
+          accentBlurred.style.visibility = blur > 0 ? "visible" : "";
+        }
+      }
     }
 
     /* Sit above the next section while exiting so the zoom covers it, then
@@ -550,7 +566,12 @@ export function bindTeamFan(
     holo.destroy();
     if (title) gsap.set(title, { xPercent: -50, yPercent: -50, y: 0 });
     gsap.set(pinEl, { clearProps: "opacity,visibility" });
-    if (accent) accent.style.filter = "";
+    for (const img of [accentSharp, accentBlurred]) {
+      if (img) {
+        img.style.opacity = "";
+        img.style.visibility = "";
+      }
+    }
     sectionEl.style.zIndex = "";
     sectionEl.removeAttribute("data-exiting");
     if (nextSection) nextSection.style.visibility = "";
