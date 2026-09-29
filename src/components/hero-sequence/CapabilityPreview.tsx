@@ -54,13 +54,17 @@ export function CapabilityPreview({
   const followRef = useRef<Follow | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  activeIdRef.current = activeId;
-  originRef.current = origin;
-
   const index = activeId
     ? items.findIndex((item) => item.id === activeId)
     : -1;
-  indexRef.current = index;
+
+  /* Mirror props into refs for the pointer handlers. First layout effect, so
+     the effects below already see this render's values. */
+  useLayoutEffect(() => {
+    activeIdRef.current = activeId;
+    originRef.current = origin;
+    indexRef.current = index;
+  });
 
   useEffect(() => {
     setMounted(true);

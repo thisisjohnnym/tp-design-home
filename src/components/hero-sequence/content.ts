@@ -44,32 +44,6 @@ export const heroSequenceHeadlineDrumWords = [
   "Building",
 ] as const;
 
-export const heroSequenceMidCopy = {
-  lines: ["We're Tapestry's", "In-House strategy", "and experience team."],
-  subhead:
-    "Bringing together brand, product, customer insight, and design to turn ambitious ideas into world-class retail experiences",
-} as const;
-
-export const heroSequenceCollab = {
-  /** Accessible label for the morphing collab title. */
-  label: "How we collab & share on Kate Spade",
-  /**
-   * Stair-step indent for line 2, as a fraction of the title font-size.
-   * Tuned so “share” sits under “collab” like the band reference.
-   */
-  lineIndentEm: 2.35,
-} as const;
-
-export type HeroSequenceBrand = {
-  id: string;
-  label: string;
-};
-
-export const heroSequenceBrands: HeroSequenceBrand[] = [
-  { id: "kate-spade", label: "Kate Spade" },
-  { id: "coach", label: "Coach" },
-];
-
 export const heroSequenceCursors = [
   {
     id: "mitra",
@@ -321,82 +295,6 @@ export const heroSequenceCapabilities = [
     ],
   },
 ] as const;
-
-export const heroSequenceCards = [
-  { title: "Grid System", href: "#" },
-  { title: "Logo Assets", href: "#" },
-  { title: "Fonts", href: "#" },
-  { title: "Imagery", href: "#" },
-  { title: "Spacing System", href: "#" },
-  { title: "Buttons", href: "#" },
-] as const;
-
-export type SphereFrame = { x: number; y: number; scale: number };
-
-export type SpherePose =
-  | "land"
-  | "zoom"
-  | "lockArc"
-  | "lock"
-  | "overlap"
-  | "takeover"
-  | "takeoverParallax";
-
-/**
- * Sphere keyframes read off the Paper storyboard. `x` is a fraction of the
- * viewport width and `y` a fraction of the viewport height, both measured from
- * the viewport centre to the sphere centre. `scale` is relative to the sphere's
- * natural 875px width in the source artwork.
- *
- * Path: land (frame 1, below) → zoom (frame 3, large/close) → lockArc (bowed
- * mid) → lock (frame 4). “Collapse” means zoomed-in → resting scale, not
- * lateral squeeze.
- */
-export const sphereNaturalWidth = 875;
-
-/**
- * Sphere width at scale 1, as a fraction of the viewport width. The storyboard
- * is 1512px wide, so 875 / 1512 keeps desktop identical to the artboard; phones
- * need a much larger fraction for the spheres to read at all.
- */
-export const sphereUnitFraction = {
-  desktop: 875 / 1512,
-  mobile: 1.1,
-} as const;
-
-export const sphereFrames: Record<
-  "left" | "right",
-  Record<SpherePose, SphereFrame>
-> = {
-  left: {
-    // Fully below the fold — never visible at land.
-    land: { x: -0.015, y: 1.55, scale: 2.911 },
-    // Frame 3 — still zoomed in; crowns fill the lower half.
-    // Nudged slightly left so rise isn’t a pure vertical then a hard X cut.
-    zoom: { x: -0.11, y: 0.689, scale: 2.911 },
-    // Bowed mid between zoom and lock — rise ahead of the left settle.
-    lockArc: { x: -0.14, y: 0.34, scale: 2.2 },
-    // Frame 4 — scale down into the resting lock composition.
-    lock: { x: -0.29, y: 0.145, scale: 1.665 },
-    // Frame 5 — slide together (same scale as lock).
-    overlap: { x: -0.182, y: 0.156, scale: 1.665 },
-    // Frame 6 — expand past the left edge while scaling so the frame stays filled
-    // (Paper places the takeover disc left of centre; drifting right left a void).
-    takeover: { x: -0.2, y: 0.1, scale: 6.4 },
-    // After scale settles — slow Y drift through band clip (bg parallax).
-    takeoverParallax: { x: -0.2, y: -0.14, scale: 6.4 },
-  },
-  right: {
-    land: { x: 0.922, y: 1.35, scale: 2.335 },
-    zoom: { x: 1.05, y: -0.093, scale: 2.335 },
-    // Arc in from the right — y dips slightly so the path isn’t a flat slide.
-    lockArc: { x: 0.58, y: -0.15, scale: 1.78 },
-    lock: { x: 0.246, y: -0.079, scale: 1.336 },
-    overlap: { x: 0.146, y: -0.046, scale: 1.336 },
-    takeover: { x: 0.146, y: -0.046, scale: 1.336 },
-    takeoverParallax: { x: 0.146, y: -0.046, scale: 1.336 },
-  },
-};
 
 /**
  * Beats are expressed on a 0-100 scrub scale so the labels stay readable while
