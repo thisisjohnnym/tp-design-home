@@ -55,6 +55,12 @@
   overflow: visible;
 }
 
+/* Off screen, hide the whole fan so its 3D card and sphere layers drop their
+   backing stores. !important beats the inline visibility GSAP writes. */
+.hs-team[data-offstage] .hs-team__pin {
+  visibility: hidden !important;
+}
+
 .hs-team__orbs {
   position: absolute;
   z-index: 1;
@@ -228,8 +234,9 @@
   width: 398.6%;
   height: 232.84%;
   object-fit: fill;
+  /* Asset is pre-inverted: a filter here gave each card its own oversized
+     GPU layer and pushed iOS Safari past its memory limit. */
   opacity: 0.16;
-  filter: invert(100%);
   translate: -50% -50%;
   pointer-events: none;
 }

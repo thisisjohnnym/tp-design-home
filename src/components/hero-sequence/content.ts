@@ -236,7 +236,7 @@ export const heroSequenceCursorTones = [
 
 /** Shared card chrome. Member lines live on each roster entry. */
 export const heroSequenceTeamCard = {
-  pattern: "/team/card-pattern.webp",
+  pattern: "/team/card-pattern-inverted.webp",
 } as const;
 
 /** Lead paragraph beside the capabilities list (Paper 7NG-0). */

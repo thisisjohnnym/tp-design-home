@@ -526,9 +526,21 @@ export function bindTeamFan(
         },
       });
 
+  /* Keep the fan's GPU layers out of memory until the section is on screen. */
+  const onstage = ScrollTrigger.create({
+    trigger: sectionEl,
+    start: "top bottom",
+    end: "bottom top",
+    onToggle: (self) =>
+      sectionEl.toggleAttribute("data-offstage", !self.isActive),
+  });
+  sectionEl.toggleAttribute("data-offstage", !onstage.isActive);
+
   ScrollTrigger.refresh();
 
   return () => {
+    onstage.kill();
+    sectionEl.removeAttribute("data-offstage");
     entrance?.kill();
     trigger?.kill();
     reveal?.scrollTrigger?.kill();
