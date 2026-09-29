@@ -8,7 +8,9 @@
     "start": "next start -p 3000",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "deploy": "vercel --prod --yes"
+    "deploy": "vercel --prod --yes",
+    "audit:mem": "node scripts/audit-mem.mjs",
+    "audit:code": "pnpm typecheck && pnpm lint && npx -y knip@latest --no-progress && npx -y react-doctor@latest --verbose"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -25,6 +27,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.19",
+    "playwright-core": "1.59.0",
     "typescript": "^5"
   }
 }

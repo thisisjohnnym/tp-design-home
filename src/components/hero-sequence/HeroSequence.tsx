@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
+import { startAutoscroll } from "@/lib/debug/autoscroll";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
@@ -133,8 +134,10 @@ export function HeroSequence() {
          only switched on once the page is released. */
       const normalizeTouchScroll =
         !smoother && ScrollTrigger.isTouch === 1 && !debugOff.has("normalize");
+      let stopAutoscroll: (() => void) | undefined;
       const enableTouchScroll = () => {
         if (normalizeTouchScroll) ScrollTrigger.normalizeScroll(true);
+        stopAutoscroll ??= startAutoscroll();
       };
 
       gsap.set(markDrum, { rotationX: 0, transformOrigin: "center center" });
@@ -605,6 +608,7 @@ export function HeroSequence() {
         shatterFitObserver?.disconnect();
         smoother?.kill();
         if (normalizeTouchScroll) ScrollTrigger.normalizeScroll(false);
+        stopAutoscroll?.();
         media.revert();
       };
     },
