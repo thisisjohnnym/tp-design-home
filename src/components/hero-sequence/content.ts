@@ -1,17 +1,18 @@
 export const heroSequenceLoaderWords = ["craft", "build", "think"] as const;
 
-export const heroSequenceResources = [
-  "Professional accountability",
-  "Feedback management",
-  "Writing as a thinking tool",
-  "Tapestry brands",
-] as const;
-
 export const heroSequenceContact = {
   email: "design@tapestry.com",
   phoneLabel: "+1 - 800 - TAPESTRY",
   phoneHref: "tel:+180082737879",
 } as const;
+
+/** Top-right nav links (Paper 81I-0). Hash targets are section ids. */
+export const heroSequenceNavLinks = [
+  { label: "Resources", href: "#resources" },
+  { label: "Team", href: "#team" },
+  { label: "Works", href: "#works" },
+  { label: "Contact", href: `mailto:${heroSequenceContact.email}` },
+] as const;
 
 /**
  * Frame 1 headline. Words are individual nodes so the shatter beat can move
@@ -49,29 +50,29 @@ export const heroSequenceCursors = [
     id: "mitra",
     name: "Mitra Raveendran",
     slot: "a",
-    tone: "blue",
+    tone: "green",
     text: "white",
   },
   {
     id: "wendy",
     name: "Wendy Chan",
     slot: "b",
-    tone: "red",
-    text: "white",
+    tone: "orange",
+    text: "black",
   },
   {
     id: "johnny",
     name: "Jonathan Martinez",
     slot: "c",
-    tone: "purple",
+    tone: "red",
     text: "white",
   },
   {
     id: "sean",
     name: "Sean Kelly",
     slot: "d",
-    tone: "yellow",
-    text: "black",
+    tone: "blue",
+    text: "white",
   },
 ] as const;
 
@@ -196,16 +197,14 @@ export const heroSequenceCursorRoster = [
 
 export const heroSequenceCursorSlots = ["a", "b", "c", "d"] as const;
 
-/** MTA line colors for hero cursors. Each visible group draws distinct tones,
- *  so no two cursors on screen share a color. Yellow takes black ink, as on
- *  the N Q R bullet; the rest take white. */
+/** Hero cursor tones (Paper 81I-0). Each group of four draws them without
+ *  replacement, so no two cursors on screen share a color. Orange takes
+ *  black ink; the rest take white. */
 export const heroSequenceCursorTones = [
-  { id: "red", text: "white" }, // 1 2 3
-  { id: "orange", text: "white" }, // B D F M
-  { id: "yellow", text: "black" }, // N Q R W
-  { id: "green", text: "white" }, // 4 5 6
-  { id: "blue", text: "white" }, // A C E
-  { id: "purple", text: "white" }, // 7
+  { id: "green", text: "white" },
+  { id: "orange", text: "black" },
+  { id: "red", text: "white" },
+  { id: "blue", text: "white" },
 ] as const;
 
 /** Shared card chrome. Member lines live on each roster entry. */

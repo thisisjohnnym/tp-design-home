@@ -124,6 +124,7 @@ export function WorkGallery() {
 
   return (
     <section
+      id="works"
       className="hs-gallery"
       ref={rootRef}
       aria-label="Selected work"

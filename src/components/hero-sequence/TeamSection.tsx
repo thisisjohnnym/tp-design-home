@@ -14,7 +14,7 @@ function TeamLight({ back = false }: { back?: boolean }) {
 
 export function TeamSection() {
   return (
-    <section className="hs-team" aria-labelledby="hs-team-heading">
+    <section id="team" className="hs-team" aria-labelledby="hs-team-heading">
       <div className="hs-team__pin">
         <div className="hs-team__orbs" aria-hidden="true">
           <div className="hs-team__orb hs-team__orb--lead">

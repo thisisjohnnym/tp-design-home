@@ -56,6 +56,7 @@ export function HeroSequence() {
       const navCurtains = select(".hs-nav__curtain") as HTMLElement[];
       const cursors = select(".hs-cursor") as HTMLElement[];
       const cursorLabels = select(".hs-cursor__label") as HTMLElement[];
+      const scrollCue = select(".hs-scroll-cue")[0] as HTMLElement;
       const navLinks = select(".hs-nav__links")[0] as HTMLElement;
       const loader = select(".hs-loader")[0] as HTMLElement;
       const loaderMark = select(".hs-loader-mark")[0] as HTMLElement;
@@ -274,14 +275,13 @@ export function HeroSequence() {
           | undefined;
         if (!headline) return;
 
-        gsap.set(shatter, { scale: 1, transformOrigin: "left bottom" });
-        const available = shatter.clientWidth;
+        /* The block shrink-wraps its lines, so measure the layer around it.
+           Transform origin comes from CSS (centered desktop, bottom-left phone). */
+        gsap.set(shatter, { scale: 1 });
+        const available = shatter.parentElement?.clientWidth ?? 0;
         const needed = headline.scrollWidth;
         if (available <= 0 || needed <= 0) return;
-        gsap.set(shatter, {
-          scale: Math.min(1, available / needed),
-          transformOrigin: "left bottom",
-        });
+        gsap.set(shatter, { scale: Math.min(1, available / needed) });
       };
 
       const shatterFitObserver =
@@ -373,7 +373,10 @@ export function HeroSequence() {
 
       if (skipIntro) {
         gsap.set([loader, loaderMark], { autoAlpha: 0, display: "none" });
-        gsap.set([shatter, navLinks, navLogo], { autoAlpha: 1, y: 0 });
+        gsap.set([shatter, navLinks, navLogo, scrollCue], {
+          autoAlpha: 1,
+          y: 0,
+        });
         ScrollTrigger.refresh();
         enableTouchScroll();
         startCursorRoster();
@@ -394,6 +397,7 @@ export function HeroSequence() {
         gsap.set(loader, { autoAlpha: 1, display: "grid" });
         gsap.set(firstWord, { autoAlpha: 0, filter: "blur(18px)", y: 10 });
         gsap.set(shatter, { autoAlpha: 0, y: 28 });
+        gsap.set(scrollCue, { autoAlpha: 0 });
         /* Links stay in place; curtains reveal the labels. */
         gsap.set(navLinks, { autoAlpha: 1, y: 0 });
 
@@ -475,6 +479,11 @@ export function HeroSequence() {
               ease: "expo.out",
             },
             "reveal",
+          )
+          .to(
+            scrollCue,
+            { autoAlpha: 1, duration: heroSequenceIntro.revealDuration },
+            `reveal+=${heroSequenceIntro.revealDuration * 0.5}`,
           )
           /* Hand the wordmark over to the nav so it scrolls with the page. */
           .to(
@@ -584,11 +593,27 @@ export function HeroSequence() {
             beats.shatterStart,
           );
 
+          /* The cue has done its job as soon as the page starts moving.
+             fromTo so the scrub doesn't record the intro's hidden state as
+             its start value. */
+          timeline.fromTo(
+            scrollCue,
+            { autoAlpha: 1 },
+            {
+              autoAlpha: 0,
+              immediateRender: false,
+              duration: beats.cursorsOutEnd - beats.shatterStart,
+              ease: "none",
+            },
+            beats.shatterStart,
+          );
 
-          const releaseTeam = bindTeamFan(root, {
-            reduceMotion,
-            layout: isMobile ? "phone" : isTablet ? "tablet" : "desktop",
-          });
+          const releaseTeam = debugOff.has("teamjs")
+            ? () => {}
+            : bindTeamFan(root, {
+                reduceMotion,
+                layout: isMobile ? "phone" : isTablet ? "tablet" : "desktop",
+              });
 
           return () => {
             releaseTeam();
@@ -642,6 +667,10 @@ export function HeroSequence() {
                   <div className="hs-scene">
                     <ShatterHeadline />
                   </div>
+
+                  <p className="hs-scroll-cue" aria-hidden="true">
+                    Scroll to explore
+                  </p>
                 </div>
               </div>
             </div>
