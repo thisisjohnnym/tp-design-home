@@ -75,24 +75,28 @@ export const heroSequenceCursors = [
     id: "mitra",
     name: "Mitra Raveendran",
     slot: "a",
+    tone: "blue",
     text: "white",
   },
   {
     id: "wendy",
     name: "Wendy Chan",
     slot: "b",
+    tone: "red",
     text: "white",
   },
   {
     id: "johnny",
     name: "Jonathan Martinez",
     slot: "c",
+    tone: "purple",
     text: "white",
   },
   {
     id: "sean",
     name: "Sean Kelly",
     slot: "d",
+    tone: "yellow",
     text: "black",
   },
 ] as const;
@@ -217,6 +221,18 @@ export const heroSequenceCursorRoster = [
 ] as const;
 
 export const heroSequenceCursorSlots = ["a", "b", "c", "d"] as const;
+
+/** MTA line colors for hero cursors. Each visible group draws distinct tones,
+ *  so no two cursors on screen share a color. Yellow takes black ink, as on
+ *  the N Q R bullet; the rest take white. */
+export const heroSequenceCursorTones = [
+  { id: "red", text: "white" }, // 1 2 3
+  { id: "orange", text: "white" }, // B D F M
+  { id: "yellow", text: "black" }, // N Q R W
+  { id: "green", text: "white" }, // 4 5 6
+  { id: "blue", text: "white" }, // A C E
+  { id: "purple", text: "white" }, // 7
+] as const;
 
 /** Shared card chrome. Member lines live on each roster entry. */
 export const heroSequenceTeamCard = {

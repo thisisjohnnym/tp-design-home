@@ -26,6 +26,7 @@ import {
   heroSequenceBeats as beats,
   heroSequenceCursorRoster,
   heroSequenceCursorSlots,
+  heroSequenceCursorTones,
   heroSequenceHeadlineDrumWords,
   heroSequenceIntro,
   heroSequenceMotion,
@@ -170,12 +171,16 @@ export function HeroSequence() {
           ...cursorGroups[cursorGroupIndex],
         ]);
         const slots = gsap.utils.shuffle([...heroSequenceCursorSlots]);
+        // Draw without replacement so no two cursors in a group share a color.
+        const tones = gsap.utils.shuffle([...heroSequenceCursorTones]);
 
         cursors.forEach((cursor, index) => {
           const person = people[index];
+          const tone = tones[index % tones.length];
           cursor.dataset.person = person.id;
           cursor.dataset.slot = slots[index];
-          cursor.dataset.text = person.text;
+          cursor.dataset.tone = tone.id;
+          cursor.dataset.text = tone.text;
           cursorLabels[index].textContent = person.name;
         });
       };

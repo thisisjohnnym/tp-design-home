@@ -756,40 +756,35 @@
   white-space: nowrap;
 }
 
-/* Team cursor identities keep the existing palette used across the site. */
-.hs-cursor[data-person="johnny"] {
-  --hs-cursor-fill: #9747ff;
-  --hs-cursor-border: #7939cc;
+/* MTA line colors. Tones are assigned per group so none repeat on screen. */
+.hs-cursor[data-tone="red"] {
+  --hs-cursor-fill: #ee352e; /* 1 2 3 */
+  --hs-cursor-border: #be2a25;
 }
 
-.hs-cursor[data-person="mitra"] {
-  --hs-cursor-fill: #0d99ff;
-  --hs-cursor-border: #0a7acc;
+.hs-cursor[data-tone="orange"] {
+  --hs-cursor-fill: #ff6319; /* B D F M */
+  --hs-cursor-border: #cc4f14;
 }
 
-.hs-cursor[data-person="wendy"] {
-  --hs-cursor-fill: #f24822;
-  --hs-cursor-border: #c23a1b;
+.hs-cursor[data-tone="yellow"] {
+  --hs-cursor-fill: #fccc0a; /* N Q R W */
+  --hs-cursor-border: #caa308;
 }
 
-.hs-cursor[data-person="sean"] {
-  --hs-cursor-fill: #ffa629;
-  --hs-cursor-border: #cc8521;
+.hs-cursor[data-tone="green"] {
+  --hs-cursor-fill: #00933c; /* 4 5 6 */
+  --hs-cursor-border: #007630;
 }
 
-.hs-cursor[data-person="cong"] {
-  --hs-cursor-fill: #ffcd29;
-  --hs-cursor-border: #cca421;
+.hs-cursor[data-tone="blue"] {
+  --hs-cursor-fill: #0039a6; /* A C E */
+  --hs-cursor-border: #002e85;
 }
 
-.hs-cursor[data-person="gulsheen"] {
-  --hs-cursor-fill: #0d99ff;
-  --hs-cursor-border: #0a7acc;
-}
-
-.hs-cursor[data-person="juliana"] {
-  --hs-cursor-fill: #9747ff;
-  --hs-cursor-border: #7939cc;
+.hs-cursor[data-tone="purple"] {
+  --hs-cursor-fill: #b933ad; /* 7 */
+  --hs-cursor-border: #94298a;
 }
 
 .hs-cursor[data-text="black"] .hs-cursor__label {

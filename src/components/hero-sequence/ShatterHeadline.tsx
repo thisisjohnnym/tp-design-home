@@ -91,6 +91,7 @@ export function ShatterHeadline() {
               className="hs-cursor"
               data-person={cursor.id}
               data-slot={cursor.slot}
+              data-tone={cursor.tone}
               data-text={cursor.text}
               key={cursor.id}
             >
