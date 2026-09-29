@@ -97,6 +97,19 @@ export function HeroSequence() {
         "(hover: hover) and (pointer: fine)",
       ).matches;
 
+      /* Crash triage: ?off=shader,team,glass,... switches features off on a
+         device (rules at the end of hero-sequence.css). No-op without it. */
+      const debugOff = new Set(
+        new URLSearchParams(window.location.search)
+          .get("off")
+          ?.split(",")
+          .map((token) => token.trim())
+          .filter(Boolean) ?? [],
+      );
+      if (debugOff.size > 0) {
+        document.documentElement.dataset.off = [...debugOff].join(" ");
+      }
+
       /* ScrollSmoother eases native scroll on desktop. Touch / reduced-motion
          keep native scrolling (Safari jitter + a11y). */
       let smoother: ScrollSmoother | undefined;
@@ -118,7 +131,8 @@ export function HeroSequence() {
          Safari's toolbar resizing the viewport mid-scroll. It scrolls
          programmatically, which bypasses the intro's overflow lock, so it is
          only switched on once the page is released. */
-      const normalizeTouchScroll = !smoother && ScrollTrigger.isTouch === 1;
+      const normalizeTouchScroll =
+        !smoother && ScrollTrigger.isTouch === 1 && !debugOff.has("normalize");
       const enableTouchScroll = () => {
         if (normalizeTouchScroll) ScrollTrigger.normalizeScroll(true);
       };
