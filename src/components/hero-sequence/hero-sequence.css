@@ -1443,6 +1443,8 @@ html.hs-has-pointer * {
 /* ------------------------------------------------------------------ */
 /* Crash triage — ?off=token,token (set in HeroSequence.tsx).          */
 /* "normalize" is handled in JS (iOS touch-scroll takeover).           */
+/* Tokens: shader team orbs cards caps hero gallery nav grid pointer   */
+/*         glass filters blend will-change normalize                   */
 /* ------------------------------------------------------------------ */
 
 html[data-off~="shader"] .hs-plate__shader,
@@ -1451,6 +1453,19 @@ html[data-off~="orbs"] .hs-team__orbs,
 html[data-off~="cards"] .hs-team__stage,
 html[data-off~="caps"] .hs-caps {
   display: none !important;
+}
+
+/* Hidden rather than removed so page length and scroll triggers stay put. */
+html[data-off~="hero"] .hs-scene,
+html[data-off~="gallery"] .hs-gallery,
+html[data-off~="nav"] .hs-nav,
+html[data-off~="grid"] .hs-grid,
+html[data-off~="pointer"] .hs-pointer {
+  visibility: hidden !important;
+}
+
+html[data-off~="will-change"] * {
+  will-change: auto !important;
 }
 
 html[data-off~="glass"] * {
