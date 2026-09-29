@@ -5,9 +5,6 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { heroSequenceWorkGallery } from "./content";
-import { appendCurtainLine } from "./curtain-reveal";
-import { curtainReveal } from "./team-fan-tuning";
-import "./curtain-reveal.css";
 import "./work-gallery.css";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -27,15 +24,13 @@ function ApplePayMark() {
 
 /**
  * Paper collage before the team section — image tiles only, no plate/grid.
- * Depth comes from per-tile scroll speeds while the stage scrolls through.
- * NYC wayfinding marks (arrows, a street-sign label, stray UI chips) ride
- * along at the speed of the tile they point at, so they stay attached.
+ * Tiles hold their Paper positions; each settles in as it scrolls up.
+ * NYC wayfinding marks (arrows, a street-sign label, stray UI chips) sit
+ * beside the tile they point at.
  */
-/* Fraction of stage height a speed-2 tile would travel over the full scroll-through. */
-const PARALLAX_DEPTH = 0.6;
-/* The phone stage is ~4× taller than wide, so it runs a shallower depth — but
-   paired with the wider data-speed-phone spread, drift reads like desktop. */
-const PARALLAX_DEPTH_PHONE = 0.42;
+/* Starting zoom of a tile's image inside its frame; settles to 1. */
+const TILE_ENTER_SCALE = 1.15;
+const TILE_ENTER_DURATION = 1.8;
 /* Matches the hero's phone breakpoint (HeroSequence isMobile). */
 const GALLERY_PHONE_QUERY = "(max-width: 699px)";
 
@@ -52,67 +47,37 @@ export function WorkGallery() {
       ).matches;
       if (prefersReducedMotion) return;
 
-      const stage = root.querySelector(".hs-gallery__stage") as HTMLElement;
       const tiles = gsap.utils.toArray<HTMLElement>(".hs-gallery__tile", root);
-      const movers = gsap.utils.toArray<HTMLElement>("[data-speed]", root);
-      if (!stage || tiles.length === 0) return;
+      if (tiles.length === 0) return;
 
       const triggers: ScrollTrigger[] = [];
-      const phoneQuery = window.matchMedia(GALLERY_PHONE_QUERY);
-      const depth = () =>
-        phoneQuery.matches ? PARALLAX_DEPTH_PHONE : PARALLAX_DEPTH;
 
-      movers.forEach((tile) => {
-        const speed = () =>
-          Number(
-            (phoneQuery.matches && tile.dataset.speedPhone) ||
-              tile.dataset.speed ||
-              "1",
-          );
-        /*
-         * Speed 1 rides with scroll. Below 1 lags (farther), above 1 leads
-         * (nearer) — leading means drifting up against the scroll, so the
-         * offset is negative. Centered on zero so the Paper layout is exact
-         * when the stage sits mid-viewport and tiles spread apart either side.
-         */
-        const travel = () => (1 - speed()) * stage.offsetHeight * depth();
+      /*
+       * Settle-in: each tile's image starts zoomed in and plays down to 1
+       * once the tile clears the bottom edge. The tile clips, so the frame
+       * never grows past its Paper size. Reverses when scrolled back below
+       * the fold so it replays.
+       */
+      tiles.forEach((tile) => {
+        const picture = tile.querySelector(".hs-gallery__picture");
+        if (!picture) return;
 
         const tween = gsap.fromTo(
-          tile,
-          { y: () => -travel() / 2 },
+          picture,
+          { scale: TILE_ENTER_SCALE },
           {
-            y: () => travel() / 2,
-            ease: "none",
+            scale: 1,
+            duration: TILE_ENTER_DURATION,
+            ease: "power2.out",
             scrollTrigger: {
-              trigger: root,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: true,
-              invalidateOnRefresh: true,
+              trigger: tile,
+              start: "top 90%",
+              toggleActions: "play none none reverse",
             },
           },
         );
 
         if (tween.scrollTrigger) triggers.push(tween.scrollTrigger);
-      });
-
-      tiles.forEach((tile) => {
-        const curtain = tile.querySelector(".hs-curtain") as HTMLElement;
-        if (!curtain) return;
-
-        const tl = gsap.timeline({ paused: true });
-        appendCurtainLine(tl, curtain, 0, curtainReveal, {
-          hideContent: true,
-        });
-
-        const trigger = ScrollTrigger.create({
-          trigger: tile,
-          start: "top bottom",
-          once: true,
-          onEnter: () => tl.play(0),
-        });
-
-        triggers.push(trigger);
       });
 
       return () => {
@@ -133,43 +98,34 @@ export function WorkGallery() {
         {heroSequenceWorkGallery.map((tile) => (
           <figure
             className={`hs-gallery__tile hs-gallery__tile--${tile.id}`}
-            data-speed={tile.speed}
-            data-speed-phone={"phoneSpeed" in tile ? tile.phoneSpeed : undefined}
             key={tile.id}
           >
-            <div className="hs-curtain hs-gallery__curtain">
-              <picture className="hs-curtain__content">
-                {"mobileSrc" in tile && (
-                  <source media={GALLERY_PHONE_QUERY} srcSet={tile.mobileSrc} />
-                )}
-                <img
-                  className="hs-gallery__image"
-                  src={tile.src}
-                  alt={tile.alt}
-                  width={tile.pixelWidth}
-                  height={tile.pixelHeight}
-                  loading="lazy"
-                  decoding="async"
-                />
-              </picture>
-              <span className="hs-curtain__mask" aria-hidden="true" />
-            </div>
+            <picture className="hs-gallery__picture">
+              {"mobileSrc" in tile && (
+                <source media={GALLERY_PHONE_QUERY} srcSet={tile.mobileSrc} />
+              )}
+              <img
+                className="hs-gallery__image"
+                src={tile.src}
+                alt={tile.alt}
+                width={tile.pixelWidth}
+                height={tile.pixelHeight}
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
           </figure>
         ))}
 
         {/* Decorative wayfinding — the tiles already carry the alt text. */}
         <span
           className="hs-gallery__ui hs-gallery__arrow hs-gallery__arrow--in"
-          data-speed="1.16"
-          data-speed-phone="0.88"
           aria-hidden="true"
         >
           ↘
         </span>
         <span
           className="hs-gallery__ui hs-gallery__sign"
-          data-speed="0.55"
-          data-speed-phone="0.72"
           aria-hidden="true"
         >
           <span className="hs-gallery__sign-bullet">KS</span>
@@ -181,24 +137,18 @@ export function WorkGallery() {
         </span>
         <span
           className="hs-gallery__ui hs-gallery__pay"
-          data-speed="1.6"
-          data-speed-phone="1.45"
           aria-hidden="true"
         >
           <ApplePayMark />
         </span>
         <span
           className="hs-gallery__ui hs-gallery__cta"
-          data-speed="0.81"
-          data-speed-phone="1.28"
           aria-hidden="true"
         >
           Add to Cart
         </span>
         <span
           className="hs-gallery__ui hs-gallery__arrow hs-gallery__arrow--out"
-          data-speed="0.84"
-          data-speed-phone="0.6"
           aria-hidden="true"
         >
           ↙

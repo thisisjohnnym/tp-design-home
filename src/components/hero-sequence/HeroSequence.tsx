@@ -602,7 +602,7 @@ export function HeroSequence() {
             {
               autoAlpha: 0,
               immediateRender: false,
-              duration: beats.cursorsOutEnd - beats.shatterStart,
+              duration: beats.scrollCueOutEnd - beats.shatterStart,
               ease: "none",
             },
             beats.shatterStart,

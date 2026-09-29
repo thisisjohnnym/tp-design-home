@@ -306,6 +306,8 @@ export const heroSequenceBeats = {
   /** Gentle cascade across the longer exit. */
   shatterStagger: 1.4,
   cursorsOutEnd: 62,
+  /** Scroll cue is gone well before the work gallery rises under it. */
+  scrollCueOutEnd: 8,
   /**
    * Spheres rise with the last departing word so the handoff stays continuous.
    */
@@ -401,8 +403,7 @@ export const heroSequenceIntro = {
 } as const;
 
 /**
- * Parallax collage before the team section (Paper 8BV-0 desktop, 6WC-0 phone).
- * `speed` drives scroll depth: under 1 lags (far), over 1 leads (near).
+ * Collage before the team section (Paper 8BV-0 desktop, 6WC-0 phone).
  * Pixel sizes are 1× frame exports used for intrinsic aspect hints.
  * `mobileSrc` swaps in the phone frame's crop; tiles without one that the
  * phone layout drops are hidden in CSS.
@@ -412,7 +413,6 @@ export const heroSequenceWorkGallery = [
     id: "pdp",
     src: "/gallery/pdp.webp",
     alt: "Kate Spade product detail page for a black shoulder bag",
-    speed: 0.55,
     pixelWidth: 883,
     pixelHeight: 764,
   },
@@ -420,8 +420,6 @@ export const heroSequenceWorkGallery = [
     id: "carousel",
     src: "/gallery/carousel.webp",
     alt: "Yellow product feature carousel cards",
-    speed: 0.81,
-    phoneSpeed: 0.72,
     pixelWidth: 367,
     pixelHeight: 437,
   },
@@ -430,8 +428,6 @@ export const heroSequenceWorkGallery = [
     src: "/gallery/cart.webp",
     mobileSrc: "/gallery/cart-mobile.webp",
     alt: "Kate Spade mobile cart with a rose smoke crossbody",
-    speed: 1,
-    phoneSpeed: 0.82,
     pixelWidth: 736,
     pixelHeight: 647,
   },
@@ -440,8 +436,6 @@ export const heroSequenceWorkGallery = [
     src: "/gallery/logo-c.webp",
     mobileSrc: "/gallery/logo-c-mobile.webp",
     alt: "Gold Coach C hardware on sage leather",
-    speed: 1.29,
-    phoneSpeed: 1.28,
     pixelWidth: 269,
     pixelHeight: 357,
   },
@@ -449,7 +443,6 @@ export const heroSequenceWorkGallery = [
     id: "testimonial",
     src: "/gallery/testimonial.webp",
     alt: "Customer testimonials mobile screen",
-    speed: 1.51,
     pixelWidth: 261,
     pixelHeight: 344,
   },
@@ -458,8 +451,6 @@ export const heroSequenceWorkGallery = [
     src: "/gallery/lifestyle.webp",
     mobileSrc: "/gallery/lifestyle-mobile.webp",
     alt: "Model wearing a pink kate spade crossbody",
-    speed: 1.72,
-    phoneSpeed: 1.6,
     pixelWidth: 139,
     pixelHeight: 437,
   },
