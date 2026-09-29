@@ -27,6 +27,8 @@
   /* Cycle progress bar (Paper team frame): track + fill tip glow. */
   --hs-team-progress: 0;
   --hs-team-progress-track: #545454;
+  /* MTA green (4/5/6 line bullet). */
+  --hs-team-progress-fill: #00933c;
   --hs-team-progress-width: 180px;
   --hs-team-progress-height: 3px;
   /* 845 / 982 on the desktop storyboard. */
@@ -401,7 +403,7 @@
   left: 0;
   width: calc(var(--hs-team-progress) * 100%);
   overflow: clip;
-  background: var(--hs-yellow);
+  background: var(--hs-team-progress-fill);
 }
 
 /* Soft tip glow — sits ahead of the fill edge (Paper glow frame). */
@@ -417,7 +419,7 @@
   background-image: linear-gradient(
     90deg,
     transparent 21.43%,
-    var(--hs-yellow) 78.57%
+    var(--hs-team-progress-fill) 78.57%
   );
   pointer-events: none;
 }
@@ -442,8 +444,20 @@
 
 }
 
+/* Phone — Paper 8MK-0 (440×956). */
 @media (max-width: 699px) {
+  .hs-team {
+    /* 266 / 440 after the centre card's z 64 perspective lift
+       (1400 / 1336 ≈ 1.048), so it projects at Paper's 266px. */
+    --hs-team-card-width: 57.68vw;
+    /* 845 / 956 */
+    --hs-team-progress-top: 88.39%;
+  }
+
   .hs-team__title {
-    font-size: clamp(40px, 12vw, 64px);
+    /* 52 / 440; sits 13 / 956 below centre. */
+    margin-top: 1.36svh;
+    font-size: 11.82vw;
+    line-height: 1;
   }
 }

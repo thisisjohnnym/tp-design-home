@@ -7,14 +7,12 @@ import {
 import { bindTeamHolo } from "./team-holo";
 import {
   curtainReveal,
-  teamAccentOrb,
   teamEntrance,
   teamExit,
   teamFanLayouts,
   teamFanReadyOffset,
-  teamFanStoryWidth,
   teamFanTiming,
-  teamLeadOrb,
+  teamOrbLayouts,
   teamOrbMomentum,
   teamQueueTilt,
   teamTitleReveal,
@@ -199,6 +197,7 @@ export function bindTeamFan(
   const pinEl = pin;
   const { poses, center } = teamFanLayouts[options.layout];
   const readyOffset = teamFanReadyOffset[options.layout];
+  const orbs = teamOrbLayouts[options.layout];
   const count = cards.length;
 
   gsap.set(cards, {
@@ -341,7 +340,7 @@ export function bindTeamFan(
       holo.lean(index, lean.x * facing, lean.y);
     }
 
-    const unit = width / teamFanStoryWidth;
+    const unit = width / orbs.storyWidth;
 
     if (setTitleY) {
       setTitleY(
@@ -359,13 +358,13 @@ export function bindTeamFan(
     }
 
     if (setLeadX && setLeadScaleX && setLeadScaleY) {
-      const leadScale = unit * zoomThroughFrames(teamExit.lead.scale, orbit);
+      const leadScale = unit * zoomThroughFrames(orbs.lead.scale, orbit);
       const leadY =
-        (gsap.utils.interpolate(teamLeadOrb.yRest, teamLeadOrb.yFan, pan) -
+        (gsap.utils.interpolate(orbs.lead.yRest, orbs.lead.yFan, pan) -
           cycleFan * teamOrbMomentum.fanDrift -
           Math.sin(orbit * Math.PI) * teamExit.lead.lift) *
         height;
-      setLeadX(throughFrames(teamExit.lead.x, orbit) * width);
+      setLeadX(throughFrames(orbs.lead.x, orbit) * width);
       setLeadScaleX(leadScale);
       setLeadScaleY(leadScale);
       if (leadYTo) leadYTo(leadY);
@@ -374,16 +373,16 @@ export function bindTeamFan(
 
     if (setAccentX && setAccentScaleX && setAccentScaleY) {
       const accentScale =
-        unit * zoomThroughFrames(teamExit.accent.scale, orbit);
+        unit * zoomThroughFrames(orbs.accent.scale, orbit);
       const accentY =
         (gsap.utils.interpolate(
-          teamAccentOrb.yRest,
-          teamAccentOrb.yFan,
+          orbs.accent.yRest,
+          orbs.accent.yFan,
           accentPanEase(pan),
         ) -
           cycleFan * teamOrbMomentum.fanDrift * 1.25) *
         height;
-      setAccentX(throughFrames(teamExit.accent.x, orbit) * width);
+      setAccentX(throughFrames(orbs.accent.x, orbit) * width);
       setAccentScaleX(accentScale);
       setAccentScaleY(accentScale);
       if (accentYTo) accentYTo(accentY);

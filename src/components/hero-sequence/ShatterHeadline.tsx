@@ -3,7 +3,9 @@ import {
   heroSequenceHeadline,
   heroSequenceHeadlineDrumWords,
   heroSequenceHeadlineLines,
+  heroSequenceHeadlinePhoneBreaks,
 } from "./content";
+import { Fragment } from "react";
 import "./curtain-reveal.css";
 
 function CursorArrow() {
@@ -60,22 +62,25 @@ export function ShatterHeadline() {
         >
           {heroSequenceHeadlineLines.map((line, lineIndex) => (
             <span className="hs-shatter__line" key={`line-${lineIndex}`}>
-              {line.map((word, wordIndex) => {
-                if (lineIndex === 0 && wordIndex === 0) {
-                  return <CurtainVerb key="curtain-verb" />;
-                }
-
-                return (
-                  <span
-                    className="hs-shatter__word"
-                    data-word={word === "what's" ? "whats" : undefined}
-                    key={`${word}-${lineIndex}-${wordIndex}`}
-                    aria-hidden="true"
-                  >
-                    {word}
-                  </span>
-                );
-              })}
+              {line.map((word, wordIndex) => (
+                <Fragment key={`${word}-${lineIndex}-${wordIndex}`}>
+                  {lineIndex === 0 && wordIndex === 0 ? (
+                    <CurtainVerb />
+                  ) : (
+                    <span
+                      className="hs-shatter__word"
+                      data-word={word === "what's" ? "whats" : undefined}
+                      aria-hidden="true"
+                    >
+                      {word}
+                    </span>
+                  )}
+                  {/* Phone-only row break; desktop keeps the line spans. */}
+                  {heroSequenceHeadlinePhoneBreaks.includes(word) && (
+                    <span className="hs-shatter__break" aria-hidden="true" />
+                  )}
+                </Fragment>
+              ))}
             </span>
           ))}
         </h1>

@@ -33,6 +33,11 @@ function ApplePayMark() {
  */
 /* Fraction of stage height a speed-2 tile would travel over the full scroll-through. */
 const PARALLAX_DEPTH = 0.6;
+/* The phone stage is ~4× taller than wide, so it runs a shallower depth — but
+   paired with the wider data-speed-phone spread, drift reads like desktop. */
+const PARALLAX_DEPTH_PHONE = 0.42;
+/* Matches the hero's phone breakpoint (HeroSequence isMobile). */
+const GALLERY_PHONE_QUERY = "(max-width: 699px)";
 
 export function WorkGallery() {
   const rootRef = useRef<HTMLElement>(null);
@@ -53,16 +58,24 @@ export function WorkGallery() {
       if (!stage || tiles.length === 0) return;
 
       const triggers: ScrollTrigger[] = [];
+      const phoneQuery = window.matchMedia(GALLERY_PHONE_QUERY);
+      const depth = () =>
+        phoneQuery.matches ? PARALLAX_DEPTH_PHONE : PARALLAX_DEPTH;
 
       movers.forEach((tile) => {
-        const speed = Number(tile.dataset.speed ?? "1");
+        const speed = () =>
+          Number(
+            (phoneQuery.matches && tile.dataset.speedPhone) ||
+              tile.dataset.speed ||
+              "1",
+          );
         /*
          * Speed 1 rides with scroll. Below 1 lags (farther), above 1 leads
          * (nearer) — leading means drifting up against the scroll, so the
          * offset is negative. Centered on zero so the Paper layout is exact
          * when the stage sits mid-viewport and tiles spread apart either side.
          */
-        const travel = () => (1 - speed) * stage.offsetHeight * PARALLAX_DEPTH;
+        const travel = () => (1 - speed()) * stage.offsetHeight * depth();
 
         const tween = gsap.fromTo(
           tile,
@@ -120,18 +133,24 @@ export function WorkGallery() {
           <figure
             className={`hs-gallery__tile hs-gallery__tile--${tile.id}`}
             data-speed={tile.speed}
+            data-speed-phone={"phoneSpeed" in tile ? tile.phoneSpeed : undefined}
             key={tile.id}
           >
             <div className="hs-curtain hs-gallery__curtain">
-              <img
-                className="hs-gallery__image hs-curtain__content"
-                src={tile.src}
-                alt={tile.alt}
-                width={tile.pixelWidth}
-                height={tile.pixelHeight}
-                loading="lazy"
-                decoding="async"
-              />
+              <picture className="hs-curtain__content">
+                {"mobileSrc" in tile && (
+                  <source media={GALLERY_PHONE_QUERY} srcSet={tile.mobileSrc} />
+                )}
+                <img
+                  className="hs-gallery__image"
+                  src={tile.src}
+                  alt={tile.alt}
+                  width={tile.pixelWidth}
+                  height={tile.pixelHeight}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
               <span className="hs-curtain__mask" aria-hidden="true" />
             </div>
           </figure>
@@ -141,6 +160,7 @@ export function WorkGallery() {
         <span
           className="hs-gallery__ui hs-gallery__arrow hs-gallery__arrow--in"
           data-speed="1.16"
+          data-speed-phone="0.88"
           aria-hidden="true"
         >
           ↘
@@ -148,6 +168,7 @@ export function WorkGallery() {
         <span
           className="hs-gallery__ui hs-gallery__sign"
           data-speed="0.55"
+          data-speed-phone="0.72"
           aria-hidden="true"
         >
           <span className="hs-gallery__sign-bullet">KS</span>
@@ -160,6 +181,7 @@ export function WorkGallery() {
         <span
           className="hs-gallery__ui hs-gallery__pay"
           data-speed="1.6"
+          data-speed-phone="1.45"
           aria-hidden="true"
         >
           <ApplePayMark />
@@ -167,6 +189,7 @@ export function WorkGallery() {
         <span
           className="hs-gallery__ui hs-gallery__cta"
           data-speed="0.81"
+          data-speed-phone="1.28"
           aria-hidden="true"
         >
           Add to Cart
@@ -174,6 +197,7 @@ export function WorkGallery() {
         <span
           className="hs-gallery__ui hs-gallery__arrow hs-gallery__arrow--out"
           data-speed="0.84"
+          data-speed-phone="0.6"
           aria-hidden="true"
         >
           ↙

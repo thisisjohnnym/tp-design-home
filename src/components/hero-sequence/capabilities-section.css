@@ -319,30 +319,117 @@
   }
 }
 
-/* Phones: services drop under the title and the row grows to fit them. */
-@media (max-width: 599px) {
+/* ------------------------------------------------------------------ */
+/* Phone — Paper 7WI-0 (440 wide)                                      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The accordion becomes a looping carousel: 330/440 columns resting on the
+ * gutter, the next one peeking in at 30%. Every column shows its services.
+ * GSAP owns each column's x and opacity (CapabilitiesSection) — drag, flick
+ * or use the arrows below.
+ */
+@media (max-width: 699px) {
   .hs-caps {
-    --hs-caps-head-col: 100%;
-    --hs-caps-services-top: 20px;
+    --hs-caps-col-w: 75vw;
+    --hs-caps-col-gap: 32px;
+    --hs-caps-lead: 20px;
+    --hs-caps-index: 20px;
+    --hs-caps-bullet: 34px;
+    --hs-caps-head-gap: 16px;
+    --hs-caps-title: 48px;
+    --hs-caps-service: 18px;
+    --hs-caps-service-gap: 14px;
+    --hs-caps-row-bottom: 32px;
+
+    /* 80px between the lead's foot and the row. */
+    gap: 80px;
+  }
+
+  /* 254 / 440, hung off the right edge. */
+  .hs-caps__intro {
+    width: 57.7vw;
+    align-self: flex-end;
+  }
+
+  /* Columns stack in one grid cell (so the row is as tall as the tallest)
+     and bleed to the screen edges; JS spreads them out along x. */
+  .hs-caps__list {
+    display: grid;
+    align-items: start;
+    column-gap: var(--hs-caps-col-gap);
+    margin-inline: calc(-1 * var(--hs-gutter));
+    padding-inline: var(--hs-gutter);
+    overflow: clip;
+    cursor: grab;
+    /* Vertical swipes still scroll the page; horizontal ones drive the row. */
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .hs-caps__list[data-dragging="true"] {
+    cursor: grabbing;
   }
 
   .hs-caps__row,
   .hs-caps__row[data-open="true"] {
+    width: var(--hs-caps-col-w);
     min-height: 0;
+    grid-area: 1 / 1;
+    border-bottom-width: 2px;
+    transition: none;
+    will-change: transform, opacity;
+  }
+
+  /* The column dims as a whole, so the title stays at full strength. */
+  .hs-caps__title {
+    opacity: 1;
+  }
+
+  .hs-caps__head {
+    width: 100%;
   }
 
   .hs-caps__panel {
     position: static;
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows var(--hs-caps-move) var(--hs-caps-ease);
   }
 
-  .hs-caps__row[data-open="true"] .hs-caps__panel {
-    grid-template-rows: 1fr;
-  }
-
+  /* 16px column gap + the frame's 66px drop under the title. */
   .hs-caps__panel-inner {
-    overflow: hidden;
+    padding-top: 82px;
+  }
+
+  .hs-caps__services,
+  .hs-caps__row[data-open="true"] .hs-caps__services {
+    opacity: 1;
+    filter: none;
+    transform: none;
+    transition: none;
+  }
+
+  .hs-caps__nav {
+    display: flex;
+    gap: 48px;
+    margin-top: -50px;
+  }
+
+  .hs-caps__arrow {
+    padding: 0;
+    border: 0;
+    margin: 0;
+    background: none;
+    color: var(--hs-light);
+    cursor: pointer;
+    font: inherit;
+    font-size: 48px;
+    font-weight: 300;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .hs-caps__arrow:focus-visible {
+    outline: 2px solid var(--hs-white);
+    outline-offset: 4px;
   }
 }

@@ -40,13 +40,19 @@ const tabletPoses: readonly FanPose[] = [
   { x: 0.78, y: -0.36, rotation: 24, z: -150 },
 ];
 
-/** Centre card, plus one on each side. */
+/**
+ * Centre card, plus one peeking in from each side (Paper 8MK-0, 440×956).
+ * The side cards sit almost level with the centre, tipped ~5° outward, so
+ * the phone reads as a flat deck rather than the desktop's rising arc.
+ */
 const phonePoses: readonly FanPose[] = [
-  { x: -0.92, y: 0.46, rotation: -18, z: -100 },
-  { x: -0.42, y: 0.16, rotation: -12, z: -36 },
+  { x: -1.35, y: 0.04, rotation: -10, z: -80 },
+  /* x is divided by the z -20 perspective shrink (1400 / 1420) so the
+     projected centres land on Paper's −289 / +294 px. */
+  { x: -0.666, y: 0.0105, rotation: -5.28, z: -20 },
   { x: 0, y: 0, rotation: 0, z: 64 },
-  { x: 0.42, y: -0.1, rotation: 12, z: -36 },
-  { x: 0.96, y: -0.34, rotation: 20, z: -100 },
+  { x: 0.678, y: 0.0106, rotation: 4.88, z: -20 },
+  { x: 1.35, y: 0.04, rotation: 10, z: -80 },
 ];
 
 export const teamFanLayouts = {
@@ -232,3 +238,68 @@ export const teamExit = {
     blur: 7,
   },
 } as const;
+
+export type TeamOrbPath = {
+  /** Centre x through rest → frame 2 → full zoom, as a fraction of width. */
+  x: readonly number[];
+  /** Scale through the same frames, in storyboard px per export px. */
+  scale: readonly number[];
+  yRest: number;
+  yFan: number;
+};
+
+/**
+ * Sphere placement per layout. Desktop and tablet share the 1512 storyboard;
+ * the phone has its own frame (Paper 8MK-0, 440 wide) where the spheres are
+ * far larger relative to the screen: a 320px lead disc tucked top-left and a
+ * 504px accent low on the right. Exit frames keep the desktop's proportions.
+ */
+const desktopOrbs = {
+  storyWidth: teamFanStoryWidth,
+  lead: {
+    x: teamExit.lead.x,
+    scale: teamExit.lead.scale,
+    yRest: teamLeadOrb.yRest,
+    yFan: teamLeadOrb.yFan,
+  },
+  accent: {
+    x: teamExit.accent.x,
+    scale: teamExit.accent.scale,
+    yRest: teamAccentOrb.yRest,
+    yFan: teamAccentOrb.yFan,
+  },
+} as const;
+
+/*
+ * Paper's phone fills are tight crops, so match the visible discs rather than
+ * the boxes: lead disc ≈ 304px (export disc 535.5 @1×), accent disc ≈ 294px
+ * (export disc 661 @1×). yFan is measured at the frame's ~41% cycle, so it adds
+ * back the fanDrift the loop subtracts by then.
+ */
+const phoneLeadScale = 304 / 535.5;
+const phoneAccentScale = 294 / 661;
+
+const phoneOrbs = {
+  storyWidth: 440,
+  lead: {
+    x: [-0.529, -0.3, -0.07],
+    scale: [phoneLeadScale, phoneLeadScale * 0.824, phoneLeadScale * 0.824],
+    yRest: teamLeadOrb.yRest,
+    yFan: -0.2505,
+  },
+  accent: {
+    x: [0.679, 0.357, 0.191],
+    scale: [phoneAccentScale, phoneAccentScale * 1.642, phoneAccentScale * 4.609],
+    yRest: teamAccentOrb.yRest,
+    yFan: 0.252,
+  },
+} as const;
+
+export const teamOrbLayouts: Record<
+  TeamLayout,
+  { storyWidth: number; lead: TeamOrbPath; accent: TeamOrbPath }
+> = {
+  desktop: desktopOrbs,
+  tablet: desktopOrbs,
+  phone: phoneOrbs,
+};

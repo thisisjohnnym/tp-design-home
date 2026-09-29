@@ -27,6 +27,17 @@ export const heroSequenceHeadlineLines = [
 
 export const heroSequenceHeadline = heroSequenceHeadlineLines.flat();
 
+/**
+ * Phone headline (Paper 8IP-0) re-breaks into four rows:
+ * Building / what's next / for coach & / kate spade.
+ * Each entry is the word a phone row ends on.
+ */
+export const heroSequenceHeadlinePhoneBreaks: readonly string[] = [
+  "Building",
+  "next",
+  "&",
+];
+
 /** Verbs cycled on the first headline word (curtain cover → swap → uncover). */
 export const heroSequenceHeadlineDrumWords = [
   "Crafting",
@@ -477,9 +488,11 @@ export const heroSequenceIntro = {
 } as const;
 
 /**
- * Parallax collage before the team section (Paper 6WC-0).
+ * Parallax collage before the team section (Paper 8BV-0 desktop, 6WC-0 phone).
  * `speed` drives scroll depth: under 1 lags (far), over 1 leads (near).
  * Pixel sizes are 1× frame exports used for intrinsic aspect hints.
+ * `mobileSrc` swaps in the phone frame's crop; tiles without one that the
+ * phone layout drops are hidden in CSS.
  */
 export const heroSequenceWorkGallery = [
   {
@@ -495,22 +508,27 @@ export const heroSequenceWorkGallery = [
     src: "/gallery/carousel.webp",
     alt: "Yellow product feature carousel cards",
     speed: 0.81,
+    phoneSpeed: 0.72,
     pixelWidth: 367,
     pixelHeight: 437,
   },
   {
     id: "cart",
     src: "/gallery/cart.webp",
+    mobileSrc: "/gallery/cart-mobile.webp",
     alt: "Kate Spade mobile cart with a rose smoke crossbody",
     speed: 1,
+    phoneSpeed: 0.82,
     pixelWidth: 736,
     pixelHeight: 647,
   },
   {
     id: "logo",
     src: "/gallery/logo-c.webp",
+    mobileSrc: "/gallery/logo-c-mobile.webp",
     alt: "Gold Coach C hardware on sage leather",
     speed: 1.29,
+    phoneSpeed: 1.28,
     pixelWidth: 269,
     pixelHeight: 357,
   },
@@ -525,8 +543,10 @@ export const heroSequenceWorkGallery = [
   {
     id: "lifestyle",
     src: "/gallery/lifestyle.webp",
+    mobileSrc: "/gallery/lifestyle-mobile.webp",
     alt: "Model wearing a pink kate spade crossbody",
     speed: 1.72,
+    phoneSpeed: 1.6,
     pixelWidth: 139,
     pixelHeight: 437,
   },

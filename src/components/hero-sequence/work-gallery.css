@@ -47,14 +47,39 @@
   height: 100%;
 }
 
+/* <picture> is the curtain content so phone crops ride the same reveal. */
+.hs-gallery__curtain > picture {
+  width: 100%;
+  height: 100%;
+}
+
 .hs-gallery__image {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
+  /* Screen tiles are transparent around the UI; the MTA color shows through. */
+  background-color: var(--hs-gallery-tile-bg, #1c1c1b);
   user-select: none;
   -webkit-user-drag: none;
+}
+
+/* MTA line colors. Green stays off the tiles beside the green KS sign bullet. */
+.hs-gallery__tile--pdp {
+  --hs-gallery-tile-bg: #fccc0a; /* N Q R */
+}
+
+.hs-gallery__tile--cart {
+  --hs-gallery-tile-bg: #0039a6; /* A C E */
+}
+
+.hs-gallery__tile--carousel {
+  --hs-gallery-tile-bg: #00933c; /* 4 5 6 */
+}
+
+.hs-gallery__tile--testimonial {
+  --hs-gallery-tile-bg: #996633; /* J Z */
 }
 
 /* Geometry from Paper 6WC-0 (left/top/width/height ÷ 1512×1898).
@@ -207,15 +232,110 @@
   white-space: nowrap;
 }
 
-@media (max-width: 900px) {
-  .hs-gallery {
-    --hs-gallery-pad-bottom: 0;
-  }
-}
+/* ------------------------------------------------------------------ */
+/* Phone — Paper 6WC-0 (440×1759)                                      */
+/* ------------------------------------------------------------------ */
 
-@media (max-width: 640px) {
+/*
+ * A new composition rather than a scaled desktop: four tiles stacked
+ * down a tall stage, PDP + testimonial dropped. Geometry is in 440ths of
+ * the stage width (--u resolves cqw at each tile, where the stage is the
+ * container), so it holds on any phone width and ignores the stage ratio.
+ */
+@media (max-width: 699px) {
   .hs-gallery {
-    --hs-gallery-pad-bottom: 0;
+    /* Paper 440×1759, re-spaced into three beats so the stack breathes and
+       parallax has room to drift; last mark (↙) ends ~1860. */
+    --hs-gallery-ratio: 440 / 1880;
+  }
+
+  .hs-gallery__stage {
+    --u: calc(100cqw / 440);
+  }
+
+  .hs-gallery__tile--pdp,
+  .hs-gallery__tile--testimonial {
+    display: none;
+  }
+
+  /* Phone crops are baked with their frame color; no tile fill needed. */
+  /* Parallax starts this lagging tile ~71u high (0.18 × stage × 0.42 ÷ 2);
+     sit it below that so it never peeks into the hero's first screen. */
+  .hs-gallery__tile--cart {
+    top: calc(110 * var(--u));
+    right: 0;
+    left: auto;
+    width: calc(283 * var(--u));
+    height: calc(375 * var(--u));
+  }
+
+  .hs-gallery__tile--logo {
+    top: calc(600 * var(--u));
+    left: 0;
+    width: calc(290 * var(--u));
+    height: calc(357 * var(--u));
+  }
+
+  .hs-gallery__tile--lifestyle {
+    top: calc(740 * var(--u));
+    right: 0;
+    left: auto;
+    width: calc(83 * var(--u));
+    height: calc(261 * var(--u));
+  }
+
+  /* Bleeds 18/440 past the right edge in Paper — keep the crop. */
+  .hs-gallery__tile--carousel {
+    top: calc(1300 * var(--u));
+    left: calc(91 * var(--u));
+    width: calc(367 * var(--u));
+    height: calc(437 * var(--u));
+  }
+
+  .hs-gallery__arrow {
+    /* 120px on the 440 frame. */
+    font-size: calc(120 * var(--u));
+  }
+
+  .hs-gallery__arrow--in {
+    top: calc(330 * var(--u));
+    left: calc(34 * var(--u));
+  }
+
+  .hs-gallery__arrow--out {
+    top: calc(1770 * var(--u));
+    left: calc(327 * var(--u));
+  }
+
+  .hs-gallery__pay {
+    top: calc(548 * var(--u));
+    left: calc(244 * var(--u));
+    width: calc(127 * var(--u));
+  }
+
+  .hs-gallery__cta {
+    top: calc(1000 * var(--u));
+    left: calc(24 * var(--u));
+    width: calc(266 * var(--u));
+    height: calc(60 * var(--u));
+    border-radius: calc(8 * var(--u));
+    font-size: calc(16 * var(--u));
+  }
+
+  .hs-gallery__sign {
+    top: calc(1200 * var(--u));
+    left: calc(250 * var(--u));
+    gap: calc(10 * var(--u));
+  }
+
+  .hs-gallery__sign-bullet {
+    width: calc(34 * var(--u));
+    height: calc(34 * var(--u));
+    font-size: calc(20 * var(--u));
+  }
+
+  .hs-gallery__sign-text {
+    font-size: calc(16 * var(--u));
   }
 }
 

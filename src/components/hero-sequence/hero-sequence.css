@@ -440,11 +440,11 @@
 .hs-nav__list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   margin: 0;
   padding: 0;
-  font-size: var(--hs-meta-copy);
-  line-height: 16px;
+  font-size: var(--hs-meta-label);
+  line-height: 18px;
   list-style: none;
   text-transform: capitalize;
 }
@@ -518,6 +518,10 @@
   column-gap: 0.22em;
 }
 
+.hs-shatter__break {
+  display: none;
+}
+
 .hs-shatter__word {
   display: block;
   flex-shrink: 0;
@@ -549,6 +553,8 @@
 /* Position the mask off the padding box so the text-bleed inset lines it up. */
 .hs-shatter__word--curtain.hs-curtain--text > .hs-curtain__mask {
   grid-area: auto;
+  /* Run the bar down through the bleed so descenders ("g") stay covered. */
+  inset: var(--hs-curtain-bleed) 0 0;
 }
 
 .hs-shatter__word--curtain .hs-curtain__sizer {
@@ -1234,13 +1240,48 @@
     --hs-gutter: 16px;
     --hs-band-height: 336px;
     --hs-scrub-length: 80svh;
-    --hs-display: 15.4vw;
+    /* 78 / 440 — Paper 8IP-0 phone headline. */
+    --hs-display: 17.73vw;
     --hs-title: 10.6vw;
     --hs-subhead: 4.4vw;
     --hs-card-title: 22px;
     --hs-logo-rest-width: 148px;
     --hs-meta-copy: 11px;
     --hs-meta-label: 12px;
+  }
+
+  /* Paper 8IP-0 grid: 6 columns on phones (last one closes the right edge). */
+  .hs-grid__col:nth-child(n + 7) {
+    display: none;
+  }
+
+  .hs-grid__col:nth-child(6) {
+    border-right: 1px solid var(--hs-white);
+  }
+
+  /*
+   * Phone headline (Paper 8IP-0): 78px on the 440 frame, 110% leading,
+   * re-broken into four rows. Line spans dissolve so the words flow as one
+   * wrap row and .hs-shatter__break forces each phone row end.
+   */
+  .hs-shatter__headline {
+    width: auto;
+    flex-flow: row wrap;
+    align-items: baseline;
+    column-gap: 0.22em;
+    padding-block: 0;
+    font-size: var(--hs-display);
+    line-height: 1.1;
+  }
+
+  .hs-shatter__line {
+    display: contents;
+  }
+
+  .hs-shatter__break {
+    display: block;
+    flex-basis: 100%;
+    height: 0;
   }
 
   .hs-nav {
@@ -1253,46 +1294,64 @@
     grid-column: auto;
   }
 
+  .hs-nav__menu-toggle {
+    font-size: 16px;
+    line-height: 20px;
+  }
+
   .hs-nav__panel {
     flex-direction: column;
-    gap: 24px;
-    padding: 24px;
+    gap: 28px;
+    padding: 28px;
+  }
+
+  /* Match the 16px toggle so the panel doesn't read as fine print. */
+  .hs-nav__group-title {
+    font-size: 16px;
+    line-height: 20px;
+  }
+
+  .hs-nav__list {
+    gap: 12px;
+    font-size: 15px;
+    line-height: 20px;
   }
 
   .hs-cards__item {
     grid-column: span 12;
   }
 
+  /* Paper 8IP-0 cursors: 17×18 arrow, 14px label. */
   .hs-cursor__svg {
-    width: 20px;
-    height: 22px;
+    width: 17px;
+    height: 18px;
   }
 
   .hs-cursor__label {
-    margin-top: -5px;
-    margin-left: 12px;
-    padding: 6px 9px;
-    font-size: 12px;
+    margin-top: -6px;
+    margin-left: 16px;
+    padding: 8px 6px;
+    font-size: 14px;
   }
 
+  /* Slots as % of the four-row type block (392×343 in Paper); three on phones. */
   .hs-cursor[data-slot="a"] {
-    top: 18%;
-    left: 46%;
+    top: 39.4%;
+    left: 58.7%;
   }
 
   .hs-cursor[data-slot="b"] {
-    top: 88%;
-    left: 34%;
+    top: 89.8%;
+    left: 53.3%;
   }
 
   .hs-cursor[data-slot="c"] {
-    top: 52%;
-    left: 8%;
+    top: 58%;
+    left: 8.9%;
   }
 
   .hs-cursor[data-slot="d"] {
-    top: 70%;
-    left: 44%;
+    display: none;
   }
 
   .hs-layer--mid {
