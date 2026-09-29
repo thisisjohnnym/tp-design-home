@@ -1127,10 +1127,17 @@
 /* Loader intro                                                        */
 /* ------------------------------------------------------------------ */
 
+/* Absolute, not fixed: Safari 26 tints its toolbar from fixed elements touching
+   the top edge and keeps that color after they fade, leaving the URL bar
+   yellow over the dark page. The intro only plays at scrollY 0 with scroll
+   locked, so a top-anchored, viewport-tall box covers the same area. */
 .hs-loader {
-  position: fixed;
+  position: absolute;
   z-index: 60;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100lvh;
   display: grid;
   overflow: clip;
   background: var(--hs-yellow);

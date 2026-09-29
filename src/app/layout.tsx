@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { DisableOverscroll } from "@/components/DisableOverscroll";
 import "./globals.css";
@@ -15,6 +15,12 @@ const helveticaNow = localFont({
 export const metadata: Metadata = {
   title: "Tapestry Design",
   description: "Tapestry Design Team hero experiment",
+};
+
+/* Page canvas color, so browser chrome (URL bar, overscroll) stays dark. */
+export const viewport: Viewport = {
+  themeColor: "#080806",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
