@@ -233,12 +233,7 @@ export function bindTeamFan(
     });
   }
 
-  /* Exit blur is a crossfade to a pre-blurred copy (see SphereRight). */
-  const accentSharp = accent?.querySelector<HTMLElement>(".hs-sphere--accent");
-  const accentBlurred = accent?.querySelector<HTMLElement>(
-    ".hs-sphere--accent-blur",
-  );
-  let accentBlur = 0;
+  const accentArt = accent?.querySelector<HTMLElement>(".hs-sphere--accent");
 
   const setLeadX = lead ? gsap.quickSetter(lead, "x", "px") : null;
   const setLeadScaleX = lead ? gsap.quickSetter(lead, "scaleX") : null;
@@ -283,6 +278,7 @@ export function bindTeamFan(
   let fan = options.reduceMotion ? settledFanProgress(count) : 0;
   let titleRevealStarted = false;
   let pinAlpha = 1;
+  let pinCovered = false;
   let progressRevealStarted = false;
   const titleRevealTl = createCurtainReveal(titleLines, teamTitleReveal, {
     reduceMotion: options.reduceMotion,
@@ -396,34 +392,25 @@ export function bindTeamFan(
       else setAccentY?.(accentY);
     }
 
-    if (accent) {
-      /* Blur only builds through the zoom half, after frame 2. */
-      const zoom = gsap.utils.clamp(
-        0,
-        1,
-        (orbit - teamExit.orbitAt) / (1 - teamExit.orbitAt),
-      );
-      const blur = Math.round(zoom * zoom * 1000) / 1000;
-      if (blur !== accentBlur) {
-        accentBlur = blur;
-        if (accentSharp) {
-          accentSharp.style.opacity = String(1 - blur);
-          accentSharp.style.visibility = blur < 1 ? "" : "hidden";
-        }
-        if (accentBlurred) {
-          accentBlurred.style.opacity = String(blur);
-          accentBlurred.style.visibility = blur > 0 ? "visible" : "";
-        }
-      }
-    }
-
     /* Sit above the next section while exiting so the zoom covers it, then
        fade out to reveal it. autoAlpha frees the pointer once it's gone. */
     const exiting = leave > 0;
     const zIndex = exiting ? "4" : "";
     if (sectionEl.style.zIndex !== zIndex) sectionEl.style.zIndex = zIndex;
     sectionEl.toggleAttribute("data-exiting", exiting);
-    const alpha = 1 - fade;
+    /* Once the zoom fills the screen, hide the rest of the scene and fade
+       only the sphere. Fading the whole pin made iOS Safari render the zoomed
+       scene offscreen as one group, which ran it out of memory. */
+    const covered = leave >= teamExit.fadeAt;
+    if (covered !== pinCovered) {
+      pinCovered = covered;
+      sectionEl.toggleAttribute("data-covered", covered);
+    }
+    if (accentArt) {
+      const opacity = covered ? String(1 - fade) : "";
+      if (accentArt.style.opacity !== opacity) accentArt.style.opacity = opacity;
+    }
+    const alpha = fade >= 1 ? 0 : 1;
     if (alpha !== pinAlpha) {
       pinAlpha = alpha;
       gsap.set(pinEl, { autoAlpha: alpha });
@@ -566,12 +553,8 @@ export function bindTeamFan(
     holo.destroy();
     if (title) gsap.set(title, { xPercent: -50, yPercent: -50, y: 0 });
     gsap.set(pinEl, { clearProps: "opacity,visibility" });
-    for (const img of [accentSharp, accentBlurred]) {
-      if (img) {
-        img.style.opacity = "";
-        img.style.visibility = "";
-      }
-    }
+    if (accentArt) accentArt.style.opacity = "";
+    sectionEl.removeAttribute("data-covered");
     sectionEl.style.zIndex = "";
     sectionEl.removeAttribute("data-exiting");
     if (nextSection) nextSection.style.visibility = "";

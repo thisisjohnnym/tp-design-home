@@ -61,6 +61,12 @@
   visibility: hidden !important;
 }
 
+/* Exit fade: the zoomed accent sphere covers the view, so everything else in
+   the pin can drop out while the sphere alone fades (see team-fan.ts). */
+.hs-team[data-covered] .hs-team__pin > :not(.hs-team__orbs--front) {
+  visibility: hidden !important;
+}
+
 .hs-team__orbs {
   position: absolute;
   z-index: 1;

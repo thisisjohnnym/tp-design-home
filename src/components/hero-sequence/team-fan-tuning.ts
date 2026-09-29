@@ -234,9 +234,6 @@ export const teamExit = {
   accent: {
     x: [teamAccentOrb.x, 0.274, 0.1465],
     scale: [teamAccentOrb.scale, 1519 / 1104, 4263 / 1104],
-    /** Blur at full zoom, in art px. Baked into /team/orb-accent-blur.webp;
-        change it there too (regenerate the asset) if this changes. */
-    blur: 7,
   },
 } as const;
 

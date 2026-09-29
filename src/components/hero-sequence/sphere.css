@@ -11,6 +11,10 @@
   -webkit-user-select: none;
   user-select: none;
   -webkit-user-drag: none;
+  /* Own layer: WebKit composites a lone <img> straight from its decoded
+     bitmap, so the exit zoom scales that bitmap instead of repainting the
+     sphere at the zoomed size (which ran iOS Safari out of memory). */
+  will-change: transform;
 }
 
 .hs-sphere--lead {
@@ -27,14 +31,3 @@
   height: 989px;
 }
 
-/* Pre-blurred accent. plus-lighter sums the two layers, so sharp at 1 − t and
-   blurred at t is a true crossfade with no dip in the sphere's opacity. */
-.hs-sphere--accent-blur {
-  top: -21px;
-  left: -21px;
-  width: 1146px;
-  height: 1031px;
-  opacity: 0;
-  visibility: hidden;
-  mix-blend-mode: plus-lighter;
-}
