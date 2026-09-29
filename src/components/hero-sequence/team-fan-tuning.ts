@@ -97,8 +97,12 @@ export const teamEntrance = {
    * what keeps the fan from reading over still-visible collage tiles.
    */
   start: "top 92%",
-  /** Title offset below centre at pan start, as a fraction of height. */
-  titleFrom: 0.25,
+  /**
+   * Title offset below centre at pan start, as a fraction of height.
+   * 0 = the title rides with the page 1:1, like the collage above it.
+   * Anything else makes it outrun the scroll during the entrance.
+   */
+  titleFrom: 0,
   /**
    * Pin progress where the exit begins. Fan cycling finishes just before
    * this; the rest is the orbit → zoom → fade handoff (see teamExit).
@@ -124,8 +128,9 @@ export const curtainReveal = {
 /** Team heading — same curtain, fired early in the entrance pan. */
 export const teamTitleReveal = {
   ...curtainReveal,
-  /** Entrance progress (0–1) when the one-shot curtain begins. */
-  playAt: 0.2,
+  /** Entrance progress (0–1) when the one-shot curtain begins —
+   *  about when the title's first line enters the bottom of the view. */
+  playAt: 0.5,
 } as const;
 
 /**

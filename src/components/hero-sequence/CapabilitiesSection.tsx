@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -12,6 +12,9 @@ import {
 import "./capabilities-section.css";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
+
+/** Where the lead locks while the rows scroll past, as a share of viewport height. */
+const INTRO_PIN_TOP = 0.18;
 
 /** Long enough to cross the gap between rows without the frame blinking off. */
 const PREVIEW_LEAVE_MS = 160;
@@ -29,9 +32,6 @@ function TitleLines({ lines }: { lines: readonly string[] }) {
     </span>
   ));
 }
-
-/** Orb drift across the section's pass through the viewport, in % of own height. */
-const ORB_DRIFT = { lead: -18, accent: -36 } as const;
 
 export function CapabilitiesSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -105,26 +105,32 @@ export function CapabilitiesSection() {
     return () => observer.disconnect();
   }, [scrollDriven]);
 
+  /* ScrollSmoother transforms the page, so CSS sticky can't hold the lead;
+     pin it until its foot meets the end of the list. Stacked layouts scroll it away. */
   useGSAP(
     () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const media = gsap.matchMedia();
 
-      (Object.keys(ORB_DRIFT) as (keyof typeof ORB_DRIFT)[]).forEach((key) => {
-        gsap.fromTo(
-          `.hs-caps__orb--${key}`,
-          { yPercent: 0 },
-          {
-            yPercent: ORB_DRIFT[key],
-            ease: "none",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: true,
-            },
-          },
+      media.add("(min-width: 900px)", () => {
+        const intro = sectionRef.current?.querySelector<HTMLElement>(
+          ".hs-caps__intro",
         );
+        if (!intro || !listRef.current) return;
+
+        const pinTop = () => window.innerHeight * INTRO_PIN_TOP;
+
+        ScrollTrigger.create({
+          trigger: intro,
+          start: () => `top ${pinTop()}px`,
+          endTrigger: listRef.current,
+          end: () => `bottom ${pinTop() + intro.offsetHeight}px`,
+          pin: intro,
+          pinSpacing: false,
+          invalidateOnRefresh: true,
+        });
       });
+
+      return () => media.revert();
     },
     { scope: sectionRef },
   );
@@ -135,34 +141,11 @@ export function CapabilitiesSection() {
       aria-labelledby="hs-caps-heading"
       ref={sectionRef}
     >
-      <img
-        alt=""
-        aria-hidden="true"
-        className="hs-caps__orb hs-caps__orb--accent"
-        decoding="async"
-        draggable={false}
-        height={974}
-        loading="lazy"
-        src="/services/orb-right.png"
-        width={925}
-      />
-
       <div className="hs-caps__intro">
         <h2 className="hs-sr-only" id="hs-caps-heading">
           Capabilities
         </h2>
         <p className="hs-caps__lead">{heroSequenceCapabilitiesIntro}</p>
-        <img
-          alt=""
-          aria-hidden="true"
-          className="hs-caps__orb hs-caps__orb--lead"
-          decoding="async"
-          draggable={false}
-          height={560}
-          loading="lazy"
-          src="/services/orb-left.png"
-          width={560}
-        />
       </div>
 
       <div className="hs-caps__list" ref={listRef}>
@@ -194,7 +177,16 @@ export function CapabilitiesSection() {
               }}
             >
               <div className="hs-caps__head">
-                <span className="hs-caps__number" aria-hidden="true">
+                <span
+                  className="hs-caps__number"
+                  aria-hidden="true"
+                  style={
+                    {
+                      "--hs-caps-line": capability.lineColor,
+                      "--hs-caps-line-ink": capability.lineInk,
+                    } as CSSProperties
+                  }
+                >
                   {capability.number}
                 </span>
                 <h3 className="hs-caps__title">

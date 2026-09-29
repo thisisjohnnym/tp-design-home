@@ -16,6 +16,22 @@
   vertical-align: top;
 }
 
+/*
+ * Text curtains: display type runs tighter leading than its glyphs, so a clip
+ * at the line box cuts descenders/ascenders (the "g" in "Building"). Grow the
+ * clip box with padding, cancel it with negative margin so layout is unchanged,
+ * and inset the mask back to the original line box so the yellow bar looks the same.
+ */
+.hs-curtain--text {
+  --hs-curtain-bleed: 0.25em;
+  padding-block: var(--hs-curtain-bleed);
+  margin-block: calc(-1 * var(--hs-curtain-bleed));
+}
+
+.hs-curtain--text > .hs-curtain__mask {
+  inset: var(--hs-curtain-bleed) 0;
+}
+
 .hs-curtain__content {
   display: block;
   opacity: var(--hs-curtain-content-opacity);

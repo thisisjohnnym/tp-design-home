@@ -512,7 +512,8 @@ export function bindTeamFan(
         end: "bottom bottom",
         pin,
         pinSpacing: false,
-        anticipatePin: 1,
+        /* No anticipatePin: under ScrollSmoother it snaps the pin early,
+           which reads as the section jumping ahead of the scroll. */
         invalidateOnRefresh: true,
         onUpdate: (self) => {
           arrive = 1;

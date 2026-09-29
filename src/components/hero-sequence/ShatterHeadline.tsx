@@ -31,7 +31,7 @@ function CursorArrow() {
 function CurtainVerb() {
   return (
     <span
-      className="hs-shatter__word hs-shatter__word--curtain hs-curtain hs-curtain--inline"
+      className="hs-shatter__word hs-shatter__word--curtain hs-curtain hs-curtain--inline hs-curtain--text"
       aria-hidden="true"
       data-curtain-verb="true"
     >

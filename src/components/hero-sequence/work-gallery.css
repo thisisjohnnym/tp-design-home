@@ -30,6 +30,8 @@
   max-width: 100%;
   margin-inline: auto;
   overflow: visible;
+  /* UI marks size in cqw so they scale with the collage like the tiles. */
+  container-type: inline-size;
 }
 
 .hs-gallery__tile {
@@ -106,6 +108,105 @@
   height: 23.02%;
 }
 
+/* ------------------------------------------------------------------ */
+/* Wayfinding marks — Paper 6WC-0, same ÷1512×1898 positioning         */
+/* ------------------------------------------------------------------ */
+
+.hs-gallery__ui {
+  position: absolute;
+  z-index: 7;
+  color: var(--hs-light);
+  user-select: none;
+  will-change: transform;
+}
+
+.hs-gallery__arrow {
+  font-size: 14.29cqw;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 0.8;
+  white-space: pre;
+}
+
+.hs-gallery__arrow--in {
+  top: 12.22%;
+  left: 7.01%;
+}
+
+.hs-gallery__arrow--out {
+  top: 88.3%;
+  left: 65.94%;
+}
+
+/* Street sign: a line bullet beside a two-line cross-street. */
+.hs-gallery__sign {
+  top: 44.78%;
+  left: 48.35%;
+  display: flex;
+  align-items: center;
+  gap: max(6px, 0.66cqw);
+}
+
+.hs-gallery__sign-bullet {
+  display: grid;
+  width: max(26px, 2.25cqw);
+  height: max(26px, 2.25cqw);
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: #427e2b;
+  color: var(--hs-white);
+  font-size: max(14px, 1.32cqw);
+  font-weight: 700;
+  font-variation-settings: "opsz" 12;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.hs-gallery__sign-text {
+  font-size: max(12px, 1.06cqw);
+  font-weight: 700;
+  font-variation-settings: "opsz" 12;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.hs-gallery__pay {
+  top: 21.07%;
+  left: 82.74%;
+  display: block;
+  width: 8.4cqw;
+  aspect-ratio: 127 / 56.16;
+  border-radius: 999px;
+  background: #000;
+  color: var(--hs-white);
+  outline: 1px solid oklch(1 0 0 / 0.2);
+}
+
+.hs-gallery__pay svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hs-gallery__cta {
+  top: 46.58%;
+  left: 66.53%;
+  display: grid;
+  width: 16.2cqw;
+  height: 3.97cqw;
+  place-items: center;
+  border-radius: max(4px, 0.53cqw);
+  background: #000;
+  color: var(--hs-white);
+  font-size: max(11px, 1.06cqw);
+  font-weight: 500;
+  line-height: 1.25;
+  outline: 1px solid oklch(1 0 0 / 0.3);
+  white-space: nowrap;
+}
+
 @media (max-width: 900px) {
   .hs-gallery {
     --hs-gallery-pad-bottom: 0;
@@ -119,7 +220,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hs-gallery__tile {
+  .hs-gallery__tile,
+  .hs-gallery__ui {
     will-change: auto;
   }
 }

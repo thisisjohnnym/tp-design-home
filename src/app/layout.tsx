@@ -5,6 +5,9 @@ import "./globals.css";
 
 const helveticaNow = localFont({
   src: "../../public/fonts/HelveticaNowVar.ttf",
+  /* Variable font: without the wght range the face is treated as 400 only,
+     so bolds get synthesized and lights snap to regular. */
+  weight: "50 1000",
   variable: "--font-hs-sans",
   display: "swap",
 });

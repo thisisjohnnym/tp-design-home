@@ -216,13 +216,16 @@ export const heroSequenceTeamCard = {
 export const heroSequenceCapabilitiesIntro =
   "Bringing together brand, product, customer insight, and design to turn ambitious ideas into world-class retail experiences";
 
-/** Capabilities accordion. `number` is the small index above each title;
+/** Capabilities accordion. `number` is the small index above each title,
+ *  set in a subway-line bullet (`lineColor` fill, `lineInk` numeral);
  *  `titleLines` sets the display break (Paper 7NG-0).
  *  `image` is a stand-in still until final service photography is ready. */
 export const heroSequenceCapabilities = [
   {
     id: "experience",
     number: "01",
+    lineColor: "#fd6615",
+    lineInk: "#ffffff",
     title: "Experience Design",
     titleLines: ["Experience", "Design"],
     image:
@@ -239,6 +242,8 @@ export const heroSequenceCapabilities = [
   {
     id: "visual",
     number: "02",
+    lineColor: "#b635a9",
+    lineInk: "#ffffff",
     title: "Visual & Brand",
     titleLines: ["Visual &", "Brand"],
     image:
@@ -255,6 +260,8 @@ export const heroSequenceCapabilities = [
   {
     id: "commerce",
     number: "03",
+    lineColor: "#03933e",
+    lineInk: "#ffffff",
     title: "Commerce & Innovation",
     titleLines: ["Commerce", "& Innovation"],
     image:
@@ -271,6 +278,8 @@ export const heroSequenceCapabilities = [
   {
     id: "research",
     number: "04",
+    lineColor: "#fcdb23",
+    lineInk: "#000000",
     title: "Research & Systems",
     titleLines: ["Research", "& Systems"],
     image:
@@ -477,7 +486,7 @@ export const heroSequenceWorkGallery = [
     id: "pdp",
     src: "/gallery/pdp.webp",
     alt: "Kate Spade product detail page for a black shoulder bag",
-    speed: 0.72,
+    speed: 0.55,
     pixelWidth: 883,
     pixelHeight: 764,
   },
@@ -485,7 +494,7 @@ export const heroSequenceWorkGallery = [
     id: "carousel",
     src: "/gallery/carousel.webp",
     alt: "Yellow product feature carousel cards",
-    speed: 0.88,
+    speed: 0.81,
     pixelWidth: 367,
     pixelHeight: 437,
   },
@@ -501,7 +510,7 @@ export const heroSequenceWorkGallery = [
     id: "logo",
     src: "/gallery/logo-c.webp",
     alt: "Gold Coach C hardware on sage leather",
-    speed: 1.18,
+    speed: 1.29,
     pixelWidth: 269,
     pixelHeight: 357,
   },
@@ -509,7 +518,7 @@ export const heroSequenceWorkGallery = [
     id: "testimonial",
     src: "/gallery/testimonial.webp",
     alt: "Customer testimonials mobile screen",
-    speed: 1.32,
+    speed: 1.51,
     pixelWidth: 261,
     pixelHeight: 344,
   },
@@ -517,7 +526,7 @@ export const heroSequenceWorkGallery = [
     id: "lifestyle",
     src: "/gallery/lifestyle.webp",
     alt: "Model wearing a pink kate spade crossbody",
-    speed: 1.45,
+    speed: 1.72,
     pixelWidth: 139,
     pixelHeight: 437,
   },

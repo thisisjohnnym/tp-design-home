@@ -1,6 +1,6 @@
 /* Capabilities accordion (Paper 7NG-0, 1512 wide): a 361px lead column, 120px
    gutter, then rows of a 501px title block with the open row's services set
-   beside it. Only the open row is lit; the rest sit at 10%. */
+   beside it. Only the open row's title is lit; the rest sit at 10%. */
 
 .hs-caps {
   --hs-caps-text: #f8f8f8;
@@ -9,8 +9,23 @@
   --hs-caps-gutter: clamp(32px, 7.94vw, 120px);
   --hs-caps-head-col: clamp(240px, 33.13vw, 501px);
   --hs-caps-col-gap: 16px;
+  /* The list snaps back to the nearest site-grid line left of where the lead
+     column + gutter would put it (grid: .hs-grid in hero-sequence.css). */
+  --hs-caps-grid-step: calc(
+    (100cqw + var(--hs-grid-gap)) / var(--hs-grid-cols)
+  );
+  --hs-caps-list-x: round(
+    down,
+    var(--hs-caps-intro-col) + var(--hs-caps-gutter),
+    var(--hs-caps-grid-step)
+  );
+  --hs-caps-intro-w: min(
+    var(--hs-caps-intro-col),
+    var(--hs-caps-list-x) - clamp(32px, 2.65vw, 40px)
+  );
   --hs-caps-lead: clamp(17px, 1.32vw, 20px);
   --hs-caps-index: clamp(17px, 1.32vw, 20px);
+  --hs-caps-bullet: clamp(29px, 2.25vw, 34px);
   --hs-caps-head-gap: clamp(10px, 1.06vw, 16px);
   --hs-caps-title: clamp(40px, 5.29vw, 80px);
   --hs-caps-service: clamp(15px, 1.19vw, 18px);
@@ -21,7 +36,7 @@
   --hs-caps-dim: 0.1;
   /* Closed rows are the index + two title lines; open rows fit six services. */
   --hs-caps-row-closed: calc(
-    var(--hs-caps-index) * 1.2 + var(--hs-caps-head-gap) +
+    var(--hs-caps-bullet) + var(--hs-caps-head-gap) +
       var(--hs-caps-title) * 2 + 8px
   );
   --hs-caps-row-open: max(
@@ -38,52 +53,28 @@
   --hs-caps-ease: cubic-bezier(0.2, 0, 0, 1);
 
   position: relative;
+  /* cqw in the grid-step math measures the section's content box, which spans
+     the same inset as .hs-grid's columns. */
+  container-type: inline-size;
   /* Under the team pin while it zooms and fades (it lifts to 4), which reveals this section. */
   z-index: 3;
   display: flex;
   align-items: flex-start;
-  gap: var(--hs-caps-gutter);
+  /* Desktop spacing comes from the list's grid-snapped margin. */
+  gap: 0;
   /* Less top pad — the section already sits up under the team exit pan. */
   padding: clamp(64px, 8vw, 120px) var(--hs-gutter);
-  /* The orbs bleed past the page edge and the section's foot. */
-  overflow: clip;
-}
-
-/* ------------------------------------------------------------------ */
-/* Orbs — GSAP drifts them on scroll (yPercent)                        */
-/* ------------------------------------------------------------------ */
-
-.hs-caps__orb {
-  display: block;
-  height: auto;
-  pointer-events: none;
-  user-select: none;
-}
-
-.hs-caps__orb--lead {
-  width: clamp(160px, 18.52vw, 280px);
-  margin-top: clamp(24px, 2.51vw, 38px);
-  /* Half the disc hangs off the left edge of the page. */
-  margin-left: calc(-1 * (var(--hs-gutter) + clamp(76px, 8.8vw, 133px)));
-}
-
-.hs-caps__orb--accent {
-  position: absolute;
-  z-index: 0;
-  top: clamp(200px, 20vw, 302px);
-  right: -32.54vw;
-  width: 61.18vw;
-  filter: blur(clamp(12px, 1.32vw, 20px));
 }
 
 /* ------------------------------------------------------------------ */
 /* Lead column                                                         */
 /* ------------------------------------------------------------------ */
 
+/* Pinned by ScrollTrigger while the rows scroll past (CapabilitiesSection). */
 .hs-caps__intro {
   position: relative;
   z-index: 1;
-  width: var(--hs-caps-intro-col);
+  width: var(--hs-caps-intro-w);
   flex: none;
 }
 
@@ -109,6 +100,7 @@
   flex: 1;
   flex-direction: column;
   gap: clamp(24px, 2.65vw, 40px);
+  margin-left: calc(var(--hs-caps-list-x) - var(--hs-caps-intro-w));
 }
 
 /* The row height rides on min-height rather than on the services: a hover
@@ -130,28 +122,43 @@
   display: flex;
   width: var(--hs-caps-head-col);
   flex-direction: column;
+  align-items: flex-start;
   gap: var(--hs-caps-head-gap);
-  opacity: var(--hs-caps-dim);
   color: var(--hs-light);
-  transition: opacity var(--hs-caps-move) var(--hs-caps-ease);
 }
 
-.hs-caps__row[data-open="true"] .hs-caps__head {
-  opacity: 1;
-}
-
+/* Subway-line bullet — NYC wayfinding. Stays lit on closed rows so the four
+   lines read as a route map down the list; only the title dims. */
 .hs-caps__number {
+  display: grid;
+  width: var(--hs-caps-bullet);
+  height: var(--hs-caps-bullet);
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--hs-caps-line);
+  color: var(--hs-caps-line-ink);
   font-size: var(--hs-caps-index);
+  font-weight: 700;
+  /* Paper sets these in the Text cut, not the auto-picked optical size. */
+  font-variation-settings: "opsz" 12;
   letter-spacing: -0.04em;
-  line-height: 1.2;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
 .hs-caps__title {
   margin: 0 0 8px;
+  opacity: var(--hs-caps-dim);
+  transition: opacity var(--hs-caps-move) var(--hs-caps-ease);
   font-size: var(--hs-caps-title);
   font-weight: 300;
   letter-spacing: -0.04em;
   line-height: 1;
+}
+
+.hs-caps__row[data-open="true"] .hs-caps__title {
+  opacity: 1;
 }
 
 .hs-caps__title-line {
@@ -177,11 +184,17 @@
   outline-offset: 6px;
 }
 
-/* Services sit beside the title block, out of flow so min-height alone sizes the row. */
+/* Services sit beside the title block, out of flow so min-height alone sizes
+   the row. The list starts on a grid line, so snapping the offset to the grid
+   step lands the services on the nearest line too. */
 .hs-caps__panel {
   position: absolute;
   top: 0;
-  left: calc(var(--hs-caps-head-col) + var(--hs-caps-col-gap));
+  left: round(
+    nearest,
+    var(--hs-caps-head-col) + var(--hs-caps-col-gap),
+    var(--hs-caps-grid-step)
+  );
 }
 
 .hs-caps__panel-inner {
@@ -242,7 +255,6 @@
 .hs-caps-preview__clip {
   position: relative;
   overflow: hidden;
-  border-radius: 12px;
   aspect-ratio: 16 / 9;
   outline: 1px solid oklch(1 0 0 / 0.1);
   outline-offset: -1px;
@@ -276,7 +288,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hs-caps__row,
-  .hs-caps__head,
+  .hs-caps__title,
   .hs-caps__panel,
   .hs-caps__services,
   .hs-caps-preview {
@@ -289,7 +301,7 @@
   }
 }
 
-/* Lead stacks over the list; the lead orb tucks behind it at the right edge. */
+/* Lead stacks over the list. */
 @media (max-width: 899px) {
   .hs-caps {
     flex-direction: column;
@@ -301,29 +313,9 @@
     position: static;
   }
 
-  .hs-caps__orb--lead {
-    position: absolute;
-    z-index: 0;
-    top: clamp(32px, 6vw, 64px);
-    right: -14vw;
-    width: 38vw;
-    margin: 0;
-  }
-
-  .hs-caps__lead {
-    position: relative;
-    z-index: 1;
-  }
-
   .hs-caps__list {
     align-self: stretch;
-  }
-
-  .hs-caps__orb--accent {
-    top: auto;
-    bottom: -20vw;
-    right: -50vw;
-    width: 100vw;
+    margin-left: 0;
   }
 }
 

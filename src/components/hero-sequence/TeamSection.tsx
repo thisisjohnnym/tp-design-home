@@ -23,11 +23,11 @@ export function TeamSection() {
         </div>
 
         <h2 className="hs-team__title" id="hs-team-heading">
-          <span className="hs-team__title-line hs-curtain">
+          <span className="hs-team__title-line hs-curtain hs-curtain--text">
             <span className="hs-curtain__content">Meet the team</span>
             <span className="hs-curtain__mask" aria-hidden="true" />
           </span>
-          <span className="hs-team__title-line hs-curtain">
+          <span className="hs-team__title-line hs-curtain hs-curtain--text">
             <span className="hs-curtain__content">behind the work</span>
             <span className="hs-curtain__mask" aria-hidden="true" />
           </span>
