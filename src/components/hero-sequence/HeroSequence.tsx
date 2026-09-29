@@ -111,6 +111,17 @@ export function HeroSequence() {
         });
       }
 
+      /* iOS scrolls on the compositor while scrubbed pins update on the main
+         thread, so pinned scenes stutter against the page. Normalizing moves
+         touch scroll onto the JS thread (in sync with the pins) and stops
+         Safari's toolbar resizing the viewport mid-scroll. It scrolls
+         programmatically, which bypasses the intro's overflow lock, so it is
+         only switched on once the page is released. */
+      const normalizeTouchScroll = !smoother && ScrollTrigger.isTouch === 1;
+      const enableTouchScroll = () => {
+        if (normalizeTouchScroll) ScrollTrigger.normalizeScroll(true);
+      };
+
       gsap.set(markDrum, { rotationX: 0, transformOrigin: "center center" });
       gsap.set(loaderMark, {
         filter: "none",
@@ -342,6 +353,7 @@ export function HeroSequence() {
         gsap.set([loader, loaderMark], { autoAlpha: 0, display: "none" });
         gsap.set([shatter, navLinks, navLogo], { autoAlpha: 1, y: 0 });
         ScrollTrigger.refresh();
+        enableTouchScroll();
         startCursorRoster();
         revealNavCurtains();
         startHeadlineVerb();
@@ -393,6 +405,7 @@ export function HeroSequence() {
             () => {
               documentElement.style.removeProperty("overflow");
               ScrollTrigger.refresh();
+              enableTouchScroll();
               startCursorRoster();
               revealNavCurtains();
               startHeadlineVerb();
@@ -572,6 +585,7 @@ export function HeroSequence() {
         if (curtainVerb) clearCurtainState(curtainVerb);
         shatterFitObserver?.disconnect();
         smoother?.kill();
+        if (normalizeTouchScroll) ScrollTrigger.normalizeScroll(false);
         media.revert();
       };
     },
