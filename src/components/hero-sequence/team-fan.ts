@@ -518,6 +518,10 @@ export function bindTeamFan(
         end: "bottom bottom",
         pin,
         pinSpacing: false,
+        /* Crash triage: ?off=fixedpin pins with transforms, not position: fixed. */
+        pinType: document.documentElement.dataset.off?.split(" ").includes("fixedpin")
+          ? "transform"
+          : undefined,
         /* No anticipatePin: under ScrollSmoother it snaps the pin early,
            which reads as the section jumping ahead of the scroll. */
         invalidateOnRefresh: true,

@@ -1451,7 +1451,9 @@ html[data-off~="shader"] .hs-plate__shader,
 html[data-off~="team"] .hs-team__pin,
 html[data-off~="orbs"] .hs-team__orbs,
 html[data-off~="cards"] .hs-team__stage,
-html[data-off~="caps"] .hs-caps {
+html[data-off~="caps"] .hs-caps,
+html[data-off~="teamtitle"] .hs-team__title,
+html[data-off~="progress"] .hs-team__progress {
   display: none !important;
 }
 

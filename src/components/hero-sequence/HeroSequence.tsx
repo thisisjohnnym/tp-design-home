@@ -523,6 +523,10 @@ export function HeroSequence() {
               scrub: heroSequenceMotion.scrub,
               pin,
               pinSpacing: false,
+        /* Crash triage: ?off=fixedpin pins with transforms, not position: fixed. */
+        pinType: document.documentElement.dataset.off?.split(" ").includes("fixedpin")
+          ? "transform"
+          : undefined,
               invalidateOnRefresh: true,
               onUpdate: (self) => {
                 getSequenceProgress = () => self.progress;
