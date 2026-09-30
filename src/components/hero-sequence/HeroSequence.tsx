@@ -20,9 +20,9 @@ import {
   playCurtainWordIntro,
   restCurtainWord,
 } from "./curtain-reveal";
-import { bindTeamFan } from "./team-fan";
+import { bindTeamScene } from "./team-scene";
 import { ShatterHeadline } from "./ShatterHeadline";
-import { curtainReveal } from "./team-fan-tuning";
+import { curtainReveal } from "./team-scene-tuning";
 import {
   heroSequenceBeats as beats,
   heroSequenceCursorRoster,
@@ -610,7 +610,7 @@ export function HeroSequence() {
 
           const releaseTeam = debugOff.has("teamjs")
             ? () => {}
-            : bindTeamFan(root, {
+            : bindTeamScene(root, {
                 reduceMotion,
                 layout: isMobile ? "phone" : isTablet ? "tablet" : "desktop",
               });
