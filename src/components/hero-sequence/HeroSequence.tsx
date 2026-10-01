@@ -12,7 +12,7 @@ import { PointerEffect } from "./PointerEffect";
 import { PlateShader } from "./PlateShader";
 import { SequenceNav } from "./SequenceNav";
 import { TeamSection } from "./TeamSection";
-import { WorkGallery } from "./WorkGallery";
+import { WorkRecords } from "./work-records/WorkRecords";
 import {
   clearCurtainState,
   createCurtainReveal,
@@ -547,10 +547,10 @@ export function HeroSequence() {
                   stopCursorRoster();
                 }
                 /*
-                 * Pause the verb cycle while shatter owns the headline;
-                 * restart cleanly when the hero returns to rest.
+                 * Verb keeps cycling through the shatter; it only stops once the
+                 * headline is fully gone.
                  */
-                if (self.progress > 0.002) stopHeadlineVerb();
+                if (self.progress > 0.98) stopHeadlineVerb();
                 else startHeadlineVerb();
 
               },
@@ -565,31 +565,105 @@ export function HeroSequence() {
             wordSpan - beats.shatterStagger * (words.length - 1),
           );
 
-          timeline.to(
+          /* Depth: every piece gets its own distance from the viewer, so the
+             break reads as a volume rushing past the camera rather than one
+             flat zoom. Near pieces travel farther, grow more, blur harder and
+             drift further from the block's centre (parallax). */
+          const depthOf = (i: number) => 0.45 + ((i * 0.618034) % 1) * 1.1;
+          const zoomGain = reduceMotion ? reduced.travel : 1;
+          const centreOffset = (el: HTMLElement, i: number) => {
+            const block = shatter.getBoundingClientRect();
+            const rect = el.getBoundingClientRect();
+            const fit = Number(gsap.getProperty(shatter, "scale")) || 1;
+            const x = Number(gsap.getProperty(el, "x")) || 0;
+            const y = Number(gsap.getProperty(el, "y")) || 0;
+            return {
+              x:
+                (rect.left + rect.width / 2 - x * fit -
+                  (block.left + block.width / 2)) /
+                fit,
+              y:
+                (rect.top + rect.height / 2 - y * fit -
+                  (block.top + block.height / 2)) /
+                fit,
+              d: depthOf(i),
+            };
+          };
+
+          const depthTweens = (
+            targets: HTMLElement[],
+            blur: number,
+            duration: number,
+            stagger: number | ((i: number) => number),
+            at: number,
+          ) => {
+            // Position: linear, scaled by depth.
+            timeline.to(
+              targets,
+              {
+                y: (i) => -vh() * travel * (0.55 + 0.3 * depthOf(i)),
+                x: (i, el) => {
+                  const o = centreOffset(el, i);
+                  return o.x * 0.55 * o.d * zoomGain;
+                },
+                duration,
+                ease: "none",
+                stagger,
+              },
+              at,
+            );
+            // Scale + blur accelerate toward the top of the screen.
+            timeline.to(
+              targets,
+              {
+                scale: (i) => 1 + 1.25 * depthOf(i) * zoomGain,
+                duration,
+                ease: "power2.in",
+                stagger,
+              },
+              at,
+            );
+            // Blur ramps sooner than scale so the defocus is felt early.
+            timeline.to(
+              targets,
+              {
+                filter: (i) =>
+                  `blur(${blurAmount(blur * (0.5 + depthOf(i) * 0.9))}px)`,
+                duration,
+                ease: "power1.in",
+                stagger,
+              },
+              at,
+            );
+            // Fade last so the push toward the viewer is actually seen.
+            timeline.to(
+              targets,
+              {
+                autoAlpha: 0,
+                duration: duration * 0.6,
+                ease: "power1.in",
+                stagger,
+              },
+              at + duration * 0.4,
+            );
+          };
+
+          const cursorOrder = gsap.utils.shuffle(cursors.map((_, i) => i));
+
+          depthTweens(
             words,
-            {
-              y: () => -vh() * travel,
-              autoAlpha: 0,
-              filter: `blur(${blurAmount(heroSequenceMotion.wordBlur)}px)`,
-              duration: wordDuration,
-              // Even scrub — matches the rest of the page’s scroll pace.
-              ease: "none",
-              stagger: beats.shatterStagger,
-            },
+            heroSequenceMotion.wordBlur,
+            wordDuration,
+            beats.shatterStagger,
             beats.shatterStart,
           );
 
-          timeline.to(
+          depthTweens(
             cursors,
-            {
-              // Same upward shatter read as the words — they just finish sooner.
-              y: () => -vh() * travel,
-              autoAlpha: 0,
-              filter: `blur(${blurAmount(heroSequenceMotion.cursorBlur)}px)`,
-              duration: beats.cursorsOutEnd - beats.shatterStart,
-              ease: "none",
-              stagger: { each: 1.6, from: "random" },
-            },
+            heroSequenceMotion.cursorBlur,
+            beats.cursorsOutEnd - beats.shatterStart,
+            // Fixed shuffle so all three tweens share one order.
+            (i: number) => cursorOrder[i] * 1.6,
             beats.shatterStart,
           );
 
@@ -678,7 +752,7 @@ export function HeroSequence() {
             <div className="hs-scrub-runway" aria-hidden="true" />
           </div>
 
-          <WorkGallery />
+          <WorkRecords />
 
           <TeamSection />
 

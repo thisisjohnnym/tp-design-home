@@ -31,18 +31,18 @@ export type TeamRingMaterial = "fabric" | "plastic" | "paper";
 export const teamRing = {
   material: "fabric" as TeamRingMaterial,
   /** Camera elevation, degrees — higher opens a bigger gap for the headline. */
-  tilt: 24,
+  tilt: 19,
   /** Ease the tilt from `introFrom` to `tilt` as the section scrolls in. */
   scrollIntro: true,
   introFrom: 40,
   /** Camera roll, degrees. */
   roll: 0,
   /** Card width multiplier (world units × 1.9). */
-  cardSize: 1.4,
+  cardSize: 2.0,
   /** Gap between cards around the ring, as a multiple of card width. */
-  spacing: 2.3,
+  spacing: 2.2,
   /** Share of the view width the ring spans on landscape screens. */
-  fitWidth: 0.99,
+  fitWidth: 1.45,
   /** Idle spin, radians per second. */
   autoSpeed: 0.06,
   direction: "left" as "left" | "right",

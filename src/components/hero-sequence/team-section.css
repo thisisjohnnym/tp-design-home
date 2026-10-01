@@ -3,16 +3,23 @@
    back rows. One screen tall and never pinned, so scrolling passes through. */
 
 .hs-team {
+  /* Extra scene height beyond one screen: the ring is fitted to its container,
+     so a taller one lets the ring and cards grow. Margins below give it back. */
+  --hs-team-extra: 25svh;
   position: relative;
   z-index: 1;
   /* The sphere art runs past the sides; keep it from widening the page. */
   overflow-x: clip;
   background: transparent;
+  /* Tighten the gap to the work gallery above (~170px at 1440 wide) and give
+     the services below the same clearance from the front cards. */
+  margin-top: calc(-12vw - var(--hs-team-extra) / 2);
+  margin-bottom: calc(10vw - var(--hs-team-extra) / 2);
 }
 
 .hs-team__scene {
   position: relative;
-  height: 100svh;
+  height: calc(100svh + var(--hs-team-extra));
   min-height: 640px;
   overflow: visible;
 }
@@ -101,15 +108,17 @@
   pointer-events: none;
   translate: -50% -50%;
   white-space: nowrap;
+  /* On the way back the headline waits for the ring to settle (delay), then fades in. */
   transition:
-    opacity 0.5s cubic-bezier(0.33, 1, 0.68, 1),
-    filter 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+    opacity 0.6s cubic-bezier(0.33, 1, 0.68, 1) 1.2s,
+    filter 0.6s cubic-bezier(0.33, 1, 0.68, 1) 1.2s;
 }
 
 /* A card is focused (team-ring/TeamRing.tsx): clear the headline out of its way. */
 .hs-team[data-focused] .hs-team__title {
   opacity: 0;
   filter: blur(12px);
+  transition-delay: 0s;
 }
 
 @media (prefers-reduced-motion: reduce) {

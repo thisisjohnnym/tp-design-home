@@ -359,8 +359,8 @@ export const heroSequenceMotion = {
   logosTravel: 0.14,
   /** Soft scroll lock once logos are fully in — a beat, not a stare. */
   logosHoldSeconds: 0.7,
-  wordBlur: 16,
-  cursorBlur: 22,
+  wordBlur: 48,
+  cursorBlur: 56,
   /** Seconds each cursor group stays before swapping to the next teammates. */
   cursorRosterHold: 4.2,
   /** Whole-cursor fade when a roster group swaps. */
@@ -403,67 +403,102 @@ export const heroSequenceIntro = {
 } as const;
 
 /**
- * Parallax collage before the team section (Paper 8BV-0 desktop, 6WC-0 phone).
- * `speed` drives scroll depth: under 1 lags (far), over 1 leads (near).
- * `phoneSpeed` overrides it on the phone stack.
- * Pixel sizes are 1× frame exports used for intrinsic aspect hints.
- * `mobileSrc` swaps in the phone frame's crop; tiles without one that the
- * phone layout drops are hidden in CSS.
+ * Record browser before the team section (Paper 9DZ-0 / 9L3-0 / 9UQ-0 / 9RA-0).
+ * Each work is one slab on the wheel. `art` is composed onto a 16:9 card:
+ * `contain` sits a screen capture on `bg`, `cover` fills the card with a photo.
+ * Titles and tags are placeholders until real case studies are named.
  */
-export const heroSequenceWorkGallery = [
+export const heroSequenceWorks = [
   {
-    id: "pdp",
-    src: "/gallery/pdp.webp",
-    alt: "Kate Spade product detail page for a black shoulder bag",
-    speed: 0.55,
-    pixelWidth: 883,
-    pixelHeight: 764,
+    id: "gradient-mesh",
+    title: "Gradient Systems",
+    tags: ["Visual Design"],
+    year: "2026",
+    art: "/gallery/placeholders/01-gradient-mesh.svg",
+    fit: "cover",
+    bg: "#12102b",
   },
   {
-    id: "carousel",
-    src: "/gallery/carousel.webp",
-    alt: "Yellow product feature carousel cards",
-    speed: 0.8,
-    phoneSpeed: 0.75,
-    pixelWidth: 367,
-    pixelHeight: 437,
+    id: "wireframe",
+    title: "Wireframe Kit",
+    tags: ["UX/UI"],
+    year: "2026",
+    art: "/gallery/placeholders/02-wireframe.svg",
+    fit: "cover",
+    bg: "#f4f4f1",
   },
   {
-    id: "cart",
-    src: "/gallery/cart.webp",
-    mobileSrc: "/gallery/cart-mobile.webp",
-    alt: "Kate Spade mobile cart with a rose smoke crossbody",
-    speed: 1.15,
-    phoneSpeed: 1.2,
-    pixelWidth: 736,
-    pixelHeight: 647,
+    id: "color-palette",
+    title: "Color Palette",
+    tags: ["Design System"],
+    year: "2026",
+    art: "/gallery/placeholders/03-color-palette.svg",
+    fit: "cover",
+    bg: "#fbf7ef",
   },
   {
-    id: "logo",
-    src: "/gallery/logo-c.webp",
-    mobileSrc: "/gallery/logo-c-mobile.webp",
-    alt: "Gold Coach C hardware on sage leather",
-    speed: 1.45,
-    phoneSpeed: 1.5,
-    pixelWidth: 269,
-    pixelHeight: 357,
+    id: "type-specimen",
+    title: "Type Specimen",
+    tags: ["Typography"],
+    year: "2026",
+    art: "/gallery/placeholders/04-type-specimen.svg",
+    fit: "cover",
+    bg: "#1c1c1b",
   },
   {
-    id: "testimonial",
-    src: "/gallery/testimonial.webp",
-    alt: "Customer testimonials mobile screen",
-    speed: 1.6,
-    pixelWidth: 261,
-    pixelHeight: 344,
+    id: "icon-grid",
+    title: "Icon Library",
+    tags: ["Design System"],
+    year: "2026",
+    art: "/gallery/placeholders/05-icon-grid.svg",
+    fit: "cover",
+    bg: "#3a5bff",
   },
   {
-    id: "lifestyle",
-    src: "/gallery/lifestyle.webp",
-    mobileSrc: "/gallery/lifestyle-mobile.webp",
-    alt: "Model wearing a pink kate spade crossbody",
-    speed: 1.9,
-    phoneSpeed: 1.85,
-    pixelWidth: 139,
-    pixelHeight: 437,
+    id: "ui-cards",
+    title: "Card Components",
+    tags: ["UX/UI"],
+    year: "2025",
+    art: "/gallery/placeholders/06-ui-cards.svg",
+    fit: "cover",
+    bg: "#e9e6ff",
+  },
+  {
+    id: "layout-grid",
+    title: "Layout Grid",
+    tags: ["UX/UI", "Research"],
+    year: "2025",
+    art: "/gallery/placeholders/07-layout-grid.svg",
+    fit: "cover",
+    bg: "#ffffff",
+  },
+  {
+    id: "vector-curves",
+    title: "Vector Curves",
+    tags: ["Branding"],
+    year: "2025",
+    art: "/gallery/placeholders/08-vector-curves.svg",
+    fit: "cover",
+    bg: "#0f172a",
+  },
+  {
+    id: "device-mockup",
+    title: "Mobile Mockup",
+    tags: ["UX/UI"],
+    year: "2025",
+    art: "/gallery/placeholders/09-device-mockup.svg",
+    fit: "cover",
+    bg: "#ffd9c7",
+  },
+  {
+    id: "motion-trails",
+    title: "Motion Trails",
+    tags: ["Motion"],
+    year: "2025",
+    art: "/gallery/placeholders/10-motion-trails.svg",
+    fit: "cover",
+    bg: "#7c3aed",
   },
 ] as const;
+
+export type HeroSequenceWork = (typeof heroSequenceWorks)[number];

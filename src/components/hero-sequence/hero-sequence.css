@@ -15,7 +15,7 @@
   --hs-gutter: clamp(16px, 1.6vw, 24px);
   --hs-band-height: 480px;
   /* Room for the shatter exit to match the page’s scroll pace. */
-  --hs-scrub-length: 100svh;
+  --hs-scrub-length: 180svh;
   /* Paper “grid” strokes: 12 cols, 8px gutters, 24px page inset. */
   --hs-grid-cols: 12;
   --hs-grid-gap: 8px;
@@ -1140,7 +1140,7 @@
   .hs-root {
     --hs-gutter: 16px;
     --hs-band-height: 336px;
-    --hs-scrub-length: 80svh;
+    --hs-scrub-length: 150svh;
     /* 78 / 440 — Paper 8IP-0 phone headline. */
     --hs-display: 17.73vw;
     --hs-title: 10.6vw;
@@ -1353,7 +1353,7 @@ html.hs-has-pointer * {
 /* ------------------------------------------------------------------ */
 /* Crash triage — ?off=token,token (set in HeroSequence.tsx).          */
 /* "normalize" is handled in JS (iOS touch-scroll takeover).           */
-/* Tokens: shader team orbs cards caps hero gallery nav grid pointer   */
+/* Tokens: shader team orbs cards caps hero records nav grid pointer   */
 /*         glass filters blend will-change normalize                   */
 /* ------------------------------------------------------------------ */
 
@@ -1368,7 +1368,7 @@ html[data-off~="teamtitle"] .hs-team__title {
 
 /* Hidden rather than removed so page length and scroll triggers stay put. */
 html[data-off~="hero"] .hs-scene,
-html[data-off~="gallery"] .hs-gallery,
+html[data-off~="records"] .hs-records,
 html[data-off~="nav"] .hs-nav,
 html[data-off~="grid"] .hs-grid,
 html[data-off~="pointer"] .hs-pointer {

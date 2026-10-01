@@ -1,8 +1,6 @@
 import dynamic from "next/dynamic";
 import { heroSequenceCursorRoster } from "./content";
-import { SphereLeft, SphereRight } from "./Sphere";
 import "./curtain-reveal.css";
-import "./sphere.css";
 import "./team-section.css";
 
 /* three.js only loads in the browser, and only in this chunk. */
@@ -15,12 +13,6 @@ export function TeamSection() {
   return (
     <section id="team" className="hs-team" aria-labelledby="hs-team-heading">
       <div className="hs-team__scene">
-        <div className="hs-team__orbs" aria-hidden="true">
-          <div className="hs-team__orb hs-team__orb--lead">
-            <SphereLeft />
-          </div>
-        </div>
-
         <TeamRing members={heroSequenceCursorRoster} />
 
         <h2 className="hs-team__title" id="hs-team-heading">
@@ -33,12 +25,6 @@ export function TeamSection() {
             <span className="hs-curtain__mask" aria-hidden="true" />
           </span>
         </h2>
-
-        <div className="hs-team__orbs hs-team__orbs--front" aria-hidden="true">
-          <div className="hs-team__orb hs-team__orb--accent">
-            <SphereRight />
-          </div>
-        </div>
       </div>
 
       {/* The ring is a canvas; this is the team for screen readers and keyboards. */}

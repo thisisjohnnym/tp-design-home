@@ -126,7 +126,7 @@ function draw(
   const inner = w - pad * 2;
 
   /* Bio sits under the portrait; measure it first so the portrait fills the rest. */
-  const bioSize = 4.32 * cq;
+  const bioSize = (16 / 324) * 100 * cq; // 16px on the 324px-wide card design
   ctx.font = font(400, bioSize);
   ctx.letterSpacing = `${-0.04 * bioSize}px`;
   const bioLines = wrapLines(ctx, member.bio, inner);

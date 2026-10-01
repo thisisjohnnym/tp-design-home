@@ -51,6 +51,24 @@ export type IntroState = {
   progress: number;
 };
 
+/** Ring radius at the start of the scroll-in, as a share of its final radius. */
+const INTRO_RADIUS_FROM = 0.55;
+/** Extra spin scrubbed in by the scroll-in, in card steps (a whole number keeps the final layout). */
+const INTRO_SPIN_STEPS = 2;
+
+const smooth = (x: number) => x * x * (3 - 2 * x);
+
+/** Radius multiplier for scroll-in progress `p`: the ring opens out as it arrives. */
+export function introScale(p: number) {
+  const e = 1 - Math.pow(1 - p, 3);
+  return INTRO_RADIUS_FROM + (1 - INTRO_RADIUS_FROM) * e;
+}
+
+/** Angle still to be unwound at progress `p`: speeds up, then eases into place. */
+export function introSpin(p: number, total: number) {
+  return (1 - smooth(p)) * INTRO_SPIN_STEPS * ((Math.PI * 2) / total);
+}
+
 export type RingSettings = {
   members: readonly TeamCardMember[];
   fog: string;
@@ -457,6 +475,7 @@ function Card({
   settings,
   motion,
   camDist,
+  intro,
   onSelect,
 }: {
   member: TeamCardMember;
@@ -468,6 +487,7 @@ function Card({
   settings: RingSettings;
   motion: RefObject<RingMotion>;
   camDist: RefObject<number>;
+  intro: RefObject<IntroState>;
   onSelect: (index: number | null) => void;
 }) {
   const mesh = useRef<THREE.Mesh>(null);
@@ -545,10 +565,13 @@ function Card({
     fx.dim += ((m.focus !== null && m.focus !== index ? 1 : 0) - fx.dim) * focusEase;
     fx.lift += ((m.focus === index ? 1 : 0) - fx.lift) * focusEase;
 
-    const a = (index / total) * Math.PI * 2 + m.angle;
+    const p = settings.scrollIntro ? intro.current.progress : 1;
+    const orbit = radius * introScale(p);
+    const a =
+      (index / total) * Math.PI * 2 + m.angle + (settings.scrollIntro ? m.dir * introSpin(p, total) : 0);
     facing.current = Math.cos(a);
     const obj = mesh.current!;
-    const reach = radius + fx.lift * radius * FOCUS_LIFT;
+    const reach = orbit + fx.lift * orbit * FOCUS_LIFT;
     obj.position.set(
       Math.sin(a) * reach,
       Math.sin(state.clock.elapsedTime * 0.7 + index) * 0.035,
@@ -560,7 +583,7 @@ function Card({
     const u = uniforms;
     u.uW.value = cardW;
     u.uH.value = cardH;
-    u.uR.value = radius;
+    u.uR.value = orbit;
     u.uBend.value = s.bend;
     u.uTime.value = state.clock.elapsedTime;
     u.uRipple.value =
@@ -694,6 +717,7 @@ export function RingScene({
           settings={settings}
           motion={motion}
           camDist={camDist}
+          intro={intro}
           onSelect={onSelect}
         />
       ))}
