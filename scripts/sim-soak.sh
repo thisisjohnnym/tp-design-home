@@ -20,18 +20,33 @@ xcrun simctl boot "$device" 2>/dev/null || true
 xcrun simctl bootstatus "$device" -b >/dev/null
 udid=$(xcrun simctl list devices | grep "$device (" | grep Booted | grep -oE '[0-9A-F-]{36}' | head -1)
 
+# Fresh Safari so earlier soak tabs are not still scrolling in the background.
+xcrun simctl terminate "$udid" com.apple.mobilesafari 2>/dev/null || true
+sleep 2
+
 sep="?"; [[ "$URL" == *"?"* ]] && sep="&"
 start_ts=$(date "+%Y-%m-%d %H:%M:%S")
 xcrun simctl openurl "$udid" "${URL}${sep}autoscroll=${LEG_SECONDS}&soak=$(date +%s)"
 
-# Simulator WebKit processes live under this device's data directory.
-pids() {
-  pgrep -f "$1" 2>/dev/null | while read -r pid; do
-    if ps -o command= -p "$pid" | grep -q "CoreSimulator"; then echo "$pid"; fi
-  done
+# Simulator WebKit processes run on the host from the iOS runtime's path.
+sim_pids() {
+  pgrep -f "SimulatorRuntime.*$1" 2>/dev/null || true
 }
-mb() { footprint -p "$1" 2>/dev/null | awk '/Footprint:/ {v=$2; u=$3; if (u=="KB") v/=1024; if (u=="GB") v*=1024; printf "%d", v; exit}'; }
+mb() {
+  footprint -p "$1" 2>/dev/null |
+    awk '{for (i = 1; i < NF; i++) if ($i == "Footprint:") {v = $(i + 1); u = $(i + 2); if (u == "KB") v /= 1024; if (u == "GB") v *= 1024; printf "%d", v; exit}}'
+}
+# The tab's process is the WebContent with the largest footprint.
+busiest_web() {
+  local best="" best_mb=0 m
+  for pid in $(sim_pids "WebKit.WebContent"); do
+    m=$(mb "$pid"); m=${m:-0}
+    if (( m > best_mb )); then best=$pid; best_mb=$m; fi
+  done
+  echo "$best $best_mb"
+}
 
+warmup=$(( $(date +%s) + 20 ))   # process swaps while the first load settles
 last_web=""
 restarts=0
 peak_web=0
@@ -39,15 +54,14 @@ peak_gpu=0
 end=$(( $(date +%s) + MINUTES * 60 ))
 while (( $(date +%s) < end )); do
   sleep 3
-  web=$(pids "WebKit.WebContent" | tail -1)
-  gpu=$(pids "WebKit.GPU" | tail -1)
-  if [[ -n "$web" && -n "$last_web" && "$web" != "$last_web" ]]; then
+  read -r web w <<<"$(busiest_web)"
+  gpu=$(sim_pids "WebKit.GPU" | head -1)
+  g=$([[ -n "$gpu" ]] && mb "$gpu" || echo 0); g=${g:-0}; w=${w:-0}
+  if (( $(date +%s) > warmup )) && [[ -n "$web" && -n "$last_web" && "$web" != "$last_web" ]]; then
     restarts=$((restarts + 1))
-    echo "$(date +%T) !! WebContent restarted ($last_web -> $web): tab crashed"
+    echo "$(date +%T) !! tab process changed ($last_web -> $web): tab crashed or reloaded"
   fi
   [[ -n "$web" ]] && last_web="$web"
-  w=$([[ -n "$web" ]] && mb "$web" || echo 0)
-  g=$([[ -n "$gpu" ]] && mb "$gpu" || echo 0)
   (( w > peak_web )) && peak_web=$w
   (( g > peak_gpu )) && peak_gpu=$g
   echo "$(date +%T) web ${w}MB gpu ${g}MB"

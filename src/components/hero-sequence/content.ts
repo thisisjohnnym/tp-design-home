@@ -1,17 +1,18 @@
 export const heroSequenceLoaderWords = ["craft", "build", "think"] as const;
 
-export const heroSequenceResources = [
-  "Professional accountability",
-  "Feedback management",
-  "Writing as a thinking tool",
-  "Tapestry brands",
-] as const;
-
 export const heroSequenceContact = {
   email: "design@tapestry.com",
   phoneLabel: "+1 - 800 - TAPESTRY",
   phoneHref: "tel:+180082737879",
 } as const;
+
+/** Top-right nav links (Paper 81I-0). Hash targets are section ids. */
+export const heroSequenceNavLinks = [
+  { label: "Resources", href: "#resources" },
+  { label: "Team", href: "#team" },
+  { label: "Works", href: "#works" },
+  { label: "Contact", href: `mailto:${heroSequenceContact.email}` },
+] as const;
 
 /**
  * Frame 1 headline. Words are individual nodes so the shatter beat can move
@@ -49,29 +50,29 @@ export const heroSequenceCursors = [
     id: "mitra",
     name: "Mitra Raveendran",
     slot: "a",
-    tone: "blue",
+    tone: "green",
     text: "white",
   },
   {
     id: "wendy",
     name: "Wendy Chan",
     slot: "b",
-    tone: "red",
-    text: "white",
+    tone: "orange",
+    text: "black",
   },
   {
     id: "johnny",
     name: "Jonathan Martinez",
     slot: "c",
-    tone: "purple",
+    tone: "red",
     text: "white",
   },
   {
     id: "sean",
     name: "Sean Kelly",
     slot: "d",
-    tone: "yellow",
-    text: "black",
+    tone: "blue",
+    text: "white",
   },
 ] as const;
 
@@ -196,16 +197,14 @@ export const heroSequenceCursorRoster = [
 
 export const heroSequenceCursorSlots = ["a", "b", "c", "d"] as const;
 
-/** MTA line colors for hero cursors. Each visible group draws distinct tones,
- *  so no two cursors on screen share a color. Yellow takes black ink, as on
- *  the N Q R bullet; the rest take white. */
+/** Hero cursor tones (Paper 81I-0). Each group of four draws them without
+ *  replacement, so no two cursors on screen share a color. Orange takes
+ *  black ink; the rest take white. */
 export const heroSequenceCursorTones = [
-  { id: "red", text: "white" }, // 1 2 3
-  { id: "orange", text: "white" }, // B D F M
-  { id: "yellow", text: "black" }, // N Q R W
-  { id: "green", text: "white" }, // 4 5 6
-  { id: "blue", text: "white" }, // A C E
-  { id: "purple", text: "white" }, // 7
+  { id: "green", text: "white" },
+  { id: "orange", text: "black" },
+  { id: "red", text: "white" },
+  { id: "blue", text: "white" },
 ] as const;
 
 /** Shared card chrome. Member lines live on each roster entry. */
@@ -307,6 +306,8 @@ export const heroSequenceBeats = {
   /** Gentle cascade across the longer exit. */
   shatterStagger: 1.4,
   cursorsOutEnd: 62,
+  /** Scroll cue is gone well before the work gallery rises under it. */
+  scrollCueOutEnd: 8,
   /**
    * Spheres rise with the last departing word so the handoff stays continuous.
    */
@@ -358,8 +359,8 @@ export const heroSequenceMotion = {
   logosTravel: 0.14,
   /** Soft scroll lock once logos are fully in — a beat, not a stare. */
   logosHoldSeconds: 0.7,
-  wordBlur: 16,
-  cursorBlur: 22,
+  wordBlur: 48,
+  cursorBlur: 56,
   /** Seconds each cursor group stays before swapping to the next teammates. */
   cursorRosterHold: 4.2,
   /** Whole-cursor fade when a roster group swaps. */
@@ -402,66 +403,102 @@ export const heroSequenceIntro = {
 } as const;
 
 /**
- * Parallax collage before the team section (Paper 8BV-0 desktop, 6WC-0 phone).
- * `speed` drives scroll depth: under 1 lags (far), over 1 leads (near).
- * Pixel sizes are 1× frame exports used for intrinsic aspect hints.
- * `mobileSrc` swaps in the phone frame's crop; tiles without one that the
- * phone layout drops are hidden in CSS.
+ * Record browser before the team section (Paper 9DZ-0 / 9L3-0 / 9UQ-0 / 9RA-0).
+ * Each work is one slab on the wheel. `art` is composed onto a 16:9 card:
+ * `contain` sits a screen capture on `bg`, `cover` fills the card with a photo.
+ * Titles and tags are placeholders until real case studies are named.
  */
-export const heroSequenceWorkGallery = [
+export const heroSequenceWorks = [
   {
-    id: "pdp",
-    src: "/gallery/pdp.webp",
-    alt: "Kate Spade product detail page for a black shoulder bag",
-    speed: 0.55,
-    pixelWidth: 883,
-    pixelHeight: 764,
+    id: "gradient-mesh",
+    title: "Gradient Systems",
+    tags: ["Visual Design"],
+    year: "2026",
+    art: "/gallery/placeholders/01-gradient-mesh.svg",
+    fit: "cover",
+    bg: "#12102b",
   },
   {
-    id: "carousel",
-    src: "/gallery/carousel.webp",
-    alt: "Yellow product feature carousel cards",
-    speed: 0.81,
-    phoneSpeed: 0.72,
-    pixelWidth: 367,
-    pixelHeight: 437,
+    id: "wireframe",
+    title: "Wireframe Kit",
+    tags: ["UX/UI"],
+    year: "2026",
+    art: "/gallery/placeholders/02-wireframe.svg",
+    fit: "cover",
+    bg: "#f4f4f1",
   },
   {
-    id: "cart",
-    src: "/gallery/cart.webp",
-    mobileSrc: "/gallery/cart-mobile.webp",
-    alt: "Kate Spade mobile cart with a rose smoke crossbody",
-    speed: 1,
-    phoneSpeed: 0.82,
-    pixelWidth: 736,
-    pixelHeight: 647,
+    id: "color-palette",
+    title: "Color Palette",
+    tags: ["Design System"],
+    year: "2026",
+    art: "/gallery/placeholders/03-color-palette.svg",
+    fit: "cover",
+    bg: "#fbf7ef",
   },
   {
-    id: "logo",
-    src: "/gallery/logo-c.webp",
-    mobileSrc: "/gallery/logo-c-mobile.webp",
-    alt: "Gold Coach C hardware on sage leather",
-    speed: 1.29,
-    phoneSpeed: 1.28,
-    pixelWidth: 269,
-    pixelHeight: 357,
+    id: "type-specimen",
+    title: "Type Specimen",
+    tags: ["Typography"],
+    year: "2026",
+    art: "/gallery/placeholders/04-type-specimen.svg",
+    fit: "cover",
+    bg: "#1c1c1b",
   },
   {
-    id: "testimonial",
-    src: "/gallery/testimonial.webp",
-    alt: "Customer testimonials mobile screen",
-    speed: 1.51,
-    pixelWidth: 261,
-    pixelHeight: 344,
+    id: "icon-grid",
+    title: "Icon Library",
+    tags: ["Design System"],
+    year: "2026",
+    art: "/gallery/placeholders/05-icon-grid.svg",
+    fit: "cover",
+    bg: "#3a5bff",
   },
   {
-    id: "lifestyle",
-    src: "/gallery/lifestyle.webp",
-    mobileSrc: "/gallery/lifestyle-mobile.webp",
-    alt: "Model wearing a pink kate spade crossbody",
-    speed: 1.72,
-    phoneSpeed: 1.6,
-    pixelWidth: 139,
-    pixelHeight: 437,
+    id: "ui-cards",
+    title: "Card Components",
+    tags: ["UX/UI"],
+    year: "2025",
+    art: "/gallery/placeholders/06-ui-cards.svg",
+    fit: "cover",
+    bg: "#e9e6ff",
+  },
+  {
+    id: "layout-grid",
+    title: "Layout Grid",
+    tags: ["UX/UI", "Research"],
+    year: "2025",
+    art: "/gallery/placeholders/07-layout-grid.svg",
+    fit: "cover",
+    bg: "#ffffff",
+  },
+  {
+    id: "vector-curves",
+    title: "Vector Curves",
+    tags: ["Branding"],
+    year: "2025",
+    art: "/gallery/placeholders/08-vector-curves.svg",
+    fit: "cover",
+    bg: "#0f172a",
+  },
+  {
+    id: "device-mockup",
+    title: "Mobile Mockup",
+    tags: ["UX/UI"],
+    year: "2025",
+    art: "/gallery/placeholders/09-device-mockup.svg",
+    fit: "cover",
+    bg: "#ffd9c7",
+  },
+  {
+    id: "motion-trails",
+    title: "Motion Trails",
+    tags: ["Motion"],
+    year: "2025",
+    art: "/gallery/placeholders/10-motion-trails.svg",
+    fit: "cover",
+    bg: "#7c3aed",
   },
 ] as const;
+
+export type HeroSequenceWork = (typeof heroSequenceWorks)[number];

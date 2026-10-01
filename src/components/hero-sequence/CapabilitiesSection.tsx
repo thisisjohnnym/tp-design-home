@@ -335,6 +335,7 @@ export function CapabilitiesSection() {
 
   return (
     <section
+      id="resources"
       className="hs-caps"
       aria-labelledby="hs-caps-heading"
       ref={sectionRef}

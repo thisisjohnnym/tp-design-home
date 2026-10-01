@@ -12,7 +12,7 @@ import { PointerEffect } from "./PointerEffect";
 import { PlateShader } from "./PlateShader";
 import { SequenceNav } from "./SequenceNav";
 import { TeamSection } from "./TeamSection";
-import { WorkGallery } from "./WorkGallery";
+import { WorkRecords } from "./work-records/WorkRecords";
 import {
   clearCurtainState,
   createCurtainReveal,
@@ -20,9 +20,9 @@ import {
   playCurtainWordIntro,
   restCurtainWord,
 } from "./curtain-reveal";
-import { bindTeamFan } from "./team-fan";
+import { bindTeamScene } from "./team-scene";
 import { ShatterHeadline } from "./ShatterHeadline";
-import { curtainReveal } from "./team-fan-tuning";
+import { curtainReveal } from "./team-scene-tuning";
 import {
   heroSequenceBeats as beats,
   heroSequenceCursorRoster,
@@ -56,6 +56,7 @@ export function HeroSequence() {
       const navCurtains = select(".hs-nav__curtain") as HTMLElement[];
       const cursors = select(".hs-cursor") as HTMLElement[];
       const cursorLabels = select(".hs-cursor__label") as HTMLElement[];
+      const scrollCue = select(".hs-scroll-cue")[0] as HTMLElement;
       const navLinks = select(".hs-nav__links")[0] as HTMLElement;
       const loader = select(".hs-loader")[0] as HTMLElement;
       const loaderMark = select(".hs-loader-mark")[0] as HTMLElement;
@@ -274,14 +275,13 @@ export function HeroSequence() {
           | undefined;
         if (!headline) return;
 
-        gsap.set(shatter, { scale: 1, transformOrigin: "left bottom" });
-        const available = shatter.clientWidth;
+        /* The block shrink-wraps its lines, so measure the layer around it.
+           Transform origin comes from CSS (centered desktop, bottom-left phone). */
+        gsap.set(shatter, { scale: 1 });
+        const available = shatter.parentElement?.clientWidth ?? 0;
         const needed = headline.scrollWidth;
         if (available <= 0 || needed <= 0) return;
-        gsap.set(shatter, {
-          scale: Math.min(1, available / needed),
-          transformOrigin: "left bottom",
-        });
+        gsap.set(shatter, { scale: Math.min(1, available / needed) });
       };
 
       const shatterFitObserver =
@@ -373,7 +373,10 @@ export function HeroSequence() {
 
       if (skipIntro) {
         gsap.set([loader, loaderMark], { autoAlpha: 0, display: "none" });
-        gsap.set([shatter, navLinks, navLogo], { autoAlpha: 1, y: 0 });
+        gsap.set([shatter, navLinks, navLogo, scrollCue], {
+          autoAlpha: 1,
+          y: 0,
+        });
         ScrollTrigger.refresh();
         enableTouchScroll();
         startCursorRoster();
@@ -394,6 +397,7 @@ export function HeroSequence() {
         gsap.set(loader, { autoAlpha: 1, display: "grid" });
         gsap.set(firstWord, { autoAlpha: 0, filter: "blur(18px)", y: 10 });
         gsap.set(shatter, { autoAlpha: 0, y: 28 });
+        gsap.set(scrollCue, { autoAlpha: 0 });
         /* Links stay in place; curtains reveal the labels. */
         gsap.set(navLinks, { autoAlpha: 1, y: 0 });
 
@@ -476,6 +480,11 @@ export function HeroSequence() {
             },
             "reveal",
           )
+          .to(
+            scrollCue,
+            { autoAlpha: 1, duration: heroSequenceIntro.revealDuration },
+            `reveal+=${heroSequenceIntro.revealDuration * 0.5}`,
+          )
           /* Hand the wordmark over to the nav so it scrolls with the page. */
           .to(
             navLogo,
@@ -523,6 +532,10 @@ export function HeroSequence() {
               scrub: heroSequenceMotion.scrub,
               pin,
               pinSpacing: false,
+        /* Crash triage: ?off=fixedpin pins with transforms, not position: fixed. */
+        pinType: document.documentElement.dataset.off?.split(" ").includes("fixedpin")
+          ? "transform"
+          : undefined,
               invalidateOnRefresh: true,
               onUpdate: (self) => {
                 getSequenceProgress = () => self.progress;
@@ -534,10 +547,10 @@ export function HeroSequence() {
                   stopCursorRoster();
                 }
                 /*
-                 * Pause the verb cycle while shatter owns the headline;
-                 * restart cleanly when the hero returns to rest.
+                 * Verb keeps cycling through the shatter; it only stops once the
+                 * headline is fully gone.
                  */
-                if (self.progress > 0.002) stopHeadlineVerb();
+                if (self.progress > 0.98) stopHeadlineVerb();
                 else startHeadlineVerb();
 
               },
@@ -552,39 +565,129 @@ export function HeroSequence() {
             wordSpan - beats.shatterStagger * (words.length - 1),
           );
 
-          timeline.to(
+          /* Depth: every piece gets its own distance from the viewer, so the
+             break reads as a volume rushing past the camera rather than one
+             flat zoom. Near pieces travel farther, grow more, blur harder and
+             drift further from the block's centre (parallax). */
+          const depthOf = (i: number) => 0.45 + ((i * 0.618034) % 1) * 1.1;
+          const zoomGain = reduceMotion ? reduced.travel : 1;
+          const centreOffset = (el: HTMLElement, i: number) => {
+            const block = shatter.getBoundingClientRect();
+            const rect = el.getBoundingClientRect();
+            const fit = Number(gsap.getProperty(shatter, "scale")) || 1;
+            const x = Number(gsap.getProperty(el, "x")) || 0;
+            const y = Number(gsap.getProperty(el, "y")) || 0;
+            return {
+              x:
+                (rect.left + rect.width / 2 - x * fit -
+                  (block.left + block.width / 2)) /
+                fit,
+              y:
+                (rect.top + rect.height / 2 - y * fit -
+                  (block.top + block.height / 2)) /
+                fit,
+              d: depthOf(i),
+            };
+          };
+
+          const depthTweens = (
+            targets: HTMLElement[],
+            blur: number,
+            duration: number,
+            stagger: number | ((i: number) => number),
+            at: number,
+          ) => {
+            // Position: linear, scaled by depth.
+            timeline.to(
+              targets,
+              {
+                y: (i) => -vh() * travel * (0.55 + 0.3 * depthOf(i)),
+                x: (i, el) => {
+                  const o = centreOffset(el, i);
+                  return o.x * 0.55 * o.d * zoomGain;
+                },
+                duration,
+                ease: "none",
+                stagger,
+              },
+              at,
+            );
+            // Scale + blur accelerate toward the top of the screen.
+            timeline.to(
+              targets,
+              {
+                scale: (i) => 1 + 1.25 * depthOf(i) * zoomGain,
+                duration,
+                ease: "power2.in",
+                stagger,
+              },
+              at,
+            );
+            // Blur ramps sooner than scale so the defocus is felt early.
+            timeline.to(
+              targets,
+              {
+                filter: (i) =>
+                  `blur(${blurAmount(blur * (0.5 + depthOf(i) * 0.9))}px)`,
+                duration,
+                ease: "power1.in",
+                stagger,
+              },
+              at,
+            );
+            // Fade last so the push toward the viewer is actually seen.
+            timeline.to(
+              targets,
+              {
+                autoAlpha: 0,
+                duration: duration * 0.6,
+                ease: "power1.in",
+                stagger,
+              },
+              at + duration * 0.4,
+            );
+          };
+
+          const cursorOrder = gsap.utils.shuffle(cursors.map((_, i) => i));
+
+          depthTweens(
             words,
-            {
-              y: () => -vh() * travel,
-              autoAlpha: 0,
-              filter: `blur(${blurAmount(heroSequenceMotion.wordBlur)}px)`,
-              duration: wordDuration,
-              // Even scrub — matches the rest of the page’s scroll pace.
-              ease: "none",
-              stagger: beats.shatterStagger,
-            },
+            heroSequenceMotion.wordBlur,
+            wordDuration,
+            beats.shatterStagger,
             beats.shatterStart,
           );
 
-          timeline.to(
+          depthTweens(
             cursors,
+            heroSequenceMotion.cursorBlur,
+            beats.cursorsOutEnd - beats.shatterStart,
+            // Fixed shuffle so all three tweens share one order.
+            (i: number) => cursorOrder[i] * 1.6,
+            beats.shatterStart,
+          );
+
+          /* The cue has done its job as soon as the page starts moving.
+             fromTo so the scrub doesn't record the intro's hidden state as
+             its start value. */
+          timeline.fromTo(
+            scrollCue,
+            { autoAlpha: 1 },
             {
-              // Same upward shatter read as the words — they just finish sooner.
-              y: () => -vh() * travel,
               autoAlpha: 0,
-              filter: `blur(${blurAmount(heroSequenceMotion.cursorBlur)}px)`,
-              duration: beats.cursorsOutEnd - beats.shatterStart,
+              immediateRender: false,
+              duration: beats.scrollCueOutEnd - beats.shatterStart,
               ease: "none",
-              stagger: { each: 1.6, from: "random" },
             },
             beats.shatterStart,
           );
 
-
-          const releaseTeam = bindTeamFan(root, {
-            reduceMotion,
-            layout: isMobile ? "phone" : isTablet ? "tablet" : "desktop",
-          });
+          const releaseTeam = debugOff.has("teamjs")
+            ? () => {}
+            : bindTeamScene(root, {
+                reduceMotion,
+                layout: isMobile ? "phone" : isTablet ? "tablet" : "desktop",
+              });
 
           return () => {
             releaseTeam();
@@ -638,6 +741,10 @@ export function HeroSequence() {
                   <div className="hs-scene">
                     <ShatterHeadline />
                   </div>
+
+                  <p className="hs-scroll-cue" aria-hidden="true">
+                    Scroll to explore
+                  </p>
                 </div>
               </div>
             </div>
@@ -645,7 +752,7 @@ export function HeroSequence() {
             <div className="hs-scrub-runway" aria-hidden="true" />
           </div>
 
-          <WorkGallery />
+          <WorkRecords />
 
           <TeamSection />
 
