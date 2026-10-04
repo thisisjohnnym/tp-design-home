@@ -7,8 +7,6 @@
   --hs-yellow: #ffcd00;
   /* Studio yellow accent (Paper --color-accent). */
   --hs-logo-bloom: #ffcb00;
-  /* Menu toggle badge (Paper nav). */
-  --hs-menu-badge: #3767ee;
   --hs-muted: rgba(223, 223, 223, 0.6);
   --hs-card-well: #1e1e1e;
   --hs-hairline: rgba(223, 223, 223, 0.18);
@@ -16,8 +14,6 @@
 
   --hs-gutter: clamp(16px, 1.6vw, 24px);
   --hs-band-height: 480px;
-  /* Room for the shatter exit to match the page’s scroll pace. */
-  --hs-scrub-length: 100svh;
   /* Paper “grid” strokes: 12 cols, 8px gutters, 24px page inset. */
   --hs-grid-cols: 12;
   --hs-grid-gap: 8px;
@@ -121,17 +117,6 @@
   background: transparent;
 }
 
-/*
- * Provides the scrub scroll distance while the pin is sticky/fixed.
- * Keep this height stable for the whole scrub — collapsing it mid-timeline
- * shrinks the scroll range and stalls progress.
- */
-.hs-scrub-runway {
-  height: var(--hs-scrub-length);
-  pointer-events: none;
-}
-
-/* Hero stays pinned while the headline leaves. The team fan follows. */
 .hs-pin {
   position: sticky;
   z-index: 3;
@@ -341,144 +326,44 @@
   color: var(--hs-logo-bloom);
 }
 
-/* Menu toggle (Paper "nav"): M badge + label, opens a white panel beneath.
-   Open state flips the toggle to white so it joins the panel as one tab. */
-.hs-nav__menu {
-  position: relative;
-  grid-column: 11 / span 2;
+/* Plain text links (Paper 81I-0): 16px, light, right-aligned. */
+.hs-nav__links {
+  display: flex;
+  grid-column: 7 / span 6;
   justify-self: end;
+  align-items: center;
+  gap: 24px;
   pointer-events: auto;
 }
 
-.hs-nav__menu-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px;
-  border: 0;
-  border-radius: 0;
-  background-color: transparent;
+.hs-nav__link {
   color: var(--hs-light);
-  font: inherit;
-  font-size: var(--hs-meta-label);
-  font-weight: 700;
-  line-height: 18px;
-  cursor: pointer;
-  transition:
-    background-color 180ms ease-out,
-    color 180ms ease-out;
-}
-
-.hs-nav__menu-toggle:focus-visible {
-  outline: 2px solid var(--hs-menu-badge);
-  outline-offset: 2px;
-}
-
-.hs-nav__menu-badge {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  background-color: var(--hs-menu-badge);
-  color: var(--hs-white);
-  font-size: 10px;
-  letter-spacing: -0.02em;
-  line-height: 12px;
-}
-
-.hs-nav__menu.is-open .hs-nav__menu-toggle {
-  background-color: var(--hs-white);
-  color: #000;
-}
-
-.hs-nav__panel {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 48px;
-  padding: 32px 32px 32px 44px;
-  background-color: var(--hs-white);
-  color: #000;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  clip-path: inset(0 0 100% 0);
-  transition:
-    clip-path 280ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 180ms ease-out,
-    visibility 0s linear 280ms;
-}
-
-.hs-nav__menu.is-open .hs-nav__panel {
-  opacity: 1;
-  visibility: visible;
-  clip-path: inset(0 0 0 0);
-  transition:
-    clip-path 320ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 120ms ease-out,
-    visibility 0s;
-}
-
-.hs-nav__group {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.hs-nav__group-title {
-  margin: 0;
-  font-size: var(--hs-meta-label);
-  font-weight: 700;
-  line-height: 18px;
-}
-
-.hs-nav__list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin: 0;
-  padding: 0;
-  font-size: var(--hs-meta-label);
-  line-height: 18px;
-  list-style: none;
-  text-transform: capitalize;
-}
-
-.hs-nav__list--contact {
-  font-style: normal;
-  text-transform: lowercase;
-}
-
-.hs-nav__list a {
-  width: fit-content;
-  color: inherit;
+  font-size: 16px;
+  line-height: 20px;
   text-decoration: none;
+  white-space: nowrap;
+  transition: color 180ms ease-out;
 }
 
-.hs-nav__list a:hover,
-.hs-nav__list a:focus-visible {
+.hs-nav__link:hover,
+.hs-nav__link:focus-visible {
+  color: var(--hs-white);
   text-decoration: underline;
-  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .hs-nav__menu-toggle,
-  .hs-nav__panel,
-  .hs-nav__menu.is-open .hs-nav__panel {
-    transition: none;
-  }
+.hs-nav__link:focus-visible {
+  outline: none;
 }
 
 /* ------------------------------------------------------------------ */
 /* Frame 1 — shatter headline + cursors                                */
 /* ------------------------------------------------------------------ */
 
+/* Paper I8-0: headline anchored bottom-left (24px gutters), 128px / 90%. */
 .hs-layer--shatter {
+  top: calc(-1 * var(--hs-nav-height, 0px));
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
@@ -486,13 +371,15 @@
 
 .hs-shatter {
   position: relative;
-  width: 100%;
+  width: max-content;
+  margin-inline: 0;
   /* Fit-scale keeps cursors locked to the type as the block shrinks. */
   transform-origin: left bottom;
   will-change: transform;
 }
 
 .hs-shatter__headline {
+  position: relative;
   display: flex;
   width: max-content;
   max-width: none;
@@ -500,10 +387,8 @@
   align-items: flex-start;
   margin: 0;
   row-gap: 0;
-  /* Tight display leading was clipping Helvetica Now glyphs; keep punchy but safe. */
-  padding-block: 0.08em;
   color: var(--hs-light);
-  font-size: var(--hs-display);
+  font-size: var(--hs-title);
   font-weight: 400;
   letter-spacing: -0.04em;
   line-height: 0.9;
@@ -515,7 +400,8 @@
   flex-wrap: nowrap;
   align-items: center;
   width: max-content;
-  column-gap: 0.22em;
+  /* One word space (words already carry 0.02em side padding). */
+  column-gap: 0.12em;
 }
 
 .hs-shatter__break {
@@ -711,7 +597,7 @@
 
 .hs-cursor[data-slot="a"] {
   top: 25.6%;
-  left: 73.1%;
+  left: 75.1%;
 }
 
 .hs-cursor[data-slot="b"] {
@@ -726,7 +612,7 @@
 
 .hs-cursor[data-slot="d"] {
   top: 60.7%;
-  left: 16.3%;
+  left: 13.5%;
 }
 
 .hs-cursor__arrow {
@@ -747,8 +633,9 @@
   margin-top: -6px;
   margin-left: 16px;
   padding: 8px 14px;
-  border: 1.5px solid var(--hs-cursor-border);
+  border: 1.5px solid var(--hs-cursor-fill);
   background: var(--hs-cursor-fill);
+  box-shadow: 0 7px 14px color-mix(in srgb, var(--hs-cursor-fill) 25%, transparent);
   color: var(--hs-white);
   font-size: 18px;
   line-height: 1.15;
@@ -756,39 +643,25 @@
   white-space: nowrap;
 }
 
-/* MTA line colors. Tones are assigned per group so none repeat on screen. */
-.hs-cursor[data-tone="red"] {
-  --hs-cursor-fill: #ee352e; /* 1 2 3 */
-  --hs-cursor-border: #be2a25;
+/* Paper 81I-0 tones. Tones are assigned per group so none repeat on screen. */
+.hs-cursor[data-tone="green"] {
+  --hs-cursor-fill: #13ad5b;
 }
 
 .hs-cursor[data-tone="orange"] {
-  --hs-cursor-fill: #ff6319; /* B D F M */
-  --hs-cursor-border: #cc4f14;
+  --hs-cursor-fill: #fea629;
 }
 
-.hs-cursor[data-tone="yellow"] {
-  --hs-cursor-fill: #fccc0a; /* N Q R W */
-  --hs-cursor-border: #caa308;
-}
-
-.hs-cursor[data-tone="green"] {
-  --hs-cursor-fill: #00933c; /* 4 5 6 */
-  --hs-cursor-border: #007630;
+.hs-cursor[data-tone="red"] {
+  --hs-cursor-fill: #f14822;
 }
 
 .hs-cursor[data-tone="blue"] {
-  --hs-cursor-fill: #0039a6; /* A C E */
-  --hs-cursor-border: #002e85;
-}
-
-.hs-cursor[data-tone="purple"] {
-  --hs-cursor-fill: #b933ad; /* 7 */
-  --hs-cursor-border: #94298a;
+  --hs-cursor-fill: #2975ff;
 }
 
 .hs-cursor[data-text="black"] .hs-cursor__label {
-  color: var(--hs-canvas);
+  color: #000;
   text-shadow: none;
 }
 
@@ -1241,7 +1114,6 @@
   .hs-root {
     --hs-gutter: 16px;
     --hs-band-height: 336px;
-    --hs-scrub-length: 80svh;
     /* 78 / 440 — Paper 8IP-0 phone headline. */
     --hs-display: 17.73vw;
     --hs-title: 10.6vw;
@@ -1266,6 +1138,18 @@
    * re-broken into four rows. Line spans dissolve so the words flow as one
    * wrap row and .hs-shatter__break forces each phone row end.
    */
+  /* Phone keeps the bottom-left headline (Paper 8IP-0). */
+  .hs-layer--shatter {
+    top: 0;
+    justify-content: flex-end;
+  }
+
+  .hs-shatter {
+    width: 100%;
+    margin-inline: 0;
+    transform-origin: left bottom;
+  }
+
   .hs-shatter__headline {
     width: auto;
     flex-flow: row wrap;
@@ -1296,27 +1180,21 @@
     grid-column: auto;
   }
 
-  .hs-nav__menu-toggle {
-    font-size: 16px;
-    line-height: 20px;
+  /* Four links don't fit beside the logo at phone width — drop them to a
+     row beneath it (the nav spacer tracks the taller nav). */
+  .hs-nav {
+    flex-wrap: wrap;
+    row-gap: 14px;
   }
 
-  .hs-nav__panel {
-    flex-direction: column;
-    gap: 28px;
-    padding: 28px;
+  .hs-nav__links {
+    flex-basis: 100%;
+    justify-content: flex-start;
+    gap: 20px;
   }
 
-  /* Match the 16px toggle so the panel doesn't read as fine print. */
-  .hs-nav__group-title {
-    font-size: 16px;
-    line-height: 20px;
-  }
-
-  .hs-nav__list {
-    gap: 12px;
+  .hs-nav__link {
     font-size: 15px;
-    line-height: 20px;
   }
 
   .hs-cards__item {
@@ -1443,21 +1321,22 @@ html.hs-has-pointer * {
 /* ------------------------------------------------------------------ */
 /* Crash triage — ?off=token,token (set in HeroSequence.tsx).          */
 /* "normalize" is handled in JS (iOS touch-scroll takeover).           */
-/* Tokens: shader team orbs cards caps hero gallery nav grid pointer   */
+/* Tokens: shader team orbs cards caps hero records nav grid pointer   */
 /*         glass filters blend will-change normalize                   */
 /* ------------------------------------------------------------------ */
 
 html[data-off~="shader"] .hs-plate__shader,
-html[data-off~="team"] .hs-team__pin,
+html[data-off~="team"] .hs-team__scene,
 html[data-off~="orbs"] .hs-team__orbs,
 html[data-off~="cards"] .hs-team__stage,
-html[data-off~="caps"] .hs-caps {
+html[data-off~="caps"] .hs-caps,
+html[data-off~="teamtitle"] .hs-team__title {
   display: none !important;
 }
 
 /* Hidden rather than removed so page length and scroll triggers stay put. */
 html[data-off~="hero"] .hs-scene,
-html[data-off~="gallery"] .hs-gallery,
+html[data-off~="records"] .hs-records,
 html[data-off~="nav"] .hs-nav,
 html[data-off~="grid"] .hs-grid,
 html[data-off~="pointer"] .hs-pointer {

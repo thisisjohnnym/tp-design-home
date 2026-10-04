@@ -2,16 +2,15 @@
 
 import Image from "next/image";
 import {
-  useEffect,
-  useId,
   useRef,
-  useState,
+  type MouseEvent,
   type PointerEvent,
   type ReactNode,
 } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { heroSequenceContact, heroSequenceResources } from "./content";
+import { ScrollSmoother } from "gsap/ScrollSmoother";
+import { heroSequenceNavLinks } from "./content";
 import "./curtain-reveal.css";
 
 gsap.registerPlugin(useGSAP);
@@ -32,10 +31,6 @@ export function SequenceNav() {
   const clipRef = useRef<HTMLSpanElement>(null);
   const bloomTween = useRef<gsap.core.Timeline | null>(null);
   const originRef = useRef({ x: 0, y: 0 });
-
-  const menuRef = useRef<HTMLDivElement>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuId = useId();
 
   const { contextSafe } = useGSAP(
     () => {
@@ -60,26 +55,20 @@ export function SequenceNav() {
     { scope: navRef },
   );
 
-  /* Close on outside press or Escape while open. */
-  useEffect(() => {
-    if (!menuOpen) return;
+  /* ScrollSmoother moves content with transforms, so native hash jumps land
+     in the wrong place — route in-page links through it when it is active. */
+  const onLinkClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    const hash = event.currentTarget.hash;
+    if (!hash) return;
+    const target = document.querySelector<HTMLElement>(hash);
+    if (!target) return;
 
-    const onPointerDown = (event: globalThis.PointerEvent) => {
-      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
-    };
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setMenuOpen(false);
-      menuRef.current?.querySelector<HTMLButtonElement>(".hs-nav__menu-toggle")?.focus();
-    };
-
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [menuOpen]);
+    event.preventDefault();
+    const smoother = ScrollSmoother.get();
+    if (smoother) smoother.scrollTo(target, true, "top top");
+    else target.scrollIntoView({ behavior: "smooth", block: "start" });
+    history.replaceState(null, "", hash);
+  };
 
   const onPointerEnter = contextSafe((event: PointerEvent<HTMLSpanElement>) => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -162,7 +151,7 @@ export function SequenceNav() {
   return (
     <header ref={navRef} className="hs-nav">
       {/* Fixed overlay target for the loader mark hand-off, then stays sticky
-          for the rest of the page alongside the Menu toggle. */}
+          for the rest of the page alongside the links. */}
       <div className="hs-nav__logo-target">
         <span className="hs-nav__logo">
           <span
@@ -200,55 +189,18 @@ export function SequenceNav() {
         </span>
       </div>
 
-      <div
-        ref={menuRef}
-        className={`hs-nav__links hs-nav__menu${menuOpen ? " is-open" : ""}`}
-      >
-        <button
-          type="button"
-          className="hs-nav__menu-toggle"
-          aria-expanded={menuOpen}
-          aria-controls={menuId}
-          onClick={() => setMenuOpen((open) => !open)}
-        >
-          <span className="hs-nav__menu-badge" aria-hidden="true">
-            {menuOpen ? "X" : "M"}
-          </span>
-          <CurtainLabel>Menu</CurtainLabel>
-        </button>
-
-        <div
-          id={menuId}
-          className="hs-nav__panel"
-          inert={!menuOpen}
-          aria-hidden={!menuOpen}
-        >
-          <div className="hs-nav__group">
-            <p className="hs-nav__group-title">Resources</p>
-            <ul className="hs-nav__list">
-              {heroSequenceResources.map((resource) => (
-                <li key={resource}>
-                  <a href="#resources" onClick={() => setMenuOpen(false)}>
-                    {resource}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="hs-nav__group">
-            <p className="hs-nav__group-title">Contact</p>
-            <address className="hs-nav__list hs-nav__list--contact">
-              <a href={`mailto:${heroSequenceContact.email}`}>
-                {heroSequenceContact.email}
-              </a>
-              <a href={heroSequenceContact.phoneHref}>
-                {heroSequenceContact.phoneLabel}
-              </a>
-            </address>
-          </div>
-        </div>
-      </div>
+      <nav className="hs-nav__links" aria-label="Primary">
+        {heroSequenceNavLinks.map((link) => (
+          <a
+            key={link.label}
+            className="hs-nav__link"
+            href={link.href}
+            onClick={link.href.startsWith("#") ? onLinkClick : undefined}
+          >
+            <CurtainLabel>{link.label}</CurtainLabel>
+          </a>
+        ))}
+      </nav>
     </header>
   );
 }

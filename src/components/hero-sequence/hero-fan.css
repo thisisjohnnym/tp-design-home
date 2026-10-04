@@ -1,0 +1,130 @@
+/* Hero fan (Paper I8-0). Slides are blades around a vertical spine. */
+.hs-fan {
+  --fan-card-w: clamp(120px, 21vw, 400px);
+  /* 5:4 landscape slides. */
+  --fan-card-h: calc(var(--fan-card-w) * 0.8);
+  /* Distance from the spine to a slide's centre. Must exceed half a card so
+     slides never cross the spine; larger opens the fan up. */
+  --fan-hub: calc(var(--fan-card-w) * 1);
+
+  /* 1 = open book (intro: slides folded behind the lead), 0 = resting fan. */
+  --fan-open: 0;
+
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  overflow: clip;
+  pointer-events: none;
+}
+
+/* Takes the scroll parallax, kept apart from the stage's intro zoom. */
+.hs-fan__scroll {
+  position: absolute;
+  inset: 0;
+}
+
+/* Zero-size anchor at the fan's resting centre. */
+.hs-fan__stage {
+  position: absolute;
+  top: 29%;
+  left: 68%;
+  width: 0;
+  height: 0;
+  /* Scales with the slides so a bigger fan keeps the same depth. */
+  perspective: calc(var(--fan-card-w) * 6);
+}
+
+.hs-fan__scrolltilt,
+.hs-fan__tilt,
+.hs-fan__spin {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.hs-fan__card {
+  position: absolute;
+  top: calc(var(--fan-card-h) / -2);
+  left: calc(var(--fan-card-w) / -2);
+  width: var(--fan-card-w);
+  height: var(--fan-card-h);
+  transform: rotateY(
+      calc(var(--fan-angle) + var(--fan-open) * var(--fan-delta, 0deg))
+    )
+    translateX(var(--fan-hub));
+}
+
+/* Yellow slides carry the wordmark on both faces; the lead's front holds the
+   loader's own drum once it is adopted. */
+.hs-fan__card--marked {
+  transform-style: preserve-3d;
+}
+
+/* Flat wordmark. Sized like the loader mark, then scaled by 1/zoom
+   (--fan-mark-scale, set in hero-fan.ts), so it matches the drum exactly. */
+.hs-fan__mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  width: calc(var(--hs-loader-logo-width) + var(--hs-loader-design-width));
+  height: var(--hs-loader-height);
+  margin-top: calc(var(--hs-loader-height) / -2);
+  margin-left: calc(
+    (var(--hs-loader-logo-width) + var(--hs-loader-design-width)) / -2
+  );
+  align-items: flex-start;
+  color: #000000;
+  backface-visibility: hidden;
+  pointer-events: none;
+}
+
+.hs-fan__mark--front {
+  transform: translateZ(1px) scale(var(--fan-mark-scale, 1));
+}
+
+/* Turned to face the back of the slide so it reads the right way round. */
+.hs-fan__mark--back {
+  transform: rotateY(180deg) translateZ(1px) scale(var(--fan-mark-scale, 1));
+}
+
+.hs-fan__mark-logo {
+  display: block;
+  width: var(--hs-loader-logo-width);
+  flex: 0 0 var(--hs-loader-logo-width);
+}
+
+.hs-fan__mark-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.hs-fan__mark-suffix {
+  display: block;
+  width: var(--hs-loader-design-width);
+  height: var(--hs-loader-height);
+  flex: 0 0 var(--hs-loader-design-width);
+  font-size: var(--hs-loader-type);
+  letter-spacing: -0.03em;
+  line-height: 0.8;
+  white-space: nowrap;
+}
+
+.hs-fan__face {
+  width: 100%;
+  height: 100%;
+  background-position: center;
+  background-size: cover;
+}
+
+@media (max-width: 699px) {
+  .hs-fan {
+    --fan-card-w: 46vw;
+  }
+
+  .hs-fan__stage {
+    top: 35%;
+    left: 60%;
+  }
+}

@@ -1,72 +1,36 @@
-/* Team fan. Width follows the fan storyboard. The face matches the glass
-   member card: 324×513, 16px outer radius, frosted fill, hairline rim. */
+/* Team section: the WebGL card ring (team-ring/TeamRing.tsx) between the two
+   sphere artworks, with the headline in the gap between the ring's front and
+   back rows. One screen tall and never pinned, so scrolling passes through. */
 
 .hs-team {
-  /*
-   * No overlap with the gallery. The collage's last marks (the ↙ arrow,
-   * the PDP and carousel tiles) sit right on its bottom edge, so any pull-up
-   * leaves them on screen when the pin locks. Stacking in normal flow means
-   * the team rises at exactly the page's scroll speed and the collage is
-   * fully gone the moment the fan locks.
-   */
-  margin-top: 0;
-  /*
-   * The exit zooms into the accent sphere and fades out. Pull the next
-   * section up a full screen so it already sits under the pin, ready for
-   * the fade to reveal it.
-   */
-  margin-bottom: -100svh;
-  /* Glass from the restyled card: 10% gray fill, 14% white hairline. */
-  --hs-team-glass: rgb(177 177 177 / 10%);
-  --hs-team-glass-line: rgb(255 255 255 / 14%);
-  --hs-team-radius: 16px;
-  --hs-team-card-width: clamp(200px, 20.77vw, 314px);
-  /* Extra scroll while the fan is pinned: 550svh of cycling, then the
-     orbit → zoom → fade exit and a clear tail (teamEntrance.exitAt). */
-  --hs-team-runway: 750svh;
-  /* Cycle progress bar (Paper team frame): track + fill tip glow. */
-  --hs-team-progress: 0;
-  --hs-team-progress-track: #545454;
-  /* MTA green (4/5/6 line bullet). */
-  --hs-team-progress-fill: #00933c;
-  --hs-team-progress-width: 180px;
-  --hs-team-progress-height: 3px;
-  /* 845 / 982 on the desktop storyboard. */
-  --hs-team-progress-top: 86.05%;
-
+  /* Extra scene height beyond one screen: the ring is fitted to its container,
+     so a taller one lets the ring and cards grow. Margins below give it back. */
+  --hs-team-extra: 25svh;
   position: relative;
   z-index: 1;
+  /* The sphere art runs past the sides; keep it from widening the page. */
+  overflow-x: clip;
   background: transparent;
+  /* Tighten the gap to the work gallery above (~170px at 1440 wide) and give
+     the services below the same clearance from the front cards. */
+  margin-top: calc(-12vw - var(--hs-team-extra) / 2);
+  margin-bottom: calc(10vw - var(--hs-team-extra) / 2);
 }
 
-/* The exit lifts this section over the next one (z-index 4) and the negative
-   margin keeps its box there, so let the pointer through to the rows below. */
-.hs-team[data-exiting],
-.hs-team[data-exiting] * {
-  pointer-events: none;
-}
-
-.hs-team__pin {
+.hs-team__scene {
   position: relative;
-  z-index: 1;
-  height: 100svh;
-  /* Cards are clipped by the stage. The spheres stay outside that box so
-     they can leave with the scene instead of being sliced at its edge. */
+  height: calc(100svh + var(--hs-team-extra));
+  min-height: 640px;
   overflow: visible;
 }
 
-/* Off screen, hide the whole fan so its 3D card and sphere layers drop their
-   backing stores. !important beats the inline visibility GSAP writes. */
-.hs-team[data-offstage] .hs-team__pin {
+/* Off screen, hide the scene so its sphere layers drop their backing stores.
+   !important beats the inline visibility GSAP writes. */
+.hs-team[data-offstage] .hs-team__scene {
   visibility: hidden !important;
 }
 
-/* Exit fade: the zoomed accent sphere covers the view, so everything else in
-   the pin can drop out while the sphere alone fades (see team-fan.ts). */
-.hs-team[data-covered] .hs-team__pin > :not(.hs-team__orbs--front) {
-  visibility: hidden !important;
-}
-
+/* Stacking: lead sphere 1 · ring 2 · headline 3 · accent sphere 4. */
 .hs-team__orbs {
   position: absolute;
   z-index: 1;
@@ -79,399 +43,136 @@
 }
 
 .hs-team__orbs--front {
-  z-index: 6;
+  z-index: 4;
 }
 
 .hs-team__orb {
   position: absolute;
   top: 50%;
   left: 50%;
-  z-index: 1;
   margin: 0;
   pointer-events: none;
   will-change: transform;
 }
 
 /* Full export frames at 1× — lead 801×798, accent 1104×989. */
-/* --hs-orb-art (set per layout in team-fan.ts) shrinks the rendered box; the
-   fan scale grows by the same factor, so the on-screen size is unchanged. */
+/* --hs-orb-art (set per layout in team-scene.ts) shrinks the rendered box;
+   the scale grows by the same factor, so the on-screen size is unchanged. */
 .hs-team__orb--lead {
   width: calc(801px * var(--hs-orb-art, 1));
   height: calc(798px * var(--hs-orb-art, 1));
 }
 
 .hs-team__orb--accent {
-  z-index: 6;
   width: calc(1104px * var(--hs-orb-art, 1));
   height: calc(989px * var(--hs-orb-art, 1));
 }
 
+.hs-team__stage {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  cursor: grab;
+  /* Sideways drags spin the ring; vertical swipes still scroll the page. */
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.hs-team__stage:active {
+  cursor: grabbing;
+}
+
+.hs-team__canvas {
+  position: absolute !important;
+  inset: 0;
+}
+
+/* Sits in the gap between the ring's back row and its front cards; the
+   ring's tilt (team-scene-tuning.ts) sets how big that gap is. */
 .hs-team__title {
   position: absolute;
-  /* Above the back sphere, below the cards. The front sphere still overlaps the fan. */
-  z-index: 2;
-  top: 50%;
+  z-index: 3;
+  top: 40%;
   left: 50%;
   display: flex;
   flex-direction: column;
   align-items: center;
   margin: 0;
   color: var(--hs-light);
-  font-size: clamp(48px, 6.61vw, 100px);
+  font-size: clamp(40px, 5.3vw, 80px);
   font-weight: 400;
   letter-spacing: -0.04em;
   line-height: 0.8;
   text-align: center;
   pointer-events: none;
-  white-space: nowrap;
-}
-
-.hs-team__stage {
-  position: absolute;
-  z-index: 5;
-  inset: 0;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  overflow: clip;
-  perspective: 1400px;
-  pointer-events: none;
-  transform-style: preserve-3d;
-}
-
-.hs-team__card {
-  --hs-glare: 0;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: var(--hs-team-card-width);
-  aspect-ratio: 324 / 513;
-  margin: 0;
-  container-type: inline-size;
-  perspective: 1400px;
-  pointer-events: none;
-  transform-style: preserve-3d;
-  visibility: hidden;
-  will-change: transform;
-}
-
-.hs-team__flip {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  perspective: 2200px;
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-
-.hs-team__tilt {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-}
-
-.hs-team__face {
-  position: absolute;
-  inset: 0;
-  border-radius: var(--hs-team-radius);
-  background: var(--hs-team-glass);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  box-shadow: inset 0 0 0 1px var(--hs-team-glass-line);
-}
-
-/* Hide the face that is turned away. backface-visibility flickers the bottom
-   edge while a card tilts, so the flip state picks the visible side instead. */
-.hs-team__flip[data-face="back"] .hs-team__face--front,
-.hs-team__flip[data-face="front"] .hs-team__face--back {
-  visibility: hidden;
-}
-
-.hs-team__shell {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  border-radius: inherit;
-}
-
-.hs-team__face--front .hs-team__shell {
-  display: flex;
-  flex-direction: column;
-  gap: 3.7cqi;
-  padding: 3.7cqi;
-}
-
-.hs-team__portrait {
-  position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
-  border-radius: 1.85cqi;
-}
-
-/* Photo fills the portrait. Type sits on top of it. */
-.hs-team__art {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  isolation: isolate;
-  pointer-events: none;
-}
-
-.hs-team__photo {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center center;
-}
-
-.hs-team__wash {
-  position: absolute;
-  inset: 0;
-  background: #000;
-  opacity: 0.3;
-}
-
-.hs-team__pattern {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 398.6%;
-  height: 232.84%;
-  object-fit: fill;
-  /* Asset is pre-inverted: a filter here gave each card its own oversized
-     GPU layer and pushed iOS Safari past its memory limit. */
-  opacity: 0.16;
   translate: -50% -50%;
-  pointer-events: none;
+  white-space: nowrap;
+  /* On the way back the headline waits for the ring to settle (delay), then fades in. */
+  transition:
+    opacity 0.6s cubic-bezier(0.33, 1, 0.68, 1) 1.2s,
+    filter 0.6s cubic-bezier(0.33, 1, 0.68, 1) 1.2s;
 }
 
-.hs-team__copy {
-  position: relative;
-  z-index: 1;
-  isolation: isolate;
-  display: flex;
-  flex-direction: column;
-  gap: 3.7cqi;
-  height: 100%;
-  min-height: 0;
-  padding: 3.7cqi;
+/* A card is focused (team-ring/TeamRing.tsx): clear the headline out of its way. */
+.hs-team[data-focused] .hs-team__title {
+  opacity: 0;
+  filter: blur(12px);
+  transition-delay: 0s;
 }
 
-.hs-team__meta,
-.hs-team__links {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2cqi;
+@media (prefers-reduced-motion: reduce) {
+  .hs-team__title {
+    transition-duration: 0.01s;
+  }
 }
 
-.hs-team__role,
-.hs-team__aside,
-.hs-team__place,
-.hs-team__given,
-.hs-team__family,
-.hs-team__bio,
-.hs-team__link {
-  margin: 0;
-}
-
-.hs-team__role,
-.hs-team__aside,
-.hs-team__place,
-.hs-team__link {
-  color: #fff;
-  font-size: 2.47cqi;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  line-height: 0.9;
-  text-transform: uppercase;
-}
-
-.hs-team__aside,
-.hs-team__place {
-  text-align: right;
-}
-
-.hs-team__link,
-.hs-team__place {
-  flex: 0 0 auto;
+/* Screen-reader roster. It comes into view when a keyboard user tabs into it. */
+.hs-team__roster {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
-.hs-team__name {
-  display: flex;
-  flex-direction: column;
-}
-
-.hs-team__given,
-.hs-team__family {
+.hs-team__roster:focus-within {
+  z-index: 5;
+  bottom: 24px;
+  left: 50%;
+  width: min(640px, calc(100vw - 32px));
+  height: auto;
+  margin: 0;
+  padding: 16px 20px;
+  overflow: visible;
+  clip-path: none;
   color: #fff;
-  font-size: 14.81cqi;
-  font-weight: 400;
-  letter-spacing: -0.04em;
-  line-height: 0.9;
+  font-size: 14px;
+  line-height: 1.4;
+  list-style: none;
+  translate: -50% 0;
+  white-space: normal;
+  background: rgb(8 8 6 / 88%);
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 12px;
 }
 
-.hs-team__family {
-  text-align: right;
-}
-
-.hs-team__spacer {
-  flex: 1 1 auto;
-  min-height: 8%;
-}
-
-.hs-team__link {
-  flex: 0 0 auto;
+.hs-team__roster a {
+  color: #fff;
   text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-  pointer-events: auto;
 }
 
-.hs-team__link:focus-visible {
+.hs-team__roster a:focus-visible {
   outline: 2px solid #fff;
   outline-offset: 2px;
 }
 
-.hs-team__bio {
-  position: relative;
-  z-index: 1;
-  flex: 0 0 auto;
-  color: #fff;
-  font-size: 4.32cqi;
-  font-weight: 400;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  text-wrap: balance;
-}
-
-.hs-team__glare {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  overflow: hidden;
-  border-radius: inherit;
-  mix-blend-mode: screen;
-  opacity: calc(var(--hs-glare) * 0.15);
-  pointer-events: none;
-}
-
-.hs-team__glare-spot {
-  position: absolute;
-  /* Oversized so the glow can slide and still cover the face. */
-  top: -45%;
-  left: -45%;
-  width: 190%;
-  height: 190%;
-  background: radial-gradient(
-    circle at 50% 50%,
-    hsl(0 0% 100% / 0.98) 0%,
-    hsl(0 0% 100% / 0.55) 14%,
-    hsl(0 0% 100% / 0) 38%
-  );
-  will-change: transform;
-}
-
-.hs-team__face--back {
-  transform: rotateY(180deg);
-}
-
-.hs-team__face--back .hs-team__glare--back {
-  mix-blend-mode: screen;
-  opacity: calc(var(--hs-glare) * 0.15);
-}
-
-.hs-team__progress {
-  position: absolute;
-  z-index: 7;
-  top: var(--hs-team-progress-top);
-  left: 50%;
-  width: var(--hs-team-progress-width);
-  height: var(--hs-team-progress-height);
-  translate: -50% 0;
-  /* Visible so the tip glow can sit past the track; mask still clips to inset. */
-  overflow: visible;
-  pointer-events: none;
-  visibility: hidden;
-}
-
-.hs-team__progress[data-on="true"] {
-  visibility: visible;
-}
-
-.hs-team__progress-body {
-  position: absolute;
-  inset: 0;
-  overflow: visible;
-  background: var(--hs-team-progress-track);
-}
-
-.hs-team__progress-fill {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: calc(var(--hs-team-progress) * 100%);
-  overflow: clip;
-  background: var(--hs-team-progress-fill);
-}
-
-/* Soft tip glow — sits ahead of the fill edge (Paper glow frame). */
-.hs-team__progress-glow {
-  position: absolute;
-  top: -6px;
-  left: calc(var(--hs-team-progress) * 100% - 34px);
-  width: 41px;
-  height: 16px;
-  overflow: clip;
-  opacity: 0.3;
-  filter: blur(5px);
-  background-image: linear-gradient(
-    90deg,
-    transparent 21.43%,
-    var(--hs-team-progress-fill) 78.57%
-  );
-  pointer-events: none;
-}
-
-.hs-team__runway {
-  height: var(--hs-team-runway);
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hs-team {
-    margin-bottom: 0;
-  }
-
-  .hs-team__runway {
-    height: 0;
-  }
-
-  .hs-team__progress {
-    transition: none;
-  }
-
-}
-
 /* Phone — Paper 8MK-0 (440×956). */
 @media (max-width: 699px) {
-  .hs-team {
-    /* 266 / 440 after the centre card's z 64 perspective lift
-       (1400 / 1336 ≈ 1.048), so it projects at Paper's 266px. */
-    --hs-team-card-width: 57.68vw;
-    /* 845 / 956 */
-    --hs-team-progress-top: 88.39%;
-  }
-
   .hs-team__title {
-    /* 52 / 440; sits 13 / 956 below centre. */
-    margin-top: 1.36svh;
     font-size: 11.82vw;
     line-height: 1;
   }

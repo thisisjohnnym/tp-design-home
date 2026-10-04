@@ -1,36 +1,37 @@
-/* Work collage from Paper artboard 1512×1898 — tiles only, no plate/grid.
-   Positions are % of the stage so the composition scales with viewport width. */
+/* Work collage — framed artwork only, no plate/grid/wayfinding marks.
+   Geometry is in 1512ths of the stage width (--u resolves cqw, where the
+   stage is the container), so the composition scales with viewport width. */
 
 .hs-gallery {
   /*
-   * Pull up by the scrub runway so the collage meets the hero exit.
-   * Above the team (z-index 1) while they overlap; under .hs-pin (3).
+   * Rises through most of the hero scrub: the first tiles clear the fold
+   * as the last shattered words leave the top — no empty screen between. Clips the
+   * sides and bottom so drift never paints into the team below; the top
+   * stays open so fast tiles can rise out past the section edge instead
+   * of being sliced as they leave (the hero is off screen by then).
    */
-  --hs-gallery-overlap-top: var(--hs-scrub-length);
-  --hs-gallery-pad-bottom: 0;
+  --hs-gallery-overlap-top: 0px;
   /*
-   * Artboard is 1512×1898, but tiles end ~88% down — crop the empty
-   * tail so the team section can meet the collage without a black void.
+   * Breathing room before the team, matched to the on-screen gap between
+   * the departing headline and the first tiles at the top.
    */
-  --hs-gallery-ratio: 1512 / 1620;
+  --hs-gallery-gap-bottom: 35svh;
 
   position: relative;
   z-index: 2;
   margin-top: calc(var(--hs-gallery-overlap-top) * -1);
-  padding-top: 0;
-  padding-bottom: var(--hs-gallery-pad-bottom);
-  overflow: visible;
+  margin-bottom: var(--hs-gallery-gap-bottom);
+  clip-path: inset(-100vh 0 0 0);
   pointer-events: none;
 }
 
 .hs-gallery__stage {
+  --u: calc(100cqw / 1512);
+
   position: relative;
   width: 100%;
-  aspect-ratio: var(--hs-gallery-ratio);
-  max-width: 100%;
-  margin-inline: auto;
-  overflow: visible;
-  /* UI marks size in cqw so they scale with the collage like the tiles. */
+  /* Tiles end ~1405, the traveler slot ~1895; the tail leaves room to drift. */
+  aspect-ratio: 1512 / 1960;
   container-type: inline-size;
 }
 
@@ -38,19 +39,17 @@
   position: absolute;
   z-index: 1;
   margin: 0;
+  /* The frame holds its size; the settle-in zoom happens inside the clip,
+     so tiles never grow into their neighbours. */
   overflow: clip;
   will-change: transform;
 }
 
-.hs-gallery__curtain {
+.hs-gallery__picture {
+  display: block;
   width: 100%;
   height: 100%;
-}
-
-/* <picture> is the curtain content so phone crops ride the same reveal. */
-.hs-gallery__curtain > picture {
-  width: 100%;
-  height: 100%;
+  will-change: transform;
 }
 
 .hs-gallery__image {
@@ -65,7 +64,7 @@
   -webkit-user-drag: none;
 }
 
-/* MTA line colors. Green stays off the tiles beside the green KS sign bullet. */
+/* MTA line colors. */
 .hs-gallery__tile--pdp {
   --hs-gallery-tile-bg: #fccc0a; /* N Q R */
 }
@@ -82,175 +81,92 @@
   --hs-gallery-tile-bg: #996633; /* J Z */
 }
 
-/* Geometry from Paper 6WC-0 (left/top/width/height ÷ 1512×1898).
-   z-index rises toward the camera so nearer tiles paint over farther ones. */
+/*
+ * Most tiles that share a column are spaced by their relative drift so
+ * they stay apart. A few pairs are set closer on purpose: the nearer
+ * (faster, higher z-index) tile slides over the farther one — cart over
+ * PDP, logo over PDP's corner, lifestyle over the carousel.
+ * Slow tiles start high, so fast ones take the top edge.
+ */
 
-.hs-gallery__tile--pdp {
-  top: 47.52%;
-  left: 0;
-  z-index: 1;
-  width: 58.4%;
-  height: 40.25%;
-}
-
-.hs-gallery__tile--carousel {
-  top: 57.01%;
-  left: 66.53%;
-  z-index: 2;
-  width: 24.27%;
-  height: 23.02%;
+.hs-gallery__tile--testimonial {
+  top: calc(0 * var(--u));
+  left: calc(1150 * var(--u));
+  z-index: 5;
+  width: calc(262 * var(--u));
+  height: calc(345 * var(--u));
 }
 
 .hs-gallery__tile--cart {
-  top: 4.06%;
-  left: 25.93%;
+  top: calc(40 * var(--u));
+  left: calc(400 * var(--u));
   z-index: 3;
-  width: 48.68%;
-  height: 34.09%;
+  width: calc(620 * var(--u));
+  height: calc(545 * var(--u));
 }
 
 .hs-gallery__tile--logo {
-  top: 23.76%;
-  left: 0;
+  top: calc(380 * var(--u));
+  left: calc(60 * var(--u));
   z-index: 4;
-  width: 17.79%;
-  height: 18.81%;
-}
-
-.hs-gallery__tile--testimonial {
-  top: 0;
-  left: 82.74%;
-  z-index: 5;
-  width: 17.26%;
-  height: 18.12%;
+  width: calc(250 * var(--u));
+  height: calc(332 * var(--u));
 }
 
 .hs-gallery__tile--lifestyle {
-  top: 25.97%;
-  left: 90.81%;
+  top: calc(470 * var(--u));
+  left: calc(1270 * var(--u));
   z-index: 6;
-  width: 9.19%;
-  height: 23.02%;
+  width: calc(150 * var(--u));
+  height: calc(472 * var(--u));
 }
 
-/* ------------------------------------------------------------------ */
-/* Wayfinding marks — Paper 6WC-0, same ÷1512×1898 positioning         */
-/* ------------------------------------------------------------------ */
+.hs-gallery__tile--pdp {
+  top: calc(700 * var(--u));
+  left: calc(240 * var(--u));
+  z-index: 1;
+  width: calc(720 * var(--u));
+  height: calc(623 * var(--u));
+}
 
-.hs-gallery__ui {
+.hs-gallery__tile--carousel {
+  top: calc(1000 * var(--u));
+  left: calc(1020 * var(--u));
+  z-index: 2;
+  width: calc(340 * var(--u));
+  height: calc(405 * var(--u));
+}
+
+/* Geometry only — the traveler card is drawn by MorphCard (Paper WU-0, red). */
+.hs-gallery__slot {
   position: absolute;
-  z-index: 7;
-  color: var(--hs-light);
-  user-select: none;
-  will-change: transform;
-}
-
-.hs-gallery__arrow {
-  font-size: 14.29cqw;
-  font-weight: 400;
-  letter-spacing: -0.04em;
-  line-height: 0.8;
-  white-space: pre;
-}
-
-.hs-gallery__arrow--in {
-  top: 12.22%;
-  left: 7.01%;
-}
-
-.hs-gallery__arrow--out {
-  top: 88.3%;
-  left: 65.94%;
-}
-
-/* Street sign: a line bullet beside a two-line cross-street. */
-.hs-gallery__sign {
-  top: 44.78%;
-  left: 48.35%;
-  display: flex;
-  align-items: center;
-  gap: max(6px, 0.66cqw);
-}
-
-.hs-gallery__sign-bullet {
-  display: grid;
-  width: max(26px, 2.25cqw);
-  height: max(26px, 2.25cqw);
-  flex: none;
-  place-items: center;
-  border-radius: 50%;
-  background: #427e2b;
-  color: var(--hs-white);
-  font-size: max(14px, 1.32cqw);
-  font-weight: 700;
-  font-variation-settings: "opsz" 12;
-  letter-spacing: -0.04em;
-  line-height: 1;
-}
-
-.hs-gallery__sign-text {
-  font-size: max(12px, 1.06cqw);
-  font-weight: 700;
-  font-variation-settings: "opsz" 12;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.hs-gallery__pay {
-  top: 21.07%;
-  left: 82.74%;
-  display: block;
-  width: 8.4cqw;
-  aspect-ratio: 127 / 56.16;
-  border-radius: 999px;
-  background: #000;
-  color: var(--hs-white);
-  outline: 1px solid oklch(1 0 0 / 0.2);
-}
-
-.hs-gallery__pay svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.hs-gallery__cta {
-  top: 46.58%;
-  left: 66.53%;
-  display: grid;
-  width: 16.2cqw;
-  height: 3.97cqw;
-  place-items: center;
-  border-radius: max(4px, 0.53cqw);
-  background: #000;
-  color: var(--hs-white);
-  font-size: max(11px, 1.06cqw);
-  font-weight: 500;
-  line-height: 1.25;
-  outline: 1px solid oklch(1 0 0 / 0.3);
-  white-space: nowrap;
+  top: calc(1415 * var(--u));
+  left: calc(827 * var(--u));
+  width: calc(359 * var(--u));
+  height: calc(480 * var(--u));
+  visibility: hidden;
 }
 
 /* ------------------------------------------------------------------ */
-/* Phone — Paper 6WC-0 (440×1759)                                      */
+/* Phone — Paper 6WC-0 (440 wide)                                      */
 /* ------------------------------------------------------------------ */
 
 /*
  * A new composition rather than a scaled desktop: four tiles stacked
- * down a tall stage, PDP + testimonial dropped. Geometry is in 440ths of
- * the stage width (--u resolves cqw at each tile, where the stage is the
- * container), so it holds on any phone width and ignores the stage ratio.
+ * down a tall stage, PDP + testimonial dropped.
  */
 @media (max-width: 699px) {
-  .hs-gallery {
-    /* Paper 440×1759, re-spaced into three beats so the stack breathes and
-       parallax has room to drift; last mark (↙) ends ~1860. */
-    --hs-gallery-ratio: 440 / 1880;
-  }
-
   .hs-gallery__stage {
     --u: calc(100cqw / 440);
+
+    aspect-ratio: 440 / 1900;
+  }
+
+  .hs-gallery__slot {
+    top: calc(1430 * var(--u));
+    left: calc(70 * var(--u));
+    width: calc(300 * var(--u));
+    height: calc(401 * var(--u));
   }
 
   .hs-gallery__tile--pdp,
@@ -259,89 +175,39 @@
   }
 
   /* Phone crops are baked with their frame color; no tile fill needed. */
-  /* Parallax starts this lagging tile ~71u high (0.18 × stage × 0.42 ÷ 2);
-     sit it below that so it never peeks into the hero's first screen. */
   .hs-gallery__tile--cart {
-    top: calc(110 * var(--u));
-    right: 0;
-    left: auto;
+    top: calc(40 * var(--u));
+    left: calc(157 * var(--u));
     width: calc(283 * var(--u));
     height: calc(375 * var(--u));
   }
 
   .hs-gallery__tile--logo {
-    top: calc(600 * var(--u));
+    top: calc(420 * var(--u));
     left: 0;
     width: calc(290 * var(--u));
     height: calc(357 * var(--u));
   }
 
   .hs-gallery__tile--lifestyle {
-    top: calc(740 * var(--u));
-    right: 0;
-    left: auto;
+    top: calc(680 * var(--u));
+    left: calc(357 * var(--u));
     width: calc(83 * var(--u));
     height: calc(261 * var(--u));
   }
 
   /* Bleeds 18/440 past the right edge in Paper — keep the crop. */
   .hs-gallery__tile--carousel {
-    top: calc(1300 * var(--u));
+    top: calc(950 * var(--u));
     left: calc(91 * var(--u));
     width: calc(367 * var(--u));
     height: calc(437 * var(--u));
-  }
-
-  .hs-gallery__arrow {
-    /* 120px on the 440 frame. */
-    font-size: calc(120 * var(--u));
-  }
-
-  .hs-gallery__arrow--in {
-    top: calc(330 * var(--u));
-    left: calc(34 * var(--u));
-  }
-
-  .hs-gallery__arrow--out {
-    top: calc(1770 * var(--u));
-    left: calc(327 * var(--u));
-  }
-
-  .hs-gallery__pay {
-    top: calc(548 * var(--u));
-    left: calc(244 * var(--u));
-    width: calc(127 * var(--u));
-  }
-
-  .hs-gallery__cta {
-    top: calc(1000 * var(--u));
-    left: calc(24 * var(--u));
-    width: calc(266 * var(--u));
-    height: calc(60 * var(--u));
-    border-radius: calc(8 * var(--u));
-    font-size: calc(16 * var(--u));
-  }
-
-  .hs-gallery__sign {
-    top: calc(1200 * var(--u));
-    left: calc(250 * var(--u));
-    gap: calc(10 * var(--u));
-  }
-
-  .hs-gallery__sign-bullet {
-    width: calc(34 * var(--u));
-    height: calc(34 * var(--u));
-    font-size: calc(20 * var(--u));
-  }
-
-  .hs-gallery__sign-text {
-    font-size: calc(16 * var(--u));
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hs-gallery__tile,
-  .hs-gallery__ui {
+  .hs-gallery__picture {
     will-change: auto;
   }
 }
