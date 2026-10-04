@@ -1,0 +1,49 @@
+/* Gallery → team traveler (MorphCard.tsx). A zero-size layer in the smoothed
+   page, above the gallery (z 2) and the team (z 1); the card is positioned
+   inside it by script every frame. */
+
+.hs-morph {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.hs-morph__card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  transform-origin: 50% 50%;
+  transform-style: preserve-3d;
+  /* No opacity here — a grouping property flattens preserve-3d and with it the
+     flip. The fade goes on the faces (--hs-morph-fade) instead. */
+  will-change: transform;
+}
+
+.hs-morph__side {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Placeholder face while it passes for a gallery tile. */
+.hs-morph__side--front {
+  background: var(--hs-morph-front, #fa241a);
+}
+
+/* The team card, pre-turned so the flip ends with it facing out. It alone
+   fades at the handoff: the front is already turned away by then, and a face
+   below full opacity stops honouring backface-visibility. */
+.hs-morph__side--back {
+  opacity: var(--hs-morph-fade, 1);
+  transform: rotateY(180deg);
+}

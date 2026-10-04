@@ -7,27 +7,30 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { CapabilitiesSection } from "./CapabilitiesSection";
+import { HeroFan } from "./HeroFan";
 import { LoaderIntro } from "./LoaderIntro";
 import { PointerEffect } from "./PointerEffect";
 import { PlateShader } from "./PlateShader";
 import { SequenceNav } from "./SequenceNav";
+import { MorphCard } from "./MorphCard";
 import { TeamSection } from "./TeamSection";
+import { WorkGallery } from "./WorkGallery";
 import { WorkRecords } from "./work-records/WorkRecords";
 import {
   clearCurtainState,
   createCurtainReveal,
   createCurtainWordCycle,
-  playCurtainWordIntro,
   restCurtainWord,
 } from "./curtain-reveal";
+import { bindHeroFan } from "./hero-fan";
+import { createRowWipe } from "./wipe-reveal";
 import { bindTeamScene } from "./team-scene";
 import { ShatterHeadline } from "./ShatterHeadline";
 import { curtainReveal } from "./team-scene-tuning";
 import {
-  heroSequenceBeats as beats,
-  heroSequenceCursorRoster,
-  heroSequenceCursorSlots,
-  heroSequenceCursorTones,
+  heroSequenceFan,
+  heroSequenceHeadlineLines,
+  heroSequenceParallax,
   heroSequenceHeadlineDrumWords,
   heroSequenceIntro,
   heroSequenceMotion,
@@ -36,6 +39,8 @@ import {
 gsap.registerPlugin(useGSAP, ScrollTrigger, ScrollSmoother);
 
 const vh = () => window.innerHeight;
+
+const SHOW_WORK_RECORDS = false;
 
 export function HeroSequence() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -47,16 +52,14 @@ export function HeroSequence() {
 
       const select = gsap.utils.selector(root);
       const sequence = select(".hs-sequence")[0] as HTMLElement;
-      const pin = select(".hs-pin")[0] as HTMLElement;
       const shatter = select(".hs-shatter")[0] as HTMLElement;
       const words = select(".hs-shatter__word") as HTMLElement[];
       const curtainVerb = select(
         '[data-curtain-verb="true"]',
       )[0] as HTMLElement | undefined;
       const navCurtains = select(".hs-nav__curtain") as HTMLElement[];
-      const cursors = select(".hs-cursor") as HTMLElement[];
-      const cursorLabels = select(".hs-cursor__label") as HTMLElement[];
-      const scrollCue = select(".hs-scroll-cue")[0] as HTMLElement;
+      const fanScroll = select(".hs-fan__scroll")[0] as HTMLElement;
+      const fanScrollTilt = select(".hs-fan__scrolltilt")[0] as HTMLElement;
       const navLinks = select(".hs-nav__links")[0] as HTMLElement;
       const loader = select(".hs-loader")[0] as HTMLElement;
       const loaderMark = select(".hs-loader-mark")[0] as HTMLElement;
@@ -64,8 +67,6 @@ export function HeroSequence() {
       const firstWord = select(
         ".hs-mark__face:first-child .hs-mark__word",
       )[0] as HTMLElement;
-      const logoFace = select(".hs-mark__face--logo")[0] as HTMLElement;
-      const logoTarget = select(".hs-nav__logo-target")[0] as HTMLElement;
       const navLogo = select(".hs-nav__logo")[0] as HTMLElement;
 
       const prefersReducedMotion = window.matchMedia(
@@ -76,22 +77,8 @@ export function HeroSequence() {
       /* Loader intro (runs once, independent of breakpoint changes)       */
       /* ---------------------------------------------------------------- */
 
-      const markRestTransform = () => {
-        const markRect = logoFace.getBoundingClientRect();
-        const targetRect = logoTarget.getBoundingClientRect();
-
-        return {
-          x:
-            targetRect.left +
-            targetRect.width / 2 -
-            (markRect.left + markRect.width / 2),
-          y:
-            targetRect.top +
-            targetRect.height / 2 -
-            (markRect.top + markRect.height / 2),
-          scale: targetRect.width / markRect.width,
-        };
-      };
+      const fan = bindHeroFan(root, prefersReducedMotion);
+      const zoom = heroSequenceFan.zoomDuration;
 
       const skipIntro = prefersReducedMotion || window.scrollY > 4;
       const documentElement = document.documentElement;
@@ -151,121 +138,13 @@ export function HeroSequence() {
       });
 
       /* ---------------------------------------------------------------- */
-      /* Cursor roster — cycle full team through the 4 slots               */
-      /* Whole cursors fade out → swap people/slots → fade in. Stops once */
-      /* shatter scrub owns the cursors so the two motions don’t fight.   */
-      /* ---------------------------------------------------------------- */
-
-      const cursorGroupSize = cursors.length;
-      const shuffledRoster = gsap.utils.shuffle([
-        ...heroSequenceCursorRoster,
-      ]);
-      const cursorGroups: (typeof heroSequenceCursorRoster)[number][][] = [];
-      for (let i = 0; i < shuffledRoster.length; i += cursorGroupSize) {
-        const chunk = shuffledRoster.slice(i, i + cursorGroupSize);
-        while (chunk.length < cursorGroupSize) {
-          chunk.push(shuffledRoster[chunk.length % shuffledRoster.length]);
-        }
-        cursorGroups.push(chunk);
-      }
-      let cursorGroupIndex = 0;
-      let cursorRosterAlive = !prefersReducedMotion;
-      let cursorRosterSwap: gsap.core.Timeline | undefined;
-      let getSequenceProgress = () => 0;
-
-      const cursorRosterTick = gsap.delayedCall(
-        heroSequenceMotion.cursorRosterHold,
-        function cursorRosterRepeat() {
-          swapCursorGroup();
-          if (cursorRosterAlive) {
-            cursorRosterTick.restart(true);
-          }
-        },
-      );
-      cursorRosterTick.pause();
-
-      const applyCursorGroup = () => {
-        const people = gsap.utils.shuffle([
-          ...cursorGroups[cursorGroupIndex],
-        ]);
-        const slots = gsap.utils.shuffle([...heroSequenceCursorSlots]);
-        // Draw without replacement so no two cursors in a group share a color.
-        const tones = gsap.utils.shuffle([...heroSequenceCursorTones]);
-
-        cursors.forEach((cursor, index) => {
-          const person = people[index];
-          const tone = tones[index % tones.length];
-          cursor.dataset.person = person.id;
-          cursor.dataset.slot = slots[index];
-          cursor.dataset.tone = tone.id;
-          cursor.dataset.text = tone.text;
-          cursorLabels[index].textContent = person.name;
-        });
-      };
-
-      applyCursorGroup();
-
-      const stopCursorRoster = () => {
-        cursorRosterAlive = false;
-        cursorRosterTick.pause();
-        cursorRosterSwap?.kill();
-        cursorRosterSwap = undefined;
-      };
-
-      const swapCursorGroup = () => {
-        if (!cursorRosterAlive) return;
-        if (getSequenceProgress() > 0.002) {
-          stopCursorRoster();
-          return;
-        }
-
-        cursorGroupIndex = (cursorGroupIndex + 1) % cursorGroups.length;
-
-        const fade = prefersReducedMotion
-          ? 0
-          : heroSequenceMotion.cursorRosterFade;
-        const stagger = heroSequenceMotion.cursorRosterStagger;
-
-        if (fade <= 0) {
-          applyCursorGroup();
-          return;
-        }
-
-        cursorRosterSwap?.kill();
-        // Fade the whole cursor (arrow + label), swap the group, fade back in.
-        cursorRosterSwap = gsap
-          .timeline()
-          .to(cursors, {
-            autoAlpha: 0,
-            filter: "blur(10px)",
-            duration: fade,
-            ease: "power2.in",
-            stagger: { each: stagger, from: "random" },
-          })
-          .add(applyCursorGroup)
-          .to(cursors, {
-            autoAlpha: 1,
-            filter: "blur(0px)",
-            duration: fade,
-            ease: "power2.out",
-            stagger: { each: stagger, from: "random" },
-          });
-      };
-
-      const startCursorRoster = () => {
-        if (prefersReducedMotion) return;
-        cursorRosterAlive = true;
-        cursorRosterTick.restart(true);
-      };
-
-      /* ---------------------------------------------------------------- */
       /* Headline verb curtain + nav link curtains (replace drumroll)      */
       /* ---------------------------------------------------------------- */
 
       let headlineVerbCycle: gsap.core.Timeline | undefined;
-      let headlineVerbIntro: gsap.core.Timeline | undefined;
       let headlineVerbRunning = false;
-      let headlineVerbIntroduced = false;
+      /* The verb only starts cycling once the headline has wiped in. */
+      let headlineVerbReady = false;
       /* Keep fixed line breaks; scale the whole shatter block to the viewport
          width so words never wrap onto a new row when space gets tight. */
       const fitShatterHeadline = () => {
@@ -320,23 +199,35 @@ export function HeroSequence() {
         paused: true,
       });
 
+      /* Whole headline wipes in row by row (same bar as the nav and team
+         heading). Words stay plain visible text until armed. */
+      const headlineEl = select(".hs-shatter__headline")[0] as HTMLElement;
+      const headlineWipe = createRowWipe(headlineEl, {
+        timing: curtainReveal,
+        words,
+        onCover: (covered) => {
+          /* The verb's own curtain sits at "hidden"; show its word with its row. */
+          if (curtainVerb && covered.includes(curtainVerb)) {
+            restCurtainWord(curtainVerb);
+          }
+        },
+        onComplete: () => {
+          headlineVerbReady = true;
+          startHeadlineVerb();
+          fitShatterHeadline();
+        },
+      });
+
       const startHeadlineVerb = () => {
-        if (!headlineVerbCycle || prefersReducedMotion || headlineVerbRunning) {
+        if (
+          !headlineVerbCycle ||
+          prefersReducedMotion ||
+          headlineVerbRunning ||
+          !headlineVerbReady
+        ) {
           return;
         }
         headlineVerbRunning = true;
-
-        if (!headlineVerbIntroduced && curtainVerb) {
-          headlineVerbIntroduced = true;
-          headlineVerbIntro?.kill();
-          headlineVerbIntro = playCurtainWordIntro(
-            curtainVerb,
-            curtainReveal,
-            headlineVerbCycle,
-            fitShatterHeadline,
-          );
-          return;
-        }
 
         if (curtainVerb) {
           const content = curtainVerb.querySelector(".hs-curtain__content");
@@ -352,9 +243,6 @@ export function HeroSequence() {
       const stopHeadlineVerb = () => {
         if (!headlineVerbRunning) return;
         headlineVerbRunning = false;
-        headlineVerbIntro?.pause(0);
-        headlineVerbIntro?.kill();
-        headlineVerbIntro = undefined;
         headlineVerbCycle?.pause();
         if (curtainVerb) restCurtainWord(curtainVerb);
       };
@@ -372,14 +260,17 @@ export function HeroSequence() {
       };
 
       if (skipIntro) {
-        gsap.set([loader, loaderMark], { autoAlpha: 0, display: "none" });
-        gsap.set([shatter, navLinks, navLogo, scrollCue], {
+        headlineVerbReady = true;
+        gsap.set(loader, { autoAlpha: 0, display: "none" });
+        /* The drum stays on the lead slide, resting on its logo face. */
+        gsap.set(markDrum, { rotationX: -270 });
+        fan.rest();
+        gsap.set([shatter, navLinks, navLogo], {
           autoAlpha: 1,
           y: 0,
         });
         ScrollTrigger.refresh();
         enableTouchScroll();
-        startCursorRoster();
         revealNavCurtains();
         startHeadlineVerb();
         fitShatterHeadline();
@@ -394,10 +285,10 @@ export function HeroSequence() {
         documentElement.style.overflow = "hidden";
 
         gsap.set(navLogo, { autoAlpha: 0 });
+        fan.prepare();
         gsap.set(loader, { autoAlpha: 1, display: "grid" });
         gsap.set(firstWord, { autoAlpha: 0, filter: "blur(18px)", y: 10 });
-        gsap.set(shatter, { autoAlpha: 0, y: 28 });
-        gsap.set(scrollCue, { autoAlpha: 0 });
+        headlineWipe.arm();
         /* Links stay in place; curtains reveal the labels. */
         gsap.set(navLinks, { autoAlpha: 1, y: 0 });
 
@@ -432,69 +323,27 @@ export function HeroSequence() {
               documentElement.style.removeProperty("overflow");
               ScrollTrigger.refresh();
               enableTouchScroll();
-              startCursorRoster();
-              revealNavCurtains();
+                    revealNavCurtains();
               startHeadlineVerb();
               fitShatterHeadline();
             },
             [],
-            "reveal",
+            `reveal+=${zoom * 0.5}`,
           )
-          .to(
-            loader,
-            { autoAlpha: 0, duration: heroSequenceIntro.revealDuration },
-            "reveal",
-          )
-          .to(
-            loaderMark,
-            {
-              filter: "invert(1)",
-              duration: heroSequenceIntro.revealDuration * 0.55,
-            },
-            "reveal+=0.15",
-          )
-          .to(
-            loaderMark,
-            {
-              x: () => markRestTransform().x,
-              y: () => markRestTransform().y,
-              scale: () => markRestTransform().scale,
-              duration: heroSequenceIntro.logoMoveDuration,
-              ease: "expo.inOut",
-              transformOrigin: "center center",
-            },
-            "reveal",
-          )
-          .set(
-            loader,
-            { display: "none" },
-            `reveal+=${heroSequenceIntro.revealDuration}`,
-          )
-          .to(
-            shatter,
-            {
-              autoAlpha: 1,
-              y: 0,
-              duration: heroSequenceIntro.revealDuration,
-              ease: "expo.out",
-            },
-            "reveal",
-          )
-          .to(
-            scrollCue,
-            { autoAlpha: 1, duration: heroSequenceIntro.revealDuration },
-            `reveal+=${heroSequenceIntro.revealDuration * 0.5}`,
-          )
-          /* Hand the wordmark over to the nav so it scrolls with the page. */
+          /* The yellow loader and the fan's lead slide are the same colour, so
+             the loader drops away instantly and the camera pulls back from
+             the slide beneath it. */
+          .set(loader, { autoAlpha: 0, display: "none" }, "reveal")
+          .add(fan.zoomOut(), "reveal")
+          /* The paused drum is moved onto the lead slide at the start of
+             fan.zoomOut, so the wordmark stays in the fan. The nav wordmark
+             fades in at its own position. */
+          /* The headline wipes in row by row once the camera is mostly out. */
+          .call(() => headlineWipe.play(), [], `reveal+=${zoom * 0.5}`)
           .to(
             navLogo,
-            { autoAlpha: 1, duration: 0.2 },
-            `reveal+=${heroSequenceIntro.logoMoveDuration}`,
-          )
-          .set(
-            loaderMark,
-            { autoAlpha: 0, display: "none" },
-            `reveal+=${heroSequenceIntro.logoMoveDuration + 0.2}`,
+            { autoAlpha: 1, duration: 0.6, ease: "power2.out" },
+            `reveal+=${zoom * 0.55}`,
           );
       }
 
@@ -516,171 +365,77 @@ export function HeroSequence() {
           const isMobile = Boolean(context.conditions?.isMobile);
           const isTablet = Boolean(context.conditions?.isTablet);
           const reduceMotion = Boolean(context.conditions?.reduceMotion);
-          const reduced = heroSequenceMotion.reduced;
 
-          const blurAmount = (value: number) =>
-            reduceMotion ? value * reduced.blur : value;
-          const travel = reduceMotion
-            ? heroSequenceMotion.wordTravel * reduced.travel
-            : heroSequenceMotion.wordTravel;
-
+          /* The hero scrolls away with the page. Extra drift on top of that
+             gives the depth: each headline line gets a little, the fan gets
+             more, so it climbs a touch faster than the type. */
           const timeline = gsap.timeline({
             scrollTrigger: {
               trigger: sequence,
               start: "top top",
-              end: "bottom bottom",
+              end: "bottom top",
               scrub: heroSequenceMotion.scrub,
-              pin,
-              pinSpacing: false,
-        /* Crash triage: ?off=fixedpin pins with transforms, not position: fixed. */
-        pinType: document.documentElement.dataset.off?.split(" ").includes("fixedpin")
-          ? "transform"
-          : undefined,
               invalidateOnRefresh: true,
               onUpdate: (self) => {
-                getSequenceProgress = () => self.progress;
-
-                if (
-                  cursorRosterAlive &&
-                  self.progress > 0.002
-                ) {
-                  stopCursorRoster();
-                }
-                /*
-                 * Verb keeps cycling through the shatter; it only stops once the
-                 * headline is fully gone.
-                 */
+                /* The verb keeps cycling until the headline has left. */
                 if (self.progress > 0.98) stopHeadlineVerb();
                 else startHeadlineVerb();
-
               },
             },
           });
 
-          /* Beat 1 — headline shatters upward; cursors lift the same way.
-             Scrub span matches page pace (ease none, long runway). */
-          const wordSpan = beats.shatterEnd - beats.shatterStart;
-          const wordDuration = Math.max(
-            0.01,
-            wordSpan - beats.shatterStagger * (words.length - 1),
-          );
+          let fanTimeline: gsap.core.Timeline | undefined;
 
-          /* Depth: every piece gets its own distance from the viewer, so the
-             break reads as a volume rushing past the camera rather than one
-             flat zoom. Near pieces travel farther, grow more, blur harder and
-             drift further from the block's centre (parallax). */
-          const depthOf = (i: number) => 0.45 + ((i * 0.618034) % 1) * 1.1;
-          const zoomGain = reduceMotion ? reduced.travel : 1;
-          const centreOffset = (el: HTMLElement, i: number) => {
-            const block = shatter.getBoundingClientRect();
-            const rect = el.getBoundingClientRect();
-            const fit = Number(gsap.getProperty(shatter, "scale")) || 1;
-            const x = Number(gsap.getProperty(el, "x")) || 0;
-            const y = Number(gsap.getProperty(el, "y")) || 0;
-            return {
-              x:
-                (rect.left + rect.width / 2 - x * fit -
-                  (block.left + block.width / 2)) /
-                fit,
-              y:
-                (rect.top + rect.height / 2 - y * fit -
-                  (block.top + block.height / 2)) /
-                fit,
-              d: depthOf(i),
-            };
-          };
+          if (!reduceMotion) {
+            const lineOfWord = heroSequenceHeadlineLines.flatMap((line, row) =>
+              line.map(() => row),
+            );
+            const drift = (fraction: number) => () => -vh() * fraction;
 
-          const depthTweens = (
-            targets: HTMLElement[],
-            blur: number,
-            duration: number,
-            stagger: number | ((i: number) => number),
-            at: number,
-          ) => {
-            // Position: linear, scaled by depth.
-            timeline.to(
-              targets,
-              {
-                y: (i) => -vh() * travel * (0.55 + 0.3 * depthOf(i)),
-                x: (i, el) => {
-                  const o = centreOffset(el, i);
-                  return o.x * 0.55 * o.d * zoomGain;
+            words.forEach((word, index) => {
+              timeline.to(
+                word,
+                {
+                  y: drift(heroSequenceParallax.lineDrift[lineOfWord[index]]),
+                  ease: "none",
+                  duration: 1,
                 },
-                duration,
-                ease: "none",
-                stagger,
+                0,
+              );
+            });
+            /* The fan has its own, laggier scrub so it carries a little
+               inertia and doesn't look glued to the page. */
+            fanTimeline = gsap.timeline({
+              scrollTrigger: {
+                trigger: sequence,
+                start: "top top",
+                end: "bottom top",
+                scrub: heroSequenceParallax.fanScrub,
+                invalidateOnRefresh: true,
               },
-              at,
-            );
-            // Scale + blur accelerate toward the top of the screen.
-            timeline.to(
-              targets,
+            });
+            /* Pitch the fan upward as the hero leaves. Its own wrapper, so it
+               adds to the resting tilt instead of replacing it. */
+            fanTimeline.fromTo(
+              fanScrollTilt,
+              { rotationX: 0 },
               {
-                scale: (i) => 1 + 1.25 * depthOf(i) * zoomGain,
-                duration,
-                ease: "power2.in",
-                stagger,
+                rotationX: heroSequenceParallax.tiltDegrees,
+                ease: heroSequenceParallax.fanEase,
+                duration: 1,
               },
-              at,
+              0,
             );
-            // Blur ramps sooner than scale so the defocus is felt early.
-            timeline.to(
-              targets,
+            fanTimeline.to(
+              fanScroll,
               {
-                filter: (i) =>
-                  `blur(${blurAmount(blur * (0.5 + depthOf(i) * 0.9))}px)`,
-                duration,
-                ease: "power1.in",
-                stagger,
+                y: drift(heroSequenceParallax.fanDrift),
+                ease: heroSequenceParallax.fanEase,
+                duration: 1,
               },
-              at,
+              0,
             );
-            // Fade last so the push toward the viewer is actually seen.
-            timeline.to(
-              targets,
-              {
-                autoAlpha: 0,
-                duration: duration * 0.6,
-                ease: "power1.in",
-                stagger,
-              },
-              at + duration * 0.4,
-            );
-          };
-
-          const cursorOrder = gsap.utils.shuffle(cursors.map((_, i) => i));
-
-          depthTweens(
-            words,
-            heroSequenceMotion.wordBlur,
-            wordDuration,
-            beats.shatterStagger,
-            beats.shatterStart,
-          );
-
-          depthTweens(
-            cursors,
-            heroSequenceMotion.cursorBlur,
-            beats.cursorsOutEnd - beats.shatterStart,
-            // Fixed shuffle so all three tweens share one order.
-            (i: number) => cursorOrder[i] * 1.6,
-            beats.shatterStart,
-          );
-
-          /* The cue has done its job as soon as the page starts moving.
-             fromTo so the scrub doesn't record the intro's hidden state as
-             its start value. */
-          timeline.fromTo(
-            scrollCue,
-            { autoAlpha: 1 },
-            {
-              autoAlpha: 0,
-              immediateRender: false,
-              duration: beats.scrollCueOutEnd - beats.shatterStart,
-              ease: "none",
-            },
-            beats.shatterStart,
-          );
+          }
 
           const releaseTeam = debugOff.has("teamjs")
             ? () => {}
@@ -691,6 +446,8 @@ export function HeroSequence() {
 
           return () => {
             releaseTeam();
+            fanTimeline?.scrollTrigger?.kill();
+            fanTimeline?.kill();
             timeline.scrollTrigger?.kill();
             timeline.kill();
           };
@@ -700,15 +457,14 @@ export function HeroSequence() {
 
       return () => {
         documentElement.style.removeProperty("overflow");
-        stopCursorRoster();
-        cursorRosterTick.kill();
         stopHeadlineVerb();
-        headlineVerbIntro?.kill();
+        headlineWipe.kill();
         headlineVerbCycle?.kill();
         navCurtainTl?.kill();
         navCurtains.forEach(clearCurtainState);
         if (curtainVerb) clearCurtainState(curtainVerb);
         shatterFitObserver?.disconnect();
+        fan.kill();
         smoother?.kill();
         if (normalizeTouchScroll) ScrollTrigger.normalizeScroll(false);
         stopAutoscroll?.();
@@ -733,6 +489,7 @@ export function HeroSequence() {
           <div className="hs-sequence">
             <div className="hs-pin">
               <div className="hs-band">
+                <HeroFan />
                 <div className="hs-band__inner">
                   {/* Reserves the nav’s expanded height so the hero scene does
                       not jump when the fixed overlay is moved out of flow. */}
@@ -742,19 +499,18 @@ export function HeroSequence() {
                     <ShatterHeadline />
                   </div>
 
-                  <p className="hs-scroll-cue" aria-hidden="true">
-                    Scroll to explore
-                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="hs-scrub-runway" aria-hidden="true" />
           </div>
 
-          <WorkRecords />
+          <WorkGallery />
+          {/* Record browser is hidden (not deleted); flip to bring it back. */}
+          {SHOW_WORK_RECORDS && <WorkRecords />}
 
           <TeamSection />
+          <MorphCard />
 
           <CapabilitiesSection />
         </div>

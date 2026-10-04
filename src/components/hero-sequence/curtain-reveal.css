@@ -55,3 +55,20 @@
     --hs-curtain-content-opacity: 1;
   }
 }
+
+/* Row wipe (wipe-reveal.ts): measured per-row bars over plain text. */
+.hs-wipe {
+  position: relative;
+}
+
+.hs-wipe__word {
+  display: inline-block;
+}
+
+.hs-wipe__mask {
+  position: absolute;
+  z-index: 1;
+  background: var(--hs-yellow);
+  pointer-events: none;
+  will-change: transform, opacity;
+}

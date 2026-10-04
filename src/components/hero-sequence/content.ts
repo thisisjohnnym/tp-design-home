@@ -403,6 +403,60 @@ export const heroSequenceIntro = {
 } as const;
 
 /**
+ * Hero scroll parallax. The hero scrolls away with the page; these are extra
+ * upward drifts on top of that, as a fraction of the viewport height by the
+ * time the hero has left. Keep the fan above every line so it climbs faster.
+ */
+export const heroSequenceParallax = {
+  /** Per headline line, top to bottom. */
+  lineDrift: [0.15, 0.1, 0.05],
+  fanDrift: 0.3,
+  /** Extra pitch (degrees) the fan gains by the time the hero has left, so it
+   *  tips upward as you scroll. Positive tips the top away, negative toward you. */
+  tiltDegrees: 30,
+  /** Seconds the fan trails the scroll by. Longer = more inertia: it keeps
+   *  drifting after the page stops, then settles. The headline stays tight. */
+  fanScrub: 1.6,
+  /** Eases in and out, so the fan starts and finishes at the page's own speed
+   *  and only picks up extra speed in between: no jump at either end. */
+  fanEase: "sine.inOut",
+} as const;
+
+/**
+ * Hero fan (Paper I8-0). 9 slides are defined here and each is duplicated
+ * directly opposite itself on the ring, so they render as 18. The middle entry is the `lead`: the
+ * flat-colour slide the loader camera starts zoomed into, so keep it the loader
+ * yellow and image-free. Other slides take a flat `bg` or an `image` (cover,
+ * placed at `pos`). Nothing else reads this list.
+ */
+export const heroSequenceFan = {
+  /** Camera pull-back from the lead slide to the resting hero. */
+  zoomDuration: 1.8,
+  /**
+   * Shape of the pull-back's speed curve: speed(t) ∝ t^start · (1-t)^tail.
+   * `start` softens the take-off from rest; `tail` sets the landing. 1 is a
+   * straight-line ramp to a stop (what sine.inOut does, and reads as a linear
+   * end); 2 is a quadratic settle; 3+ finishes early and the fan seems to
+   * arrive then sit. Between 2 and 3 is the sweet spot.
+   */
+  easeStart: 1.3,
+  easeTail: 2.2,
+  /** Seconds per full turn of the resting fan. */
+  spinSeconds: 36,
+  slides: [
+    { id: "trench", image: "/fan/slide-3.jpg", pos: "50% 30%" },
+    { id: "product", image: "/fan/slide-2.jpg", pos: "50% 40%" },
+    { id: "navy", bg: "#0b1f6b" },
+    { id: "portrait", image: "/fan/slide-4.jpg", pos: "38% 30%" },
+    { id: "lead", bg: "#ffcd00", lead: true },
+    { id: "coffee", image: "/fan/slide-5.jpg", pos: "45% 50%" },
+    { id: "mark", image: "/fan/slide-6.jpg", pos: "35% 50%" },
+    { id: "fog", bg: "#f0f0f0" },
+    { id: "cart", image: "/fan/slide-1.jpg", pos: "20% 20%" },
+  ],
+} as const;
+
+/**
  * Record browser before the team section (Paper 9DZ-0 / 9L3-0 / 9UQ-0 / 9RA-0).
  * Each work is one slab on the wheel. `art` is composed onto a 16:9 card:
  * `contain` sits a screen capture on `bg`, `cover` fills the card with a photo.
@@ -502,3 +556,69 @@ export const heroSequenceWorks = [
 ] as const;
 
 export type HeroSequenceWork = (typeof heroSequenceWorks)[number];
+
+/**
+ * Parallax collage before the team section (Paper 8BV-0 desktop, 6WC-0 phone).
+ * `speed` drives scroll depth: under 1 lags (far), over 1 leads (near).
+ * `phoneSpeed` overrides it on the phone stack.
+ * Pixel sizes are 1× frame exports used for intrinsic aspect hints.
+ * `mobileSrc` swaps in the phone frame's crop; tiles without one that the
+ * phone layout drops are hidden in CSS.
+ */
+export const heroSequenceWorkGallery = [
+  {
+    id: "pdp",
+    src: "/gallery/pdp.webp",
+    alt: "Kate Spade product detail page for a black shoulder bag",
+    speed: 0.55,
+    pixelWidth: 883,
+    pixelHeight: 764,
+  },
+  {
+    id: "carousel",
+    src: "/gallery/carousel.webp",
+    alt: "Yellow product feature carousel cards",
+    speed: 0.8,
+    phoneSpeed: 0.75,
+    pixelWidth: 367,
+    pixelHeight: 437,
+  },
+  {
+    id: "cart",
+    src: "/gallery/cart.webp",
+    mobileSrc: "/gallery/cart-mobile.webp",
+    alt: "Kate Spade mobile cart with a rose smoke crossbody",
+    speed: 1.15,
+    phoneSpeed: 1.2,
+    pixelWidth: 736,
+    pixelHeight: 647,
+  },
+  {
+    id: "logo",
+    src: "/gallery/logo-c.webp",
+    mobileSrc: "/gallery/logo-c-mobile.webp",
+    alt: "Gold Coach C hardware on sage leather",
+    speed: 1.45,
+    phoneSpeed: 1.5,
+    pixelWidth: 269,
+    pixelHeight: 357,
+  },
+  {
+    id: "testimonial",
+    src: "/gallery/testimonial.webp",
+    alt: "Customer testimonials mobile screen",
+    speed: 1.6,
+    pixelWidth: 261,
+    pixelHeight: 344,
+  },
+  {
+    id: "lifestyle",
+    src: "/gallery/lifestyle.webp",
+    mobileSrc: "/gallery/lifestyle-mobile.webp",
+    alt: "Model wearing a pink kate spade crossbody",
+    speed: 1.9,
+    phoneSpeed: 1.85,
+    pixelWidth: 139,
+    pixelHeight: 437,
+  },
+] as const;

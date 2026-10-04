@@ -217,6 +217,47 @@ function draw(
   ];
 }
 
+/**
+ * Paints the same card into a plain 2D canvas (card area only, no blur bleed)
+ * for DOM use — the gallery traveler's back face. Redraws once fonts and the
+ * photo resolve. Returns a cleanup.
+ */
+export function paintCardFace(
+  member: TeamCardMember,
+  target: HTMLCanvasElement,
+) {
+  const source = document.createElement("canvas");
+  source.width = TEX_PX.w;
+  source.height = TEX_PX.h;
+  target.width = CARD_PX.w;
+  target.height = CARD_PX.h;
+  const ctx = target.getContext("2d")!;
+  const paint = (img: HTMLImageElement | null) => {
+    draw(source, member, img);
+    ctx.clearRect(0, 0, CARD_PX.w, CARD_PX.h);
+    ctx.drawImage(
+      source,
+      CARD_BLEED,
+      CARD_BLEED,
+      CARD_PX.w,
+      CARD_PX.h,
+      0,
+      0,
+      CARD_PX.w,
+      CARD_PX.h,
+    );
+  };
+
+  let disposed = false;
+  paint(null);
+  Promise.all([loadFonts(), loadImage(member.portrait)]).then(([, img]) => {
+    if (!disposed) paint(img);
+  });
+  return () => {
+    disposed = true;
+  };
+}
+
 /** Returns a texture immediately; it is redrawn once fonts and the photo resolve. */
 export function createCardTexture(member: TeamCardMember) {
   const canvas = document.createElement("canvas");

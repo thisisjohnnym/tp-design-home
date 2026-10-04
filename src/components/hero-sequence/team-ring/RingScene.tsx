@@ -10,6 +10,7 @@ import {
   type CardLink,
   type TeamCardMember,
 } from "./cardTexture";
+import { morphBridge } from "../morph-bridge";
 
 export type RingMotion = {
   angle: number;
@@ -175,6 +176,7 @@ const fragmentShader = /* glsl */ `
   uniform float uGloss;
   uniform vec3 uFog;
   uniform float uDim;
+  uniform float uShow;
 
   varying vec2 vUv;
   varying float vDepth;
@@ -182,6 +184,8 @@ const fragmentShader = /* glsl */ `
   varying vec3 vViewDir;
 
   void main() {
+    // Card handed to the gallery traveler: nothing to draw until it lands.
+    if (uShow < 0.004) discard;
     vec2 uv = vUv;
     vec3 n = normalize(vNormalW);
     // Seen from behind, flip so the front reads through the card.
@@ -211,7 +215,7 @@ const fragmentShader = /* glsl */ `
 
     col = mix(col, uFog, smoothstep(0.0, 1.0, vDepth) * uFogAmt);
     col = mix(col, uFog, uDim * 0.8);
-    gl_FragColor = vec4(col, alpha * (1.0 - uDim * 0.5));
+    gl_FragColor = vec4(col, alpha * (1.0 - uDim * 0.5) * uShow);
     #include <colorspace_fragment>
   }
 `;
@@ -221,17 +225,39 @@ function hash(i: number) {
   return x - Math.floor(x);
 }
 
+
 /** Runs first each frame: integrates auto-rotation and fling inertia. */
 function MotionDriver({
   motion,
   autoSpeed,
+  total,
 }: {
   motion: RefObject<RingMotion>;
   autoSpeed: number;
+  total: number;
 }) {
+  const morph = useRef({ holding: false, released: false, base: 0, off: 0 });
   useFrame((_, delta) => {
     const dt = Math.min(delta, 1 / 20);
     const m = motion.current;
+    const h = morph.current;
+    if (!morphBridge.hold) {
+      h.holding = false;
+      h.released = false;
+    }
+    // Grabbing or focusing the ring takes it out of the pin for good: it is the
+    // visitor's now, and keeps its own spin, fling and focus until they scroll on.
+    if (morphBridge.hold && (m.dragging || m.focus !== null)) {
+      h.released = true;
+      h.holding = false;
+    }
+    // Free ring: the traveler will become whichever card is nearest the front.
+    if (
+      morphBridge.active &&
+      (!morphBridge.hold || (h.released && morphBridge.landed))
+    ) {
+      morphBridge.index = frontIndexFor(m.angle, total);
+    }
     if (m.dragging) {
       // Angle is moved directly by the pointer; let measured velocity settle if it stops.
       m.vel *= Math.exp(-dt * 6);
@@ -243,11 +269,49 @@ function MotionDriver({
       const w = FOCUS_TURN_RATE;
       m.vel += (w * w * (m.focusAngle - m.angle) - 2 * w * m.vel) * dt;
       m.angle += m.vel * dt;
+    } else if (morphBridge.hold && h.released && morphBridge.landed) {
+      // Released and still in the settle stretch: an ordinary free ring.
+      const target = m.dir * autoSpeed;
+      m.vel += (target - m.vel) * (1 - Math.exp(-dt * 0.9));
+      m.angle += m.vel * dt;
+    } else if (morphBridge.hold && h.released) {
+      // Released, then scrolled back up toward the flight: ease the ring onto
+      // the card the traveler will become (never more than half a step), then
+      // let the scrub take over from there.
+      const w = FOCUS_TURN_RATE;
+      const front = frontAngleFor(morphBridge.index, total, m.angle);
+      m.vel += (w * w * (front - m.angle) - 2 * w * m.vel) * dt;
+      m.angle += m.vel * dt;
+      if (Math.abs(front - m.angle) < 0.01 && Math.abs(m.vel) < 0.05) {
+        h.released = false;
+        h.holding = false;
+      }
+    } else if (morphBridge.hold) {
+      // The gallery traveler is landing on the card nearest the front (its
+      // index was fixed when it left). The ring is pinned to that card, and
+      // scroll — not time — decides how far it has let go: at the landing it is
+      // exactly on it, and `past` of the way through the settle stretch it is
+      // back to where it was cruising. Entering from the free ring, `off` is
+      // that remembered offset (never more than half a card step), so nothing
+      // jumps; scrolling back up replays the glide home.
+      if (!h.holding) {
+        h.base = frontAngleFor(morphBridge.index, total, m.angle);
+        h.off = m.angle - h.base;
+        h.holding = true;
+      }
+      const k = THREE.MathUtils.clamp(morphBridge.past, 0, 1);
+      const next = h.base + h.off * (k * k * (3 - 2 * k));
+      // Cards bend with how fast the ring moves; measure it from the scrub.
+      m.vel += ((next - m.angle) / dt - m.vel) * 0.5;
+      m.angle = next;
     } else {
       const target = m.dir * autoSpeed;
       m.vel += (target - m.vel) * (1 - Math.exp(-dt * 0.9));
       m.angle += m.vel * dt;
     }
+    // Tell the traveler whether its card is parked at the front yet.
+    morphBridge.aligned =
+      Math.abs(frontAngleFor(morphBridge.index, total, m.angle) - m.angle) < 0.02;
   });
   return null;
 }
@@ -300,6 +364,52 @@ function solveRig(
   // A fixed world point to aim at, so pointer parallax orbits around the framing.
   const focus = pos.clone().addScaledVector(look, D);
   return { D, t, focus };
+}
+
+/**
+ * Reports where the front card sits on screen, for the gallery traveler to land
+ * on. Uses the same orbit the cards use, so it tracks the scroll-in as the ring
+ * opens out and the camera tilts down. Runs after CameraRig so it reads this
+ * frame's camera.
+ */
+function SlotProbe({
+  radius,
+  cardW,
+  cardH,
+  scrollIntro,
+  intro,
+}: {
+  radius: number;
+  cardW: number;
+  cardH: number;
+  scrollIntro: boolean;
+  intro: RefObject<IntroState>;
+}) {
+  const point = useMemo(() => new THREE.Vector3(), []);
+  useFrame((state) => {
+    const camera = state.camera;
+    camera.updateMatrixWorld();
+    const p = scrollIntro ? intro.current.progress : 1;
+    const orbit = radius * introScale(p);
+    // Card edges on the ring's cylinder, front-on.
+    const th = cardW / 2 / orbit;
+    const { width, height } = state.size;
+    const toPx = (x: number, y: number, z: number) => {
+      point.set(x, y, z).project(camera);
+      return { x: ((point.x + 1) / 2) * width, y: ((1 - point.y) / 2) * height };
+    };
+    const left = toPx(-Math.sin(th) * orbit, 0, Math.cos(th) * orbit);
+    const right = toPx(Math.sin(th) * orbit, 0, Math.cos(th) * orbit);
+    const top = toPx(0, cardH / 2, orbit);
+    const bottom = toPx(0, -cardH / 2, orbit);
+    const slot = morphBridge.slot;
+    slot.cx = (left.x + right.x) / 2;
+    slot.cy = (top.y + bottom.y) / 2;
+    slot.w = right.x - left.x;
+    slot.h = bottom.y - top.y;
+    slot.valid = true;
+  });
+  return null;
 }
 
 function CameraRig({
@@ -525,6 +635,7 @@ function Card({
           uGloss: { value: 0 },
           uFog: { value: new THREE.Color() },
           uDim: { value: 0 },
+          uShow: { value: 1 },
         },
       }),
     [index],
@@ -597,6 +708,7 @@ function Card({
     u.uFogAmt.value = settings.depthFade;
     u.uGloss.value = feel.gloss;
     u.uDim.value = fx.dim;
+    u.uShow.value = index === morphBridge.index ? morphBridge.arrive : 1;
   });
 
   const setPointer = (on: boolean) => {
@@ -613,7 +725,10 @@ function Card({
       (uv.y - 0.5) * PLANE_SCALE_Y + 0.5,
     );
   };
+  /* Still in the gallery's hands: not there to hover or click. */
+  const unseen = () => index === morphBridge.index && morphBridge.arrive < 0.5;
   const onMove = (e: ThreeEvent<PointerEvent>) => {
+    if (unseen()) return;
     e.stopPropagation();
     setPressUv(e.uv);
     if (spring.current.pressTarget < 1.4) spring.current.pressTarget = 1;
@@ -631,11 +746,12 @@ function Card({
     setPointer(false);
   };
   const onDown = (e: ThreeEvent<PointerEvent>) => {
+    if (unseen()) return;
     setPressUv(e.uv);
     spring.current.pressTarget = 1.8;
   };
   const onClick = (e: ThreeEvent<MouseEvent>) => {
-    if (e.delta > CLICK_SLOP || !onCard(e.uv)) return;
+    if (unseen() || e.delta > CLICK_SLOP || !onCard(e.uv)) return;
     e.stopPropagation();
     const focus = motion.current.focus;
     /* While a card is focused, the stepped-back cards count as empty space:
@@ -690,7 +806,11 @@ export function RingScene({
 
   return (
     <>
-      <MotionDriver motion={motion} autoSpeed={settings.autoSpeed} />
+      <MotionDriver
+        motion={motion}
+        autoSpeed={settings.autoSpeed}
+        total={total}
+      />
       <CameraRig
         motion={motion}
         tilt={settings.tilt}
@@ -704,6 +824,13 @@ export function RingScene({
         cardW={cardW}
         cardH={cardH}
         camDist={camDist}
+      />
+      <SlotProbe
+        radius={radius}
+        cardW={cardW}
+        cardH={cardH}
+        scrollIntro={settings.scrollIntro}
+        intro={intro}
       />
       {members.map((m, i) => (
         <Card

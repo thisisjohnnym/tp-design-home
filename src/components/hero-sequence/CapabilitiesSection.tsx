@@ -5,6 +5,8 @@ import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CapabilityPreview } from "./CapabilityPreview";
+import { useWipeOnScroll } from "./use-wipe-on-scroll";
+import { WipeWords } from "./WipeWords";
 import {
   heroSequenceCapabilities,
   heroSequenceCapabilitiesIntro,
@@ -42,7 +44,7 @@ const DRAG_THRESHOLD = 6;
 function TitleLines({ lines }: { lines: readonly string[] }) {
   return lines.map((line, index) => (
     <span className="hs-caps__title-line" key={index}>
-      {line}
+      <WipeWords text={line} />
     </span>
   ));
 }
@@ -303,6 +305,10 @@ export function CapabilitiesSection() {
     return () => observer.disconnect();
   }, [scrollDriven, phone]);
 
+  /* Lead and row titles wipe in line by line as they scroll into view. The
+     markup remounts when the layout mode flips, so re-arm on that. */
+  useWipeOnScroll(sectionRef, `${scrollDriven}-${phone}`);
+
   /* ScrollSmoother transforms the page, so CSS sticky can't hold the lead;
      pin it until its foot meets the end of the list. Stacked layouts scroll it away. */
   useGSAP(
@@ -344,7 +350,9 @@ export function CapabilitiesSection() {
         <h2 className="hs-sr-only" id="hs-caps-heading">
           Capabilities
         </h2>
-        <p className="hs-caps__lead">{heroSequenceCapabilitiesIntro}</p>
+        <p className="hs-caps__lead hs-wipe" data-wipe="caps-lead">
+          <WipeWords text={heroSequenceCapabilitiesIntro} />
+        </p>
       </div>
 
       <div
@@ -395,7 +403,10 @@ export function CapabilitiesSection() {
                 >
                   {capability.number}
                 </span>
-                <h3 className="hs-caps__title">
+                <h3
+                  className="hs-caps__title hs-wipe"
+                  data-wipe={`caps-title-${capability.id}`}
+                >
                   {staticTitle ? (
                     /* Scrolling drives the panel, so there is nothing to press. */
                     <TitleLines lines={capability.titleLines} />

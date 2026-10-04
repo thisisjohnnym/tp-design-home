@@ -14,8 +14,6 @@
 
   --hs-gutter: clamp(16px, 1.6vw, 24px);
   --hs-band-height: 480px;
-  /* Room for the shatter exit to match the page’s scroll pace. */
-  --hs-scrub-length: 180svh;
   /* Paper “grid” strokes: 12 cols, 8px gutters, 24px page inset. */
   --hs-grid-cols: 12;
   --hs-grid-gap: 8px;
@@ -119,17 +117,6 @@
   background: transparent;
 }
 
-/*
- * Provides the scrub scroll distance while the pin is sticky/fixed.
- * Keep this height stable for the whole scrub — collapsing it mid-timeline
- * shrinks the scroll range and stalls progress.
- */
-.hs-scrub-runway {
-  height: var(--hs-scrub-length);
-  pointer-events: none;
-}
-
-/* Hero stays pinned while the headline leaves. The team fan follows. */
 .hs-pin {
   position: sticky;
   z-index: 3;
@@ -208,19 +195,6 @@
   height: 100%;
   flex-direction: column;
   padding: var(--hs-gutter);
-}
-
-/* Paper 81I-0: centered 14px label near the bottom edge of the hero. */
-.hs-scroll-cue {
-  position: absolute;
-  bottom: calc(var(--hs-gutter) + 22px);
-  left: 50%;
-  margin: 0;
-  color: var(--hs-light);
-  font-size: var(--hs-meta-label);
-  line-height: 18px;
-  pointer-events: none;
-  translate: -50% 0;
 }
 
 /* ------------------------------------------------------------------ */
@@ -387,37 +361,37 @@
 /* Frame 1 — shatter headline + cursors                                */
 /* ------------------------------------------------------------------ */
 
-/* Paper 81I-0: headline block centered in the hero, lines centered. */
+/* Paper I8-0: headline anchored bottom-left (24px gutters), 128px / 90%. */
 .hs-layer--shatter {
-  /* Center on the viewport, not the space left under the nav. */
   top: calc(-1 * var(--hs-nav-height, 0px));
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
 }
 
 .hs-shatter {
   position: relative;
   width: max-content;
-  margin-inline: auto;
+  margin-inline: 0;
   /* Fit-scale keeps cursors locked to the type as the block shrinks. */
-  transform-origin: center center;
+  transform-origin: left bottom;
   will-change: transform;
 }
 
 .hs-shatter__headline {
+  position: relative;
   display: flex;
   width: max-content;
   max-width: none;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   margin: 0;
   row-gap: 0;
   color: var(--hs-light);
-  font-size: var(--hs-display);
+  font-size: var(--hs-title);
   font-weight: 400;
   letter-spacing: -0.04em;
-  line-height: 0.8;
+  line-height: 0.9;
   text-transform: capitalize;
 }
 
@@ -1140,7 +1114,6 @@
   .hs-root {
     --hs-gutter: 16px;
     --hs-band-height: 336px;
-    --hs-scrub-length: 150svh;
     /* 78 / 440 — Paper 8IP-0 phone headline. */
     --hs-display: 17.73vw;
     --hs-title: 10.6vw;
@@ -1222,11 +1195,6 @@
 
   .hs-nav__link {
     font-size: 15px;
-  }
-
-  /* Phone headline sits on the bottom edge (Paper 8IP-0 has no cue). */
-  .hs-scroll-cue {
-    display: none;
   }
 
   .hs-cards__item {
