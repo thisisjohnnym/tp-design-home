@@ -74,6 +74,32 @@
   flex: none;
 }
 
+/* Paper 2IN-0: a row of 5×2 dashes, 66.8px apart, at 31% white. It sits a
+   little below the names' middle; the script slides it by a share of the names'
+   travel. Wider than the stage by a pitch each side so the wrap never shows. */
+.hs-team__dots {
+  position: absolute;
+  z-index: 1;
+  top: calc(50% + 24px);
+  right: -67px;
+  left: -67px;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    #fff 0 5px,
+    transparent 5px 66.8px
+  );
+  opacity: 0.31;
+  pointer-events: none;
+  translate: 0 -50%;
+  will-change: transform;
+}
+
+/* Phone-only cue under the card; the desktop has the pointer pill. */
+.hs-team__hint {
+  display: none;
+}
+
 /* ---- Cards ---------------------------------------------------------- */
 
 .hs-team__cards {
@@ -270,14 +296,93 @@
   outline-offset: 2px;
 }
 
-/* Phone: a narrower pitch so the names still trail the card. */
+/* Phone — Paper 1CY-0 (402 wide): the words are 204px (about half the width),
+   the card 272×491 with the same type sizes as desktop in px, so its insets and
+   text are the desktop's in cqi × 324/272. The dotted line runs through the
+   middle, with a "drag" cue below the card. */
 @media (max-width: 699px) {
   .hs-team__names {
-    font-size: 16vw;
+    gap: 0.485em;
+    font-size: 50.7vw;
+  }
+
+  .hs-team__dots {
+    top: 50%;
   }
 
   .hs-team__slot,
   .hs-team__card {
-    --hs-card-w: min(78vw, 340px);
+    --hs-card-w: min(67.66vw, 360px);
+
+    top: calc(50% + 10.5px);
+    aspect-ratio: 272 / 491;
+  }
+
+  .hs-team__card {
+    gap: calc(var(--hs-card-w) * 0.0441);
+    padding: calc(var(--hs-card-w) * 0.0441);
+    border-radius: calc(var(--hs-card-w) * 0.0588);
+  }
+
+  .hs-team__portrait {
+    border-radius: 2.2cqi;
+  }
+
+  .hs-team__meta,
+  .hs-team__links {
+    right: 4.41cqi;
+    left: 4.41cqi;
+    font-size: 2.94cqi;
+  }
+
+  .hs-team__meta {
+    top: 4.41cqi;
+  }
+
+  .hs-team__links {
+    bottom: 4.41cqi;
+  }
+
+  .hs-team__given,
+  .hs-team__family {
+    right: 4.41cqi;
+    left: 4.41cqi;
+    font-size: 17.64cqi;
+  }
+
+  .hs-team__given {
+    top: 12.5cqi;
+  }
+
+  .hs-team__family {
+    top: 29.8cqi;
+  }
+
+  .hs-team__bio {
+    font-size: 5.88cqi;
+  }
+
+  .hs-team__hint {
+    position: absolute;
+    z-index: 2;
+    top: 82.4%;
+    left: 50%;
+    display: block;
+    margin: 0;
+    color: #fff;
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    line-height: 0.9;
+    opacity: 0.3;
+    pointer-events: none;
+    text-transform: uppercase;
+    transition: opacity 300ms linear;
+    translate: -50%;
+    white-space: nowrap;
+  }
+
+  .hs-team__stage[data-dragged] .hs-team__hint {
+    opacity: 0;
   }
 }

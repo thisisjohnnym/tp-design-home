@@ -40,7 +40,9 @@
   background: var(--hs-morph-front, #fa241a);
 }
 
-/* The section title, bottom left (Paper 1Y8-0: 56px on a 359px card). */
+/* The section title, bottom left (Paper 1Y8-0: 56px on a 359px card). Set a
+   little under that (13.4cqi) so the widest line, "People Behind", stays
+   inside the card at every size. */
 .hs-morph__side--front {
   container-type: inline-size;
 }
@@ -50,7 +52,7 @@
   bottom: 2.23cqi;
   left: 2.23cqi;
   color: #dfdfdf;
-  font-size: 15.6cqi;
+  font-size: 13.4cqi;
   letter-spacing: -0.04em;
   line-height: 1;
   text-transform: capitalize;

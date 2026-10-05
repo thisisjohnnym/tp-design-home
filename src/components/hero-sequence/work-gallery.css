@@ -6,7 +6,8 @@
   /*
    * Rises through most of the hero scrub: the first tiles clear the fold
    * as the last shattered words leave the top — no empty screen between. Clips the
-   * sides and bottom so drift never paints into the team below; the top
+   * sides, and the bottom at the team's top edge so drift never paints into
+   * the team below; the top
    * stays open so fast tiles can rise out past the section edge instead
    * of being sliced as they leave (the hero is off screen by then).
    */
@@ -21,7 +22,9 @@
   z-index: 2;
   margin-top: calc(var(--hs-gallery-overlap-top) * -1);
   margin-bottom: var(--hs-gallery-gap-bottom);
-  clip-path: inset(-100vh 0 0 0);
+  /* The bottom edge opens by the gap below, so the camera zoom (tiles and the
+     slot scale outward) is not sliced at the stage's edge. */
+  clip-path: inset(-100vh 0 calc(var(--hs-gallery-gap-bottom) * -1) 0);
   pointer-events: none;
 }
 
@@ -219,68 +222,95 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Phone — Paper 6WC-0 (440 wide)                                      */
+/* Phone — Paper 1PW-0 (440 wide)                                      */
 /* ------------------------------------------------------------------ */
 
 /*
- * A new composition rather than a scaled desktop: the rows dissolve and the
- * tiles stack in one staggered column; PDP, the second logo, the green cart and
- * the light testimonial are dropped.
+ * A new composition rather than a scaled desktop: the rows dissolve and every
+ * tile is placed at its Paper offset on a 440 x 1311 stage (the second logo is
+ * dropped). Offsets are in 440ths of the stage width.
  */
 @media (max-width: 699px) {
+  /* Paper 1PW-0 leaves 127 of 440 below the last tile. */
+  .hs-gallery {
+    --hs-gallery-gap-bottom: 28.9vw;
+  }
+
   .hs-gallery__stage {
     --u: calc(100cqw / 440);
+
+    height: calc(1311 * var(--u));
   }
 
-  .hs-gallery__rows {
-    gap: calc(40 * var(--u));
-    padding-top: calc(40 * var(--u));
-  }
-
+  .hs-gallery__rows,
   .hs-gallery__row,
   .hs-gallery__col {
     display: contents;
   }
 
-  .hs-gallery__tile--pdp,
-  .hs-gallery__tile--logo-mid,
-  .hs-gallery__tile--cart-green,
-  .hs-gallery__tile--testimonial {
+  .hs-gallery__tile--logo-mid {
     display: none;
   }
 
-  /* Phone crops are baked with their frame color. */
+  .hs-gallery__tile,
+  .hs-gallery__slot {
+    position: absolute;
+  }
+
   .hs-gallery__tile--cart {
-    --w: 283;
-    --h: 375;
-    align-self: flex-end;
+    --w: 304;
+    --h: 266;
+    left: 0;
+    top: calc(106 * var(--u));
+  }
+
+  .hs-gallery__tile--testimonial {
+    --w: 109;
+    --h: 130;
+    right: 0;
+    top: 0;
   }
 
   .hs-gallery__tile--logo-top {
-    --w: 290;
-    --h: 357;
-    align-self: flex-start;
+    --w: 72;
+    --h: 96;
+    left: calc(24 * var(--u));
+    top: calc(364 * var(--u));
+  }
+
+  .hs-gallery__tile--pdp {
+    --w: 270;
+    --h: 275;
+    left: calc(139 * var(--u));
+    top: calc(382.5 * var(--u));
+  }
+
+  .hs-gallery__tile--carousel {
+    --w: 174;
+    --h: 168;
+    left: calc(40 * var(--u));
+    top: calc(668 * var(--u));
+  }
+
+  .hs-gallery__tile--cart-green {
+    --w: 203;
+    --h: 238;
+    right: 0;
+    top: calc(791 * var(--u));
   }
 
   .hs-gallery__tile--testimonial-tall {
-    --w: 150;
-    --h: 253;
-    align-self: flex-end;
-    margin-right: calc(30 * var(--u));
-  }
-
-  /* Bleeds past the right edge in Paper — keep the crop. */
-  .hs-gallery__tile--carousel {
-    --w: 367;
-    --h: 437;
-    align-self: flex-end;
-    margin-right: calc(-18 * var(--u));
+    --w: 125;
+    --h: 213;
+    left: calc(107 * var(--u));
+    top: calc(1053 * var(--u));
   }
 
   .hs-gallery__slot {
-    width: calc(300 * var(--u));
-    height: calc(401 * var(--u));
-    align-self: center;
+    width: calc(89 * var(--u));
+    height: calc(118 * var(--u));
+    left: calc(304 * var(--u));
+    top: calc(1193 * var(--u));
   }
 }
 

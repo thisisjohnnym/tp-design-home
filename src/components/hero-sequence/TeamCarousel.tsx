@@ -70,6 +70,11 @@ const LAG_RATE = 14;
    and whenever the traveler is standing in for the card. */
 const MAG_CARD = { x: 24, y: 18 };
 const MAG_NAMES = { x: 9, y: 6 };
+/* The dotted line (Paper 2IN-0: 5px dashes, 66.8px apart) rides the names'
+   travel at this share, so it trails them for depth. It is a repeating
+   pattern, so its offset wraps at one dash pitch. */
+const DOT_PITCH = 66.8;
+const DOT_PARALLAX = 0.35;
 /* A critically damped spring (no overshoot) so it starts and stops softly;
    ω in 1/s — 4.5 takes roughly 800ms to come to rest. */
 const MAG_OMEGA = 4.5;
@@ -92,16 +97,18 @@ export function TeamCarousel({
 }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const namesRef = useRef<HTMLDivElement>(null);
+  const dotsRef = useRef<HTMLDivElement>(null);
   const lagRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
     const stage = stageRef.current;
     const names = namesRef.current;
+    const dots = dotsRef.current;
     const lag = lagRef.current;
     const cards = cardRefs.current;
     const count = members.length;
-    if (!stage || !names || !lag || count === 0) return;
+    if (!stage || !names || !dots || !lag || count === 0) return;
 
     const root = document.documentElement;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -186,6 +193,10 @@ export function TeamCarousel({
         names.style.transform = `translate3d(${
           -nameCenter(pw) + s.mx * MAG_NAMES.x
         }px, ${s.my * MAG_NAMES.y}px, 0)`;
+        dots.style.transform = `translate3d(${mod(
+          -nameCenter(pw) * DOT_PARALLAX + s.mx * MAG_NAMES.x * 0.5,
+          DOT_PITCH,
+        )}px, 0, 0)`;
       }
       for (let i = 0; i < count; i += 1) {
         const card = cards[i];
@@ -364,6 +375,7 @@ export function TeamCarousel({
         /* Capture only once it is a drag, so a plain click still reaches the
            card's links. */
         s.dragging = true;
+        stage.setAttribute("data-dragged", "");
         s.pt = s.p;
         s.dragFrom = s.p;
         s.v = 0;
@@ -514,6 +526,7 @@ export function TeamCarousel({
       unhint();
       stage.removeAttribute("data-flying");
       stage.removeAttribute("data-dragging");
+      stage.removeAttribute("data-dragged");
     };
   }, [members]);
 
@@ -529,6 +542,9 @@ export function TeamCarousel({
           )),
         )}
       </div>
+
+      {/* Dotted line through the names: a drag hint that trails them. */}
+      <div className="hs-team__dots" ref={dotsRef} aria-hidden="true" />
 
       <div className="hs-team__lag" ref={lagRef}>
         <div className="hs-team__cards" aria-hidden="true">
@@ -579,6 +595,10 @@ export function TeamCarousel({
         {/* Where the traveler lands; same box as a card at rest. */}
         <div className="hs-team__slot" aria-hidden="true" />
       </div>
+
+      <p className="hs-team__hint" aria-hidden="true">
+        Drag left or right
+      </p>
     </div>
   );
 }
