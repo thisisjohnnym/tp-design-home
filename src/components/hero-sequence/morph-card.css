@@ -40,9 +40,33 @@
   background: var(--hs-morph-front, #fa241a);
 }
 
+/* The section title, bottom left (Paper 1Y8-0: 56px on a 359px card). */
+.hs-morph__side--front {
+  container-type: inline-size;
+}
+
+.hs-morph__title {
+  position: absolute;
+  bottom: 2.23cqi;
+  left: 2.23cqi;
+  color: #dfdfdf;
+  font-size: 15.6cqi;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  text-transform: capitalize;
+  white-space: pre;
+}
+
 /* The team card, pre-turned so the flip ends with it facing out. It alone
    fades at the handoff: the front is already turned away by then, and a face
    below full opacity stops honouring backface-visibility. */
+/* Landed, it must read as the carousel card it stands in for, which blurs the
+   names behind it. */
+.hs-morph__card[data-landed] .hs-morph__side--back {
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
 .hs-morph__side--back {
   opacity: var(--hs-morph-fade, 1);
   transform: rotateY(180deg);

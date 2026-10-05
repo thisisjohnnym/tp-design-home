@@ -362,8 +362,6 @@ export function HeroSequence() {
           allowMotion: "(prefers-reduced-motion: no-preference)",
         },
         (context) => {
-          const isMobile = Boolean(context.conditions?.isMobile);
-          const isTablet = Boolean(context.conditions?.isTablet);
           const reduceMotion = Boolean(context.conditions?.reduceMotion);
 
           /* The hero scrolls away with the page. Extra drift on top of that
@@ -439,10 +437,7 @@ export function HeroSequence() {
 
           const releaseTeam = debugOff.has("teamjs")
             ? () => {}
-            : bindTeamScene(root, {
-                reduceMotion,
-                layout: isMobile ? "phone" : isTablet ? "tablet" : "desktop",
-              });
+            : bindTeamScene(root);
 
           return () => {
             releaseTeam();

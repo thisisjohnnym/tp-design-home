@@ -135,8 +135,8 @@ export const heroSequenceCursorRoster = [
   },
   {
     id: "johnny",
-    name: "Jonathan Martinez",
-    given: "Jonathan",
+    name: "Johnny Martinez",
+    given: "Johnny",
     family: "Martinez",
     text: "white",
     role: "sr. product designer",
@@ -558,67 +558,66 @@ export const heroSequenceWorks = [
 export type HeroSequenceWork = (typeof heroSequenceWorks)[number];
 
 /**
- * Parallax collage before the team section (Paper 8BV-0 desktop, 6WC-0 phone).
- * `speed` drives scroll depth: under 1 lags (far), over 1 leads (near).
- * `phoneSpeed` overrides it on the phone stack.
- * Pixel sizes are 1× frame exports used for intrinsic aspect hints.
- * `mobileSrc` swaps in the phone frame's crop; tiles without one that the
- * phone layout drops are hidden in CSS.
+ * Parallax collage before the team section (Paper 1PW-0 desktop, 6WC-0 phone).
+ * `speed` drives scroll depth: under 1 lags (far), over 1 leads (near) — and the
+ * same number is how far the tile flies out when the camera zooms to the
+ * traveler card. `phoneSpeed` overrides it on the phone stack.
+ * Sources are 2× exports of the tile frames; `mobileSrc` swaps in the phone
+ * frame's crop. Tiles the phone layout drops are hidden in CSS.
  */
 export const heroSequenceWorkGallery = [
   {
     id: "pdp",
-    src: "/gallery/pdp.webp",
+    src: "/gallery/v2/pdp.webp",
     alt: "Kate Spade product detail page for a black shoulder bag",
     speed: 0.55,
-    pixelWidth: 883,
-    pixelHeight: 764,
   },
   {
     id: "carousel",
-    src: "/gallery/carousel.webp",
+    src: "/gallery/v2/carousel.webp",
     alt: "Yellow product feature carousel cards",
     speed: 0.8,
     phoneSpeed: 0.75,
-    pixelWidth: 367,
-    pixelHeight: 437,
+  },
+  {
+    id: "cart-green",
+    src: "/gallery/v2/cart-green.webp",
+    alt: "Kate Spade mobile cart on a green field",
+    speed: 1,
   },
   {
     id: "cart",
-    src: "/gallery/cart.webp",
+    src: "/gallery/v2/cart-blue.webp",
     mobileSrc: "/gallery/cart-mobile.webp",
     alt: "Kate Spade mobile cart with a rose smoke crossbody",
     speed: 1.15,
     phoneSpeed: 1.2,
-    pixelWidth: 736,
-    pixelHeight: 647,
   },
   {
-    id: "logo",
-    src: "/gallery/logo-c.webp",
+    id: "logo-top",
+    src: "/gallery/v2/logo-c.webp",
     mobileSrc: "/gallery/logo-c-mobile.webp",
     alt: "Gold Coach C hardware on sage leather",
     speed: 1.45,
     phoneSpeed: 1.5,
-    pixelWidth: 269,
-    pixelHeight: 357,
+  },
+  {
+    id: "logo-mid",
+    src: "/gallery/v2/logo-c.webp",
+    alt: "Gold Coach C hardware on sage leather",
+    speed: 1.3,
   },
   {
     id: "testimonial",
-    src: "/gallery/testimonial.webp",
+    src: "/gallery/v2/testimonial-light.webp",
     alt: "Customer testimonials mobile screen",
     speed: 1.6,
-    pixelWidth: 261,
-    pixelHeight: 344,
   },
   {
-    id: "lifestyle",
-    src: "/gallery/lifestyle.webp",
-    mobileSrc: "/gallery/lifestyle-mobile.webp",
-    alt: "Model wearing a pink kate spade crossbody",
+    id: "testimonial-tall",
+    src: "/gallery/v2/testimonial-tall.webp",
+    alt: "Customer testimonials mobile screen on a light field",
     speed: 1.9,
     phoneSpeed: 1.85,
-    pixelWidth: 139,
-    pixelHeight: 437,
   },
 ] as const;

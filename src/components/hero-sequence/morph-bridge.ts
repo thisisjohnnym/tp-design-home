@@ -1,29 +1,23 @@
 /**
- * Shared state between the gallery's traveler card (MorphCard.tsx, DOM) and the
- * team ring (team-ring/RingScene.tsx, WebGL). Both run their own frame loops,
- * so they meet through this module instead of props. Single instance only.
+ * Shared state between the gallery's traveler card (MorphCard.tsx) and the
+ * team carousel (TeamCarousel.tsx). Both run their own frame loops, so they
+ * meet through this module instead of props. Single instance only.
  */
 export const morphBridge = {
-  /** The traveler is engaged. False (reduced motion, no gallery slot) leaves the ring untouched. */
+  /** The traveler is engaged. False (reduced motion, no gallery slot) leaves the carousel untouched. */
   active: false,
-  /** Ring slot that receives the traveler: the card nearest the front when it left. */
+  /** Member the traveler shows. Written by the carousel while flying and once the cards have taken over. */
   index: 0,
-  /** Traveler still in flight: the ring holds that slot at the front and hides its card. */
-  hold: false,
-  /** The ring has its traveler card exactly at the front (written by the ring each frame). */
-  aligned: true,
-  /** The traveler has landed (flight complete); the ring may be in its settle stretch. */
-  landed: false,
+  /** Flight progress, 0 → 1, written by the traveler. The carousel scrolls one name in with it. */
+  progress: 1,
+  /** The flight is complete: the traveler sits on the card slot and the carousel may be dragged. */
+  landed: true,
   /**
-   * How far past the landing the page has scrolled, 0 → 1. Over this stretch
-   * the ring is still pinned to the landed card and lets go gradually.
+   * The carousel's own cards have replaced the traveler. Until then the
+   * traveler IS the centre card and follows `out`; the carousel takes over
+   * only once a drag has carried that card out of sight, so the swap is never seen.
    */
-  past: 1,
-  /** 0 → ring card hidden, traveler shown · 1 → ring card shown, traveler gone. Never in between. */
-  arrive: 1,
-  /**
-   * Where the ring's front card sits right now, in CSS px from the canvas's
-   * top-left. Written by the ring each frame; the traveler lands on it.
-   */
-  slot: { valid: false, cx: 0, cy: 0, w: 0, h: 0 },
+  handoff: true,
+  /** Where the carousel wants the traveler's card while it stands in: slide (px), turn (deg), opacity. */
+  out: { x: 0, turn: 0, o: 1 },
 };
