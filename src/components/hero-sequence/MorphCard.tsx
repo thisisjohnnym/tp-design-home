@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { heroSequenceCursorRoster } from "./content";
 import { morphBridge } from "./morph-bridge";
-import { paintCardFace } from "./team-ring/cardTexture";
+import { paintCardFace } from "./team-card-face";
 import {
   DRIFT_HEIGHT_CAP,
   DRIFT_HEIGHT_CAP_PHONE,
@@ -18,33 +18,29 @@ import "./morph-card.css";
  * slot of the collage (WorkGallery's `.hs-gallery__slot`), drifts with the
  * parallax like its neighbours, then — as the team ring scrolls in — leaves the
  * collage on an S-shaped path, flips over to show a team card, and lands on the
- * ring's front card, which takes over.
+ * team carousel's card slot, where the carousel's own card takes over.
  *
- * Everything is scrubbed by the ring's own scroll-in progress (the same
- * 0 → 1 that tilts its camera), so the flip finishes exactly when the ring is
- * fully in view. The traveler is a DOM card because it has to cross the gallery
- * (which clips) into the team section; the ring is a canvas that can't draw
- * outside its box.
+ * Everything is scrubbed by scroll, so the flip finishes exactly when the team
+ * section is fully in view. The carousel scrolls one name in on the same
+ * progress (morphBridge.progress). The traveler lives outside both sections
+ * because it has to cross the gallery (which clips) into the team section.
  */
 
 /* Parallax speed while still part of the collage (>1 leads, like the cart). */
 const TRAVELER_SPEED = 1.2;
 /* The flight runs while the section's top travels from the viewport's bottom
-   edge to this far above the viewport top (in viewport heights) — the point
-   where the ring reads as fully in view. Longer than the ring's own camera
-   scroll-in (TeamRing's IntroProbe), which is settled well before it. */
-const FLIGHT_END = -0.15;
+   edge to this far below the viewport top (in viewport heights) — roughly where
+   the names sit mid-screen — so the card has landed, and the carousel is live,
+   before the section is fully in view. */
+const FLIGHT_END = 0.21;
 const INTRO_SPAN = 1 - FLIGHT_END;
-/* Scroll distance past the landing, in viewport heights, over which the ring
-   lets go of the landed card — and, scrolling back, glides home to it. */
-const SETTLE_SPAN = 0.5;
-/* How fast the card rushes to catch up with the scroll after waiting for the ring (1/s). */
-const CATCH_UP_RATE = 7;
 /* Sideways swing of the S, as a share of viewport width. */
 const S_AMPLITUDE = 0.2;
 /* Peak lift toward the viewer mid-flip, px of perspective depth. */
 const LIFT = 150;
 const PERSPECTIVE = 1400;
+/* Each half of the back-up swap: cards fade out, then the traveler fades in. */
+const DIP_MS = 150;
 /* The member card's corner radius, from the card design (16 of 324). */
 const CARD_RADIUS = 16 / 324;
 /* Red placeholder; swap for artwork. Square corners, as in the Paper frame. */
@@ -79,31 +75,26 @@ export function MorphCard() {
     const phone = window.matchMedia(GALLERY_PHONE_QUERY);
     const slotEl = document.querySelector<HTMLElement>(".hs-gallery__slot");
     const sceneEl = document.querySelector<HTMLElement>(".hs-team__scene");
-    if (!slotEl || !sceneEl || reduceMotion.matches) return;
+    const landEl = document.querySelector<HTMLElement>(".hs-team__slot");
+    if (!slotEl || !sceneEl || !landEl || reduceMotion.matches) return;
 
-    /* Back face shows whichever member the ring hands the traveler (the card
-       nearest the front when it left); repainted when that changes, which only
+    /* Back face shows whichever member the carousel hands the traveler (its
+       current card when it left); repainted when that changes, which only
        happens while the traveler is gone. */
     let painted = morphBridge.index;
     let stopPaint = paintCardFace(heroSequenceCursorRoster[painted], face);
 
     morphBridge.active = true;
+    let wasLanded = false;
+    let dipAt = -Infinity;
 
-    /* Flight progress the card actually shows. Normally the scroll's own
-       (scrubbed); but leaving the landing before the ring has parked its card
-       at the front (the visitor dragged it) the card waits, as the ring's own
-       card, until it is parked, then rushes to catch up with the scroll. */
-    let shown = 0;
-    let catching = false;
-
-    const tick = (_time: number, deltaMs: number) => {
-      const dt = Math.min(deltaMs, 50) / 1000;
+    const tick = () => {
       const vh = window.innerHeight;
       const vw = window.innerWidth;
       const scene = sceneEl.getBoundingClientRect();
+      const land = landEl.getBoundingClientRect();
       const home = slotEl.getBoundingClientRect();
       const layerBox = layer.getBoundingClientRect();
-      const slot = morphBridge.slot;
 
       if (morphBridge.index !== painted) {
         painted = morphBridge.index;
@@ -111,38 +102,29 @@ export function MorphCard() {
         stopPaint = paintCardFace(heroSequenceCursorRoster[painted], face);
       }
 
-      /* Scroll-in progress, as the ring computes it. Held at 0 until the ring
-         has reported where its front card is. */
-      const scroll = slot.valid
-        ? clamp01((vh - scene.top) / (vh * INTRO_SPAN))
-        : 0;
-      if (scroll >= shown) {
-        shown = scroll;
-        catching = false;
-      } else {
-        if (!catching && shown >= 0.999 && !morphBridge.aligned) catching = true;
-        if (!catching) {
-          shown = scroll;
-        } else if (shown < 0.999 || morphBridge.aligned) {
-          shown += (scroll - shown) * (1 - Math.exp(-dt * CATCH_UP_RATE));
-          if (shown - scroll < 0.004) {
-            shown = scroll;
-            catching = false;
-          }
-        }
+      /* The section's top travels from the viewport's bottom edge (0) to
+         FLIGHT_END below the top (1). */
+      const u = clamp01((vh - scene.top) / (vh * INTRO_SPAN));
+      /* The traveler stays as the card once landed. The carousel's own card
+         replaces it only after the visitor moves — scrolling on past the
+         section's top, or pressing the carousel — so the swap hides in motion.
+         A hard swap, never a crossfade: both are translucent glass, so any
+         overlap shows as a ghost. */
+      const landed = u >= 0.998;
+      /* Scrolling back up after the cards took over: they fade out first, then
+         the traveler fades in, one after the other so they never overlap. */
+      if (!landed && wasLanded && morphBridge.handoff)
+        dipAt = performance.now();
+      if (!landed) {
+        morphBridge.handoff = false;
+        /* Start from rest, not from wherever the last drag left the card. */
+        Object.assign(morphBridge.out, { x: 0, turn: 0, o: 1 });
       }
-      const u = shown;
-      /* A hard swap, never a crossfade: both cards are translucent glass, so
-         any overlap shows as a ghost. The ring is exactly on the landing spot
-         by now, so the swap is invisible. */
-      const arrive = u >= 0.998 ? 1 : 0;
-      const past = slot.valid
-        ? clamp01((FLIGHT_END * vh - scene.top) / (SETTLE_SPAN * vh))
-        : 0;
-      morphBridge.landed = scroll >= 0.999;
-      morphBridge.past = past;
-      morphBridge.hold = scroll < 0.999 || past < 1;
-      morphBridge.arrive = arrive;
+      wasLanded = landed;
+      const dip = clamp01((performance.now() - dipAt - DIP_MS) / DIP_MS);
+      const arrive = landed && morphBridge.handoff ? 1 : 0;
+      morphBridge.progress = u;
+      morphBridge.landed = landed;
 
       /* Start: the collage slot plus the drift a gallery tile would have there. */
       const runway = Math.min(
@@ -155,9 +137,9 @@ export function MorphCard() {
       const x0 = home.left + home.width / 2;
       const y0 = home.top + home.height / 2 + lerp(drift, -drift, pass);
 
-      /* End: the ring's front card (canvas-local → viewport). */
-      const x3 = scene.left + slot.cx;
-      const y3 = scene.top + slot.cy;
+      /* End: the carousel's card slot. */
+      const x3 = land.left + land.width / 2;
+      const y3 = land.top + land.height / 2;
 
       const s = ease(u);
       const dx = x3 - x0;
@@ -165,12 +147,16 @@ export function MorphCard() {
       /* Swing away from the target first, then across it: an S. */
       const side = dx <= 0 ? 1 : -1;
       const swing = vw * S_AMPLITUDE * side;
-      const x = bezier(x0, x0 + swing, x3 - swing * 0.9, x3, s);
+      /* Landed and still standing in for the card: follow the drag. */
+      const hold = landed && !morphBridge.handoff;
+      const out = morphBridge.out;
+      const x =
+        bezier(x0, x0 + swing, x3 - swing * 0.9, x3, s) + (hold ? out.x : 0);
       const y = bezier(y0, y0 + dy * 0.3, y0 + dy * 0.72, y3, s);
 
-      const w = lerp(home.width, slot.w || home.width, s);
-      const h = lerp(home.height, slot.h || home.height, s);
-      const radius = lerp(RED_RADIUS, CARD_RADIUS * (slot.w || w), s);
+      const w = lerp(home.width, land.width, s);
+      const h = lerp(home.height, land.height, s);
+      const radius = lerp(RED_RADIUS, CARD_RADIUS * land.width, s);
 
       /* Flip is the same scrub as the position, so it lands face-up with the
          card; the sway rides the S and settles flat. */
@@ -179,8 +165,7 @@ export function MorphCard() {
       const lift = LIFT * Math.sin(Math.PI * s);
 
       /* Skip the paint while it is nowhere near the viewport. */
-      const onScreen =
-        arrive < 1 && y + h > -vh * 0.5 && y - h < vh * 1.5;
+      const onScreen = arrive < 1 && y + h > -vh * 0.5 && y - h < vh * 1.5;
       card.style.visibility = onScreen ? "visible" : "hidden";
       if (!onScreen) {
         /* Faces set their own visibility below, which beats the card's. */
@@ -197,10 +182,14 @@ export function MorphCard() {
       card.style.width = `${w}px`;
       card.style.height = `${h}px`;
       card.style.borderRadius = `${radius}px`;
-      card.style.setProperty("--hs-morph-fade", String(1 - arrive));
+      card.toggleAttribute("data-landed", landed);
+      card.style.setProperty(
+        "--hs-morph-fade",
+        String((hold ? out.o : 1) * dip),
+      );
       card.style.transform = `translate3d(${x - w / 2 - layerBox.left}px, ${
         y - h / 2 - layerBox.top
-      }px, 0) perspective(${PERSPECTIVE}px) translateZ(${lift}px) rotateZ(${sway}deg) rotateY(${flip}deg)`;
+      }px, 0) perspective(${PERSPECTIVE}px) translateZ(${lift}px) rotateZ(${sway}deg) rotateY(${flip + (hold ? out.turn : 0)}deg)`;
     };
 
     gsap.ticker.add(tick);
@@ -208,18 +197,25 @@ export function MorphCard() {
       gsap.ticker.remove(tick);
       stopPaint();
       morphBridge.active = false;
-      morphBridge.hold = false;
-      morphBridge.arrive = 1;
+      morphBridge.progress = 1;
+      morphBridge.landed = true;
+      morphBridge.handoff = true;
     };
   }, []);
 
   return (
     <div className="hs-morph" ref={layerRef} aria-hidden="true">
       <div className="hs-morph__card" ref={cardRef}>
-        <div
-          className="hs-morph__side hs-morph__side--front"
-          ref={frontRef}
-        />
+        <div className="hs-morph__side hs-morph__side--front" ref={frontRef}>
+          {/* The section's title, set on the card (the real heading is in the gallery). */}
+          <span className="hs-morph__title">
+            Meet the
+            <br />
+            people behind
+            <br />
+            the work
+          </span>
+        </div>
         <canvas className="hs-morph__side hs-morph__side--back" ref={faceRef} />
       </div>
     </div>

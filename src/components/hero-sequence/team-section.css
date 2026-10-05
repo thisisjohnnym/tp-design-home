@@ -1,133 +1,233 @@
-/* Team section: the WebGL card ring (team-ring/TeamRing.tsx) between the two
-   sphere artworks, with the headline in the gap between the ring's front and
-   back rows. One screen tall and never pinned, so scrolling passes through. */
+/* Team section: giant first names behind one glass member card, dragged
+   sideways (TeamCarousel.tsx). Paper 1CY-0 (1512×982). One screen tall and
+   never pinned, so vertical scrolling passes straight through. */
 
 .hs-team {
-  /* Extra scene height beyond one screen: the ring is fitted to its container,
-     so a taller one lets the ring and cards grow. Margins below give it back. */
-  --hs-team-extra: 25svh;
   position: relative;
   z-index: 1;
-  /* The sphere art runs past the sides; keep it from widening the page. */
+  /* The names run past the sides; keep them from widening the page. */
   overflow-x: clip;
   background: transparent;
-  /* Tighten the gap to the work gallery above (~170px at 1440 wide) and give
-     the services below the same clearance from the front cards. */
-  margin-top: calc(-12vw - var(--hs-team-extra) / 2);
-  margin-bottom: calc(10vw - var(--hs-team-extra) / 2);
 }
 
 .hs-team__scene {
   position: relative;
-  height: calc(100svh + var(--hs-team-extra));
+  height: 100svh;
   min-height: 640px;
   overflow: visible;
 }
 
-/* Off screen, hide the scene so its sphere layers drop their backing stores.
-   !important beats the inline visibility GSAP writes. */
+/* Off screen, hide the scene. !important beats any inline visibility. */
 .hs-team[data-offstage] .hs-team__scene {
   visibility: hidden !important;
 }
 
-/* Stacking: lead sphere 1 · ring 2 · headline 3 · accent sphere 4. */
-.hs-team__orbs {
+.hs-team__heading {
   position: absolute;
-  z-index: 1;
-  inset: 0;
-  overflow: visible;
-  pointer-events: none;
-  -webkit-user-select: none;
-  user-select: none;
-  visibility: hidden;
-}
-
-.hs-team__orbs--front {
-  z-index: 4;
-}
-
-.hs-team__orb {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin: 0;
-  pointer-events: none;
-  will-change: transform;
-}
-
-/* Full export frames at 1× — lead 801×798, accent 1104×989. */
-/* --hs-orb-art (set per layout in team-scene.ts) shrinks the rendered box;
-   the scale grows by the same factor, so the on-screen size is unchanged. */
-.hs-team__orb--lead {
-  width: calc(801px * var(--hs-orb-art, 1));
-  height: calc(798px * var(--hs-orb-art, 1));
-}
-
-.hs-team__orb--accent {
-  width: calc(1104px * var(--hs-orb-art, 1));
-  height: calc(989px * var(--hs-orb-art, 1));
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 .hs-team__stage {
   position: absolute;
-  z-index: 2;
   inset: 0;
+  overflow: clip;
   cursor: grab;
-  /* Sideways drags spin the ring; vertical swipes still scroll the page. */
+  /* Sideways drags move the carousel; vertical swipes still scroll the page. */
   touch-action: pan-y;
   -webkit-user-select: none;
   user-select: none;
 }
 
-.hs-team__stage:active {
+.hs-team__stage[data-dragging] {
   cursor: grabbing;
 }
 
-.hs-team__canvas {
-  position: absolute !important;
-  inset: 0;
-}
+/* ---- Names ---------------------------------------------------------- */
 
-/* Sits in the gap between the ring's back row and its front cards; the
-   ring's tilt (team-scene-tuning.ts) sets how big that gap is. */
-.hs-team__title {
+/* The strip's centre is its own left edge; the script slides it so the current
+   name's centre sits here, behind the card. */
+.hs-team__names {
   position: absolute;
-  z-index: 3;
-  top: 40%;
+  z-index: 1;
+  top: 50%;
   left: 50%;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  margin: 0;
-  color: var(--hs-light);
-  font-size: clamp(40px, 5.3vw, 80px);
+  gap: 0.37em;
+  color: #dfdfdf;
+  font-size: clamp(120px, 17.2vw, 360px);
   font-weight: 400;
   letter-spacing: -0.04em;
-  line-height: 0.8;
-  text-align: center;
+  line-height: 1;
   pointer-events: none;
-  translate: -50% -50%;
-  white-space: nowrap;
-  /* On the way back the headline waits for the ring to settle (delay), then fades in. */
-  transition:
-    opacity 0.6s cubic-bezier(0.33, 1, 0.68, 1) 1.2s,
-    filter 0.6s cubic-bezier(0.33, 1, 0.68, 1) 1.2s;
+  translate: 0 -50%;
+  white-space: pre;
+  will-change: transform;
 }
 
-/* A card is focused (team-ring/TeamRing.tsx): clear the headline out of its way. */
-.hs-team[data-focused] .hs-team__title {
+.hs-team__name {
+  flex: none;
+}
+
+/* ---- Cards ---------------------------------------------------------- */
+
+.hs-team__cards {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* While the gallery traveler is in flight the cards are out of the way: a
+   quick fade, which is also the first half of the back-up swap. */
+/* Carries the cards and the landing slot, so the scroll lag moves them as one. */
+.hs-team__lag {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.hs-team__cards {
+  transition: opacity 150ms linear;
+}
+
+.hs-team__stage[data-flying] .hs-team__cards {
   opacity: 0;
-  filter: blur(12px);
-  transition-delay: 0s;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .hs-team__title {
-    transition-duration: 0.01s;
-  }
+/* The slot and the cards share one box: 324×513 at 1512 wide. */
+.hs-team__slot,
+.hs-team__card {
+  --hs-card-w: clamp(264px, 21.43vw, 420px);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--hs-card-w);
+  aspect-ratio: 324 / 513;
+  translate: -50% -50%;
 }
 
-/* Screen-reader roster. It comes into view when a keyboard user tabs into it. */
+.hs-team__slot {
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.hs-team__card {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--hs-card-w) * 0.037);
+  box-sizing: border-box;
+  padding: calc(var(--hs-card-w) * 0.037);
+  overflow: clip;
+  container-type: inline-size;
+  color: #fff;
+  background: rgb(177 177 177 / 10%);
+  border-radius: calc(var(--hs-card-w) * 0.0494);
+  outline: 1px solid rgb(255 255 255 / 14%);
+  outline-offset: -1px;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  transform-origin: 50% 50%;
+  visibility: hidden;
+  will-change: transform, opacity;
+}
+
+.hs-team__portrait {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: clip;
+  background: #1a1a1a;
+  border-radius: 1.85cqi;
+}
+
+.hs-team__photo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  -webkit-user-drag: none;
+}
+
+/* 30% black wash under the type. */
+.hs-team__portrait::before {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 30%);
+  content: "";
+}
+
+.hs-team__meta,
+.hs-team__links {
+  position: absolute;
+  right: 3.7cqi;
+  left: 3.7cqi;
+  display: flex;
+  justify-content: space-between;
+  font-size: 2.47cqi;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.hs-team__meta {
+  top: 3.7cqi;
+}
+
+.hs-team__links {
+  bottom: 3.7cqi;
+}
+
+.hs-team__links a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.35em;
+}
+
+.hs-team__given,
+.hs-team__family {
+  position: absolute;
+  right: 3.7cqi;
+  left: 3.7cqi;
+  margin: 0;
+  font-size: 14.81cqi;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  white-space: nowrap;
+}
+
+.hs-team__given {
+  top: 10.5cqi;
+}
+
+.hs-team__family {
+  top: 25cqi;
+  text-align: right;
+}
+
+.hs-team__bio {
+  flex: none;
+  margin: 0;
+  font-size: 4.94cqi;
+  letter-spacing: -0.04em;
+  line-height: 1.07;
+  text-wrap: pretty;
+}
+
+/* ---- Screen-reader roster ------------------------------------------- */
+
+/* It comes into view when a keyboard user tabs into it. */
 .hs-team__roster {
   position: absolute;
   width: 1px;
@@ -170,10 +270,14 @@
   outline-offset: 2px;
 }
 
-/* Phone — Paper 8MK-0 (440×956). */
+/* Phone: a narrower pitch so the names still trail the card. */
 @media (max-width: 699px) {
-  .hs-team__title {
-    font-size: 11.82vw;
-    line-height: 1;
+  .hs-team__names {
+    font-size: 16vw;
+  }
+
+  .hs-team__slot,
+  .hs-team__card {
+    --hs-card-w: min(78vw, 340px);
   }
 }

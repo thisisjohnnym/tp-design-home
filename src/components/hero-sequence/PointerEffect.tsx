@@ -134,7 +134,9 @@ export function PointerEffect() {
 
   return createPortal(
     <div aria-hidden="true" className="hs-pointer">
-      <div className="hs-pointer__dot" ref={dotRef} />
+      <div className="hs-pointer__dot" ref={dotRef}>
+        <span className="hs-pointer__label">Drag</span>
+      </div>
       <div className="hs-pointer__arrow" ref={arrowRef}>
         {/* Mac-style pointer — black rim + white face, tip at ~0,0 of the box. */}
         <svg

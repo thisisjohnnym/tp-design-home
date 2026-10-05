@@ -25,19 +25,120 @@
   pointer-events: none;
 }
 
+.hs-gallery__heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .hs-gallery__stage {
   --u: calc(100cqw / 1512);
 
   position: relative;
-  width: 100%;
-  /* Tiles end ~1405, the traveler slot ~1895; the tail leaves room to drift. */
-  aspect-ratio: 1512 / 1960;
+  width: min(100%, 1820px);
+  margin-inline: auto;
   container-type: inline-size;
 }
 
+/* Paper 1PW-0: three flex rows in a column. Rows and columns stay unpositioned
+   so the stage is every tile's offset parent (the camera zoom reads it). */
+.hs-gallery__rows {
+  display: flex;
+  flex-direction: column;
+  gap: calc(50 * var(--u));
+}
+
+.hs-gallery__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hs-gallery__row--one {
+  height: calc(823 * var(--u));
+}
+
+.hs-gallery__row--three {
+  height: calc(871 * var(--u));
+  padding-left: calc(64 * var(--u));
+}
+
+.hs-gallery__col {
+  display: flex;
+}
+
+/* Row one */
+.hs-gallery__col--logo-top {
+  flex-direction: column;
+  justify-content: flex-end;
+  align-self: stretch;
+  width: calc(269 * var(--u));
+}
+
+.hs-gallery__col--testimonial {
+  align-items: flex-start;
+  justify-content: flex-end;
+  align-self: stretch;
+  width: calc(290 * var(--u));
+}
+
+/* Row two */
+.hs-gallery__col--pdp {
+  align-items: flex-start;
+  padding-top: calc(72 * var(--u));
+}
+
+.hs-gallery__col--stack {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: calc(135 * var(--u));
+  width: calc(685 * var(--u));
+}
+
+.hs-gallery__col--carousel {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  padding-left: calc(72 * var(--u));
+}
+
+/* Row three */
+.hs-gallery__col--cart-green {
+  flex-direction: column;
+  align-self: flex-start;
+  width: calc(551 * var(--u));
+  padding-top: calc(64 * var(--u));
+}
+
+.hs-gallery__col--slot {
+  align-items: flex-end;
+  justify-content: center;
+  align-self: stretch;
+  width: calc(359 * var(--u));
+}
+
+.hs-gallery__col--tall {
+  align-items: flex-start;
+  justify-content: flex-end;
+  align-self: stretch;
+  width: calc(290 * var(--u));
+}
+
 .hs-gallery__tile {
-  position: absolute;
+  --w: 0;
+  --h: 0;
+
+  position: relative;
   z-index: 1;
+  flex: none;
+  width: calc(var(--w) * var(--u));
+  height: calc(var(--h) * var(--u));
   margin: 0;
   /* The frame holds its size; the settle-in zoom happens inside the clip,
      so tiles never grow into their neighbours. */
@@ -64,84 +165,54 @@
   -webkit-user-drag: none;
 }
 
-/* MTA line colors. */
+/* Tile frames (Paper 1PW-0), in 1512ths. Nearer tiles stack higher. */
 .hs-gallery__tile--pdp {
-  --hs-gallery-tile-bg: #fccc0a; /* N Q R */
-}
-
-.hs-gallery__tile--cart {
-  --hs-gallery-tile-bg: #0039a6; /* A C E */
-}
-
-.hs-gallery__tile--carousel {
-  --hs-gallery-tile-bg: #00933c; /* 4 5 6 */
-}
-
-.hs-gallery__tile--testimonial {
-  --hs-gallery-tile-bg: #996633; /* J Z */
-}
-
-/*
- * Most tiles that share a column are spaced by their relative drift so
- * they stay apart. A few pairs are set closer on purpose: the nearer
- * (faster, higher z-index) tile slides over the farther one — cart over
- * PDP, logo over PDP's corner, lifestyle over the carousel.
- * Slow tiles start high, so fast ones take the top edge.
- */
-
-.hs-gallery__tile--testimonial {
-  top: calc(0 * var(--u));
-  left: calc(1150 * var(--u));
-  z-index: 5;
-  width: calc(262 * var(--u));
-  height: calc(345 * var(--u));
-}
-
-.hs-gallery__tile--cart {
-  top: calc(40 * var(--u));
-  left: calc(400 * var(--u));
-  z-index: 3;
-  width: calc(620 * var(--u));
-  height: calc(545 * var(--u));
-}
-
-.hs-gallery__tile--logo {
-  top: calc(380 * var(--u));
-  left: calc(60 * var(--u));
-  z-index: 4;
-  width: calc(250 * var(--u));
-  height: calc(332 * var(--u));
-}
-
-.hs-gallery__tile--lifestyle {
-  top: calc(470 * var(--u));
-  left: calc(1270 * var(--u));
-  z-index: 6;
-  width: calc(150 * var(--u));
-  height: calc(472 * var(--u));
-}
-
-.hs-gallery__tile--pdp {
-  top: calc(700 * var(--u));
-  left: calc(240 * var(--u));
+  --w: 750;
+  --h: 764;
   z-index: 1;
-  width: calc(720 * var(--u));
-  height: calc(623 * var(--u));
 }
 
 .hs-gallery__tile--carousel {
-  top: calc(1000 * var(--u));
-  left: calc(1020 * var(--u));
+  --w: 454;
+  --h: 437;
   z-index: 2;
-  width: calc(340 * var(--u));
-  height: calc(405 * var(--u));
 }
 
-/* Geometry only — the traveler card is drawn by MorphCard (Paper WU-0, red). */
+.hs-gallery__tile--cart-green {
+  --w: 551;
+  --h: 647;
+  z-index: 3;
+}
+
+.hs-gallery__tile--cart {
+  --w: 736;
+  --h: 647;
+  z-index: 3;
+}
+
+.hs-gallery__tile--logo-top,
+.hs-gallery__tile--logo-mid {
+  --w: 269;
+  --h: 357;
+  z-index: 4;
+}
+
+.hs-gallery__tile--testimonial {
+  --w: 290;
+  --h: 344;
+  z-index: 5;
+}
+
+.hs-gallery__tile--testimonial-tall {
+  --w: 290;
+  --h: 490;
+  z-index: 6;
+}
+
+/* The traveler card's home (MorphCard.tsx draws the card). */
 .hs-gallery__slot {
-  position: absolute;
-  top: calc(1415 * var(--u));
-  left: calc(827 * var(--u));
+  position: relative;
+  flex: none;
   width: calc(359 * var(--u));
   height: calc(480 * var(--u));
   visibility: hidden;
@@ -152,56 +223,64 @@
 /* ------------------------------------------------------------------ */
 
 /*
- * A new composition rather than a scaled desktop: four tiles stacked
- * down a tall stage, PDP + testimonial dropped.
+ * A new composition rather than a scaled desktop: the rows dissolve and the
+ * tiles stack in one staggered column; PDP, the second logo, the green cart and
+ * the light testimonial are dropped.
  */
 @media (max-width: 699px) {
   .hs-gallery__stage {
     --u: calc(100cqw / 440);
-
-    aspect-ratio: 440 / 1900;
   }
 
-  .hs-gallery__slot {
-    top: calc(1430 * var(--u));
-    left: calc(70 * var(--u));
-    width: calc(300 * var(--u));
-    height: calc(401 * var(--u));
+  .hs-gallery__rows {
+    gap: calc(40 * var(--u));
+    padding-top: calc(40 * var(--u));
+  }
+
+  .hs-gallery__row,
+  .hs-gallery__col {
+    display: contents;
   }
 
   .hs-gallery__tile--pdp,
+  .hs-gallery__tile--logo-mid,
+  .hs-gallery__tile--cart-green,
   .hs-gallery__tile--testimonial {
     display: none;
   }
 
-  /* Phone crops are baked with their frame color; no tile fill needed. */
+  /* Phone crops are baked with their frame color. */
   .hs-gallery__tile--cart {
-    top: calc(40 * var(--u));
-    left: calc(157 * var(--u));
-    width: calc(283 * var(--u));
-    height: calc(375 * var(--u));
+    --w: 283;
+    --h: 375;
+    align-self: flex-end;
   }
 
-  .hs-gallery__tile--logo {
-    top: calc(420 * var(--u));
-    left: 0;
-    width: calc(290 * var(--u));
-    height: calc(357 * var(--u));
+  .hs-gallery__tile--logo-top {
+    --w: 290;
+    --h: 357;
+    align-self: flex-start;
   }
 
-  .hs-gallery__tile--lifestyle {
-    top: calc(680 * var(--u));
-    left: calc(357 * var(--u));
-    width: calc(83 * var(--u));
-    height: calc(261 * var(--u));
+  .hs-gallery__tile--testimonial-tall {
+    --w: 150;
+    --h: 253;
+    align-self: flex-end;
+    margin-right: calc(30 * var(--u));
   }
 
-  /* Bleeds 18/440 past the right edge in Paper — keep the crop. */
+  /* Bleeds past the right edge in Paper — keep the crop. */
   .hs-gallery__tile--carousel {
-    top: calc(950 * var(--u));
-    left: calc(91 * var(--u));
-    width: calc(367 * var(--u));
-    height: calc(437 * var(--u));
+    --w: 367;
+    --h: 437;
+    align-self: flex-end;
+    margin-right: calc(-18 * var(--u));
+  }
+
+  .hs-gallery__slot {
+    width: calc(300 * var(--u));
+    height: calc(401 * var(--u));
+    align-self: center;
   }
 }
 
