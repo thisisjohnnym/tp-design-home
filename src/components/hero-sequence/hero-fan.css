@@ -118,13 +118,22 @@
   background-size: cover;
 }
 
+/*
+ * Phone: the fan lives in the band between the nav and the headline, never over
+ * either. The headline is four rows of 17.73vw at 0.95 leading, 16px off the
+ * bottom; the fan's tilted footprint is about 2.42 card widths tall, 1.03 of
+ * them above the stage anchor. The cards shrink to fit short screens, and the
+ * anchor centres what is left over.
+ */
 @media (max-width: 699px) {
   .hs-fan {
-    --fan-card-w: 46vw;
+    /* Band height: viewport − nav (54) − gaps (24) − headline (16 + 67.4vw). */
+    --fan-avail: calc(100svh - 94px - 67.4vw);
+    --fan-card-w: max(96px, min(46vw, calc(var(--fan-avail) / 2.42)));
   }
 
   .hs-fan__stage {
-    top: 35%;
+    top: calc(54px + var(--fan-avail) / 2 - 0.18 * var(--fan-card-w));
     left: 60%;
   }
 }

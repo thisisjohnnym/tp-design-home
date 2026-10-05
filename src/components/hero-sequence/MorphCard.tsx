@@ -9,6 +9,7 @@ import {
   DRIFT_HEIGHT_CAP,
   DRIFT_HEIGHT_CAP_PHONE,
   GALLERY_PHONE_QUERY,
+  FLIGHT_END,
   PARALLAX_DEPTH,
 } from "./WorkGallery";
 import "./morph-card.css";
@@ -32,7 +33,6 @@ const TRAVELER_SPEED = 1.2;
    edge to this far below the viewport top (in viewport heights) — roughly where
    the names sit mid-screen — so the card has landed, and the carousel is live,
    before the section is fully in view. */
-const FLIGHT_END = 0.21;
 const INTRO_SPAN = 1 - FLIGHT_END;
 /* Sideways swing of the S, as a share of viewport width. */
 const S_AMPLITUDE = 0.2;

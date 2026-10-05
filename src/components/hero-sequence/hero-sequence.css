@@ -326,6 +326,12 @@
   color: var(--hs-logo-bloom);
 }
 
+/* Phone menu controls (Paper 8IP-0 / A3U-0); the desktop has plain links. */
+.hs-nav__menu,
+.hs-nav__close {
+  display: none;
+}
+
 /* Plain text links (Paper 81I-0): 16px, light, right-aligned. */
 .hs-nav__links {
   display: flex;
@@ -1157,7 +1163,7 @@
     column-gap: 0.22em;
     padding-block: 0;
     font-size: var(--hs-display);
-    line-height: 1.1;
+    line-height: 0.95;
   }
 
   .hs-shatter__line {
@@ -1170,7 +1176,11 @@
     height: 0;
   }
 
+  /* Paper 8IP-0: logo left, "Menu" right, on 24px gutters. */
   .hs-nav {
+    top: 24px;
+    right: 24px;
+    left: 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1180,21 +1190,99 @@
     grid-column: auto;
   }
 
-  /* Four links don't fit beside the logo at phone width — drop them to a
-     row beneath it (the nav spacer tracks the taller nav). */
-  .hs-nav {
-    flex-wrap: wrap;
-    row-gap: 14px;
+  .hs-nav__menu {
+    display: block;
+    padding: 0;
+    color: var(--hs-light);
+    font: inherit;
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 22px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    pointer-events: auto;
+    -webkit-tap-highlight-color: transparent;
   }
 
+  .hs-nav[data-open] .hs-nav__menu {
+    visibility: hidden;
+  }
+
+  /* Paper A3U-0: the links become a full-screen menu, stacked bottom left in
+     78px type (78/440 of the width) with "Close menu" beneath. The logo, in the
+     nav above it, stays put. */
   .hs-nav__links {
-    flex-basis: 100%;
-    justify-content: flex-start;
-    gap: 20px;
+    position: fixed;
+    z-index: -1;
+    inset: 0;
+    /* Full bleed: the desktop row's end-alignment would shrink it to fit. */
+    justify-self: stretch;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 3px;
+    padding: 24px;
+    pointer-events: auto;
+  }
+
+  .hs-nav[data-shown] .hs-nav__links {
+    display: flex;
+  }
+
+  /* Black at 85% over the zoomed-out page, which blurs through it. */
+  .hs-nav__veil {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / 85%);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    pointer-events: none;
+  }
+
+  .hs-nav__link,
+  .hs-nav__close {
+    position: relative;
   }
 
   .hs-nav__link {
-    font-size: 15px;
+    color: var(--hs-light);
+    font-size: 17.73vw;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    text-transform: capitalize;
+    text-decoration: none;
+  }
+
+  .hs-nav__close {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 35px;
+    padding: 16px 0 0;
+    color: var(--hs-light);
+    font: inherit;
+    font-size: 22px;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    text-transform: capitalize;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .hs-nav__close-icon {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: var(--hs-white);
+    stroke-linecap: round;
+    stroke-width: 1.5;
   }
 
   .hs-cards__item {

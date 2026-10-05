@@ -47,8 +47,7 @@ const LAG_DAMPING = 0.6;
 const LAG_MAX = 0.12;
 /*
  * Camera zoom into the traveler card. From the moment the slot has peeked into
- * view by SLOT_PEEK of its height until the team section's top reaches the
- * bottom edge (where the traveler's flight begins), the collage scales about
+ * view by SLOT_PEEK of its height until the traveler's flight has landed, the collage scales about
  * the traveler's slot. The slot itself runs
  * from SLOT_START to full size; every tile scales by its own depth (its speed),
  * so the nearer ones fly outward faster than the farther ones.
@@ -56,6 +55,11 @@ const LAG_MAX = 0.12;
 const SLOT_PEEK = 0.1;
 const SLOT_START = 0.6;
 const ZOOM_GAIN = 1 / SLOT_START - 1;
+/* The traveler's flight (MorphCard.tsx) runs while the team section's top
+   travels from the viewport's bottom edge to this far below the top, in
+   viewport heights. The camera zoom runs the same stretch, so it only stops
+   once the flight has landed. */
+export const FLIGHT_END = 0.21;
 /* Matches the hero's phone breakpoint (HeroSequence isMobile). */
 export const GALLERY_PHONE_QUERY = "(max-width: 699px)";
 
@@ -205,15 +209,15 @@ export function WorkGallery() {
 
           /* Camera zoom progress: 0 until the traveler's slot has peeked into
              view by SLOT_PEEK of its height, then 0 → 1 up to where the
-             traveler's flight begins (the team section's top at the bottom
-             edge). The slot's centre is steady under its own scale, so it is
+             traveler's flight lands (the team section's top at FLIGHT_END). The slot's centre is steady under its own scale, so it is
              what the position is read from. */
           if (scene) {
             const box = slot.getBoundingClientRect();
             const center = box.top + box.height / 2;
             const baseH = slot.offsetHeight * SLOT_START;
             const start = vh - SLOT_PEEK * baseH + baseH / 2;
-            const end = vh - (scene.getBoundingClientRect().top - center);
+            const end =
+              center - (scene.getBoundingClientRect().top - vh * FLIGHT_END);
             const raw = clamp01((start - center) / Math.max(1, start - end));
             const z = 0.5 - 0.5 * Math.cos(Math.PI * raw);
             slot.style.scale = String(SLOT_START * (1 + ZOOM_GAIN * z));
@@ -310,9 +314,6 @@ export function WorkGallery() {
         data-speed-phone={"phoneSpeed" in tile ? tile.phoneSpeed : undefined}
       >
         <picture className="hs-gallery__picture">
-          {"mobileSrc" in tile && (
-            <source media={GALLERY_PHONE_QUERY} srcSet={tile.mobileSrc} />
-          )}
           {/* eslint-disable-next-line @next/next/no-img-element -- sized by the tile frame */}
           <img
             className="hs-gallery__image"
