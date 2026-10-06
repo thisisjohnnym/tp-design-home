@@ -36,15 +36,10 @@
   position: absolute;
   inset: 0;
   overflow: clip;
-  cursor: grab;
   /* Sideways drags move the carousel; vertical swipes still scroll the page. */
   touch-action: pan-y;
   -webkit-user-select: none;
   user-select: none;
-}
-
-.hs-team__stage[data-dragging] {
-  cursor: grabbing;
 }
 
 /* ---- Names ---------------------------------------------------------- */

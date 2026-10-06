@@ -17,6 +17,9 @@ import type { TeamCardMember } from "./team-card-face";
 
 /* Pointer travel (px) before a press turns into a drag. */
 const DRAG_SLOP = 6;
+/* Share of the viewport the stage must fill before the drag hint shows. The
+   section is never pinned, so exact full view is a single scroll position. */
+const HINT_VISIBLE = 0.85;
 /* How far from the centre (in cards) a card is still visible. */
 const FADE_REACH = 0.65;
 /* A card travels this share of the viewport width per step — the finger's pace. */
@@ -106,9 +109,10 @@ export function TeamCarousel({
     const names = namesRef.current;
     const dots = dotsRef.current;
     const lag = lagRef.current;
+    const slot = lag?.querySelector<HTMLElement>(".hs-team__slot");
     const cards = cardRefs.current;
     const count = members.length;
-    if (!stage || !names || !dots || !lag || count === 0) return;
+    if (!stage || !names || !dots || !lag || !slot || count === 0) return;
 
     const root = document.documentElement;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -448,14 +452,48 @@ export function TeamCarousel({
       s.wheelAt = performance.now();
     };
 
-    /* The yellow pointer dot grows into a "Drag" pill over the stage, and
-       goes back to a dot over the card's links (PointerEffect.tsx). */
+    /* The yellow pointer dot grows into a "Drag" pill and the system cursor
+       becomes a hand (hero-sequence.css), but only in the band the card spans,
+       edge to edge, and only while the section mostly fills the viewport. Never over
+       the card's links. Kept through a drag, which captures the pointer. */
+    const lastMouse = { x: 0, y: 0, in: false };
+    const updateHint = () => {
+      if (s.dragging) {
+        root.classList.add("hs-drag-hint");
+        root.setAttribute("data-team-dragging", "");
+        return;
+      }
+      root.removeAttribute("data-team-dragging");
+      let on = false;
+      if (lastMouse.in) {
+        const r = stage.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const visible = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+        const full = visible >= vh * HINT_VISIBLE;
+        if (full) {
+          const band = slot.getBoundingClientRect();
+          const under = document.elementFromPoint(lastMouse.x, lastMouse.y);
+          on =
+            lastMouse.y >= band.top &&
+            lastMouse.y <= band.bottom &&
+            under?.closest("a") == null;
+        }
+      }
+      root.classList.toggle("hs-drag-hint", on);
+    };
     const hint = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
-      const overLink = (e.target as Element).closest("a") !== null;
-      root.classList.toggle("hs-drag-hint", !overLink);
+      lastMouse.x = e.clientX;
+      lastMouse.y = e.clientY;
+      lastMouse.in = true;
+      updateHint();
     };
-    const unhint = () => root.classList.remove("hs-drag-hint");
+    const unhint = () => {
+      lastMouse.in = false;
+      if (s.dragging) return;
+      root.classList.remove("hs-drag-hint");
+      root.removeAttribute("data-team-dragging");
+    };
 
     /* Pointer position inside the stage, for the magnetic lean. */
     const lean = (e: PointerEvent) => {
@@ -482,7 +520,9 @@ export function TeamCarousel({
     stage.addEventListener("lostpointercapture", onUp);
     stage.addEventListener("wheel", onWheel, { passive: true });
     stage.addEventListener("pointermove", lean);
-    stage.addEventListener("pointerover", hint);
+    stage.addEventListener("pointermove", hint);
+    stage.addEventListener("lostpointercapture", updateHint);
+    window.addEventListener("scroll", updateHint, { passive: true });
     stage.addEventListener("pointerleave", unhint);
     stage.addEventListener("pointerleave", unlean);
 
@@ -520,7 +560,9 @@ export function TeamCarousel({
       stage.removeEventListener("lostpointercapture", onUp);
       stage.removeEventListener("wheel", onWheel);
       stage.removeEventListener("pointermove", lean);
-      stage.removeEventListener("pointerover", hint);
+      stage.removeEventListener("pointermove", hint);
+      stage.removeEventListener("lostpointercapture", updateHint);
+      window.removeEventListener("scroll", updateHint);
       stage.removeEventListener("pointerleave", unlean);
       stage.removeEventListener("pointerleave", unhint);
       unhint();

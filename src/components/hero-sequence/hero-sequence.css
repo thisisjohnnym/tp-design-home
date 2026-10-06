@@ -1352,13 +1352,8 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Custom pointer (Paper 6FY-0) — Mac arrow + lagging yellow trail     */
+/* Custom pointer (Paper 6FY-0) — lagging yellow dot; system cursor     */
 /* ------------------------------------------------------------------ */
-
-html.hs-has-pointer,
-html.hs-has-pointer * {
-  cursor: none !important;
-}
 
 .hs-pointer {
   position: fixed;
@@ -1368,7 +1363,6 @@ html.hs-has-pointer * {
   pointer-events: none;
 }
 
-.hs-pointer__arrow,
 .hs-pointer__dot {
   position: absolute;
   top: 0;
@@ -1431,11 +1425,16 @@ html.hs-has-pointer * {
   scale: 0;
 }
 
-.hs-pointer__svg {
-  display: block;
-  width: 18px;
-  height: 24px;
-  overflow: visible;
+/* Drag band (TeamCarousel.tsx): the system open hand, then the closed hand
+   while the strip is held. The dot's "Drag" pill above stays for both. */
+html.hs-drag-hint,
+html.hs-drag-hint * {
+  cursor: grab !important;
+}
+
+html.hs-drag-hint[data-team-dragging],
+html.hs-drag-hint[data-team-dragging] * {
+  cursor: grabbing !important;
 }
 
 /* ------------------------------------------------------------------ */
